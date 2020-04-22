@@ -1,0 +1,51 @@
+\chapter{EcoBuilder}
+
+\section{Background}
+May stability
+feasibility
+
+\section{Design and Hypotheses}
+\subsection{hi}
+score
+trophic levels
+
+\section{Results and Analysis}
+
+layout:
+\begin{itemize}
+    \item TROPHIC LEVELS:
+    \begin{itemize}
+        \item gauss-seidel iteration because positive definite, optimised to only take O(m) per iteration and O(n) extra space (because we only care about the sum of the rows and not where the rows are placed. In general we find the number of iterations required is <100 (test this) but requires for for loops
+        \item whether this laplacian has a solution can also be found using a breadth first search from sources (which is also used for chain)
+    \end{itemize}
+    \item LAYOUT:
+    \begin{itemize}
+        \item SGD is so fast that we use it on every topological change
+        \item 3D vs 2D: originally used 3D, but we found that players could not quickly pick up the rotational interface. Nodes would also often become obscured in the center of the layout, so we switched to 2D instead. 
+        \item however this also made trophic level constraints more difficult to satisfy because there is one fewer dimension to move around in (previously all that was needed was to always keep the y-position. After many attempts, the best solution was to start the optimization in 3D, but to then slowly reduce the contribution of the z-axis to the magnitude in the calculations.
+        \item localised majorization is used every frame for one node in order to fine-tune layout
+        \item we compare constrained to non-constrained to see who performs better. They both use the same initial layout (SGD constrained to trophic levels) but with either constrained or non-constrained majorization when fine tuning.
+        \item TODO: procrustes then performed on each connected component
+    \end{itemize}
+    
+    \item superfocus
+    \item johnson's algorithm for loops
+    \item mention old idea for chess-board and why it didn't work
+\end{itemize}
+
+extra SGD recipes: 1. Works for normal MDS as well as graphs. 2. Works well for pinning nodes, especially if many are pinned (mention graphviz), because 3. terms can be left out of the summation very easily (unlike majorization), which also means that disconnected components are easily dealt with by never adding those terms (rather than separate solvers for each component).
+
+model:
+\begin{itemize}
+    \item scoring metric
+
+    \item lotka-volterra type-I
+    \item diagonals of interaction matrix
+    \item math.net library
+\end{itemize}
+
+UI:
+\begin{itemize}
+    \item database in sql
+    \item indexed using...
+\end{itemize}

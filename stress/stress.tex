@@ -1,0 +1,31 @@
+\chapter{Force-directed Node Layout}
+we present advances in stress
+
+\section{Background}
+introduce different visualisations for graphs, lead into node-link
+introduce types of node-link (like hive), lead into force-directed
+introduce stress, demonstrate that stress and force are actually both optimisation but that force is gradient descent (and shouldn't be called force)
+\url{http://deleeuwpdx.net/pubfolders/converge/converge.html}
+
+\section{Stochastic Gradient Descent}
+SGD
+recommended cooling schedule changes for different things
+\subsection{Results}
+comparison to majorization
+\subsection{Parameterisation}
+finding $\eta_{\max}$ and $\varepsilon$.
+\subsection{Large Graphs}
+various bottlenecks
+multisource shortest paths is still used to find regions
+but we present a simpler algorithm to find weights (make pseudocode)
+note that it does not really minimise a particular function because the weights are asymmetric.
+
+\section{Cookbook}
+tweaks to the algorithm for various applications
+\subsection{Radial Layout}
+cool much more than usual for convergence
+\subsection{Vertical Constraints}
+should this go here or later?
+\subsection{Regular Multidimensional Scaling}
+show the digits dataset (note that weights are all set to 1)
+try Phate classical MDS stuff
