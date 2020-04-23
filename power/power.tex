@@ -1,9 +1,15 @@
 \chapter{Hierarchical Edge Bundling}
-The first chapter of this thesis was an exploration of how to position the nodes of a graph, and the natural question to then ask is how to deal with the only remaining component: the links. However this question is seemingly redundant at first, as the obvious answer is to simply draw straight lines between nodes with edges between them. While is by no means a poor choice, and is exactly how I have drawn all of the node-link diagrams thus far, this chapter will explore the possibility of drawing links using curves.
+The first chapter of this thesis was an exploration of how to position the nodes of a graph, and the natural question to then ask is how to deal with the only remaining component: the links. However this question is seemingly redundant at first, as the obvious answer is to simply draw straight lines between nodes with edges between them. While is by no means a poor choice, and is exactly how all node-link diagrams have been drawn thus far, this chapter will explore the possibility of drawing links using curves.
 
 \section{Background}
-The curving of edges in the concept of a node-link diagram is known as \textit{edge} bundling, and asdlkjsdlfkjsdflkjsdlfkj
-sldfkj
+The curving of edges in the context of a node-link diagram is known as \textit{edge bundling}. It is a technique that has been developed because many networks, when processed through a standard force-directed layout, result in a seemingly random layout with no discernable structure. See Figure~\ref{TODO} for an example. The similarity of such resulting layouts to tangled piles of hair has led to them being colloquially termed \textit{hairballs}. 
+
+Unfortunately this is not an easily solved problem, because the \textit{curse of dimensionality}~\cite{TODO} means that most of these networks simply cannot be accurately represented in two dimensions and the likelihood of this problem only rises as the size of any network increases. This is all even if we know that there is an underlying structure to these networks, lying just beyond our reach.
+Edge bundling attempts to alleviate this issue by introducing a trade-off---the ability to follow individual edges is sacrificed for better representation of global structure, by allowing edges to overlap. 
+
+This is analogous to organising the wires in a computer system by tying groups of wires together that share similar endpoints. A simple example of this is illustrated in Figure x~\ref{TODO}.
+
+In other words, we allow multiple edges to 
 
 One of the most powerful visualisations is from Holten in hierarchical edge bundling. It is a visualisation that uses extra metadata. Here is the 
 edge bundling and confluent drawing
