@@ -10,22 +10,24 @@ Edge bundling attempts to alleviate this issue by introducing a trade-off---the 
 This is analogous to organising the wires in a computer system by tying groups of wires together that share similar endpoints. A simple example of this is illustrated in Figure~\ref{TODO}, where the compromise between being able to follow links showing global structure is clearly visible.
 
 The literature is rich with various different methods for performing this bundling, such as multilevel agglomerative edge bundling (MINGLE) by Gansner et al.~\cite{TODO} which greedily merges pairs of links at a time by selecting the pairs that minimise a cost function based on the amount of `ink' used to draw links. A more complex cost function is used in metro-style bundling by Pupyrev et al.~\cite{TODO}, which is based on multiple criteria including ink, individual edge lengths and separations. 
-The same premise behind force-directed node layout is also used in force-directed edge bundling by Holten~\cite{TODO}, which bundles links by defining forces between adjacent links instead of nodes. However, as shown in Section~\ref{TODO}, force-based methods are in fact gradient descent optimisation methods where the gradient is defined before the cost function itself.
+The same premise behind force-directed node layout is also used in force-directed edge bundling by Holten~\cite{TODO}, which bundles links by defining forces between adjacent links instead of nodes. However, as shown previously in Section~\ref{TODO}, force-based methods are in fact gradient descent optimisation methods where the gradient is defined before the cost function itself, and this edge bundling technique is no different.
 
-A slightly approach Kernel Density Estimation by Hurter et al.~\cite{TODO} 
-One aspect 
+A slightly different but effective approach comes from Kernel Density Estimation by Hurter et al.~\cite{TODO}, who iteratively apply a convolutional filter over a density map of links in an already rendered diagram, and has spawned the subfield of image-based bundling methods~\cite{TODO,TODO,TODO}.
+However all of the aforementioned methods share a key similarity: they apply bundling upon the assumption that node positions are predetermined and will not be moved. This is perfectly fine and in fact desirable in the case of many common use cases, such as geographical maps etc. but by definition do not take the actual structure of the data into account. Force-directed layouts, in particular, were never designed to place similar edges in parallel (in fact, edge angular resolution at nodes is even sometimes used as part of the cost function~\cite{TODO}) and so common force-directed layouts do not necessarily help, if not make worse, the bundling quality of a visualisation.
 
-One of the most powerful visualisations is from Holten in hierarchical edge bundling. It is a visualisation that uses extra metadata. Here is the 
+This is why one of the most powerful graph visualisations is technique known as hierarchical edge bundling, published by Holten in 2006~\cite{TODO}. The reason behind its effectiveness is that it uses extra metadata in order to inform the nature of the bundling; specifically every vertex in the visualised graph also exists as a leaf vertex in a hierarchical tree. As an example, a common and effective use case is in the call graph of a piece of software. Each function is a vertex, and is connected by an edge to any other function that calls it. The metadata in this case is the hierarchy of namespaces and classes within.
+The trick to the bundling is as follows: the hierarchy, not the call graph itself, determines the layout of the graph. This contains extra nodes to represent the namespaces and classes, but these are erased from the final visualisation, and instead are used as an auxiliary routing graph (ARG) through which the call graph edges are routed through.
+An example of this on the source code of the unity game engine can be seen in Figure~\ref{TODO}. The tree itself can be seen on the TODO hand side, to illustrate the layout and influence of the ARG on the final visualisation.
+
+This idea of using an auxiliary graph to inform the bundling is the basis of the work in this chapter. We will first
 edge bundling and confluent drawing
 blurring the line between the two (one is more practical, one is more theoretical)
 
 
-in confluent drawings the aforementioned tradeoff is actually 
-
 Note that there is also a body of work on how to render links, once their trajectories are already known.
 
 
-\section{Agglomerative Clustering}
+\section{Hierarchical Clustering}
 clustering is a huge can of worms.
 it is very important to realise that there are two types of clusters, which will be henceforth referred to as 'community' and 'betweenness' structure. This can also be referred to as 'assortative' and 'disassortative'.
 some networks have both at the same time, and it is therefore difficult 
@@ -38,5 +40,9 @@ mention the optimal ordering from scipy, around a circle
 \end{itemize}
 
 \section{Power-confluent Drawings}
+in confluent drawings the aforementioned tradeoff is actually attempted to be avoided
 fixing issues and improving speed
+\subsection{Splines}
 b-spline algorithms and things
+holten qualitatively said some desirable properties of b-splines, but the real benefit of them is the convex hull property, which helps to prevent crossings (explain why... because)
+examples of splines that are not convex hull is like the garland paper.

@@ -7,6 +7,7 @@ Because of this difference between the abstract mathematical structure and its r
 introduce different visualisations for graphs (matrix, coin) lead into node-link
 introduce types of node-link (like hive), lead into force-directed
 introduce stress, demonstrate that stress and force are actually both optimisation but that force is gradient descent (and shouldn't be called force, more like velocity)
+\subsection{Stress}
 \url{http://deleeuwpdx.net/pubfolders/converge/converge.html}
 admit that you have no idea about GEM 
 
@@ -19,6 +20,7 @@ comparison to majorization
 finding $\eta_{\max}$ and $\varepsilon$.
 \subsection{Large Graphs}
 various bottlenecks
+normal MDS community has some options like Halko et al. or GLINT, but an additional problem with graphs is that shortest paths still need to be computed, and so we cannot presume that the entire distance matrix is available to us.
 multisource shortest paths is still used to find regions
 but we present a simpler algorithm to find weights (make pseudocode)
 note that it does not really minimise a particular function because the weights are asymmetric.
@@ -32,3 +34,4 @@ should this go here or later?
 \subsection{Regular Multidimensional Scaling}
 show the digits dataset (note that weights are all set to 1)
 try Phate classical MDS stuff
+graphviz optimises in a subspace first?
