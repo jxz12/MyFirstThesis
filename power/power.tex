@@ -15,34 +15,46 @@ The same premise behind force-directed node layout is also used in force-directe
 A slightly different but effective approach comes from Kernel Density Estimation by Hurter et al.~\cite{TODO}, who iteratively apply a convolutional filter over a density map of links in an already rendered diagram, and has spawned the subfield of image-based bundling methods~\cite{TODO,TODO,TODO}.
 However all of the aforementioned methods share a key similarity: they apply bundling upon the assumption that node positions are predetermined and will not be moved. This is perfectly fine and in fact desirable in the case of many common use cases, such as geographical maps etc. but by definition do not take the actual structure of the data into account. Force-directed layouts, in particular, were never designed to place similar edges in parallel (in fact, edge angular resolution at nodes is even sometimes used as part of the cost function~\cite{TODO}) and so common force-directed layouts do not necessarily help, if not make worse, the bundling quality of a visualisation.
 
-This is why one of the most powerful graph visualisations is technique known as hierarchical edge bundling, published by Holten in 2006~\cite{TODO}. The reason behind its effectiveness is that it uses extra metadata in order to inform the nature of the bundling; specifically every vertex in the visualised graph also exists as a leaf vertex in a hierarchical tree. As an example, a common and effective use case is in the call graph of a piece of software. Each function is a vertex, and is connected by an edge to any other function that calls it. The metadata in this case is the hierarchy of namespaces and classes within.
-The trick to the bundling is as follows: the hierarchy, not the call graph itself, determines the layout of the graph. This contains extra nodes to represent the namespaces and classes, but these are erased from the final visualisation, and instead are used as an auxiliary routing graph (ARG) through which the call graph edges are routed through.
-An example of this on the source code of the unity game engine can be seen in Figure~\ref{TODO}. The tree itself can be seen on the TODO hand side, to illustrate the layout and influence of the ARG on the final visualisation.
+This is why one of the most powerful graph visualisations is technique known as hierarchical edge bundling, published by Holten in 2006~\cite{TODO}. The reason behind its effectiveness is that it uses extra metadata in order to inform the nature of the bundling; specifically every vertex in the visualised graph also exists as a leaf vertex in a hierarchical tree. As an example, a common and effective use case is in the call graph of a piece of software. Each function is a vertex, and is connected by an edge to any other function that calls it. The metadata in this case is the hierarchy of folders and source files within.
+The trick to the bundling is as follows: the hierarchy, not the call graph itself, determines the layout of the graph. This therefore contains extra vertices that represent folders and source files, but these are erased from the final visualisation. They are instead used as an auxiliary routing graph (ARG) through which the call graph edges are routed through.
+More precisely, this process of routing involves taking every edge in the call graph, and rendering each one using a spline curve whose control points consist of a path through the ARG. The precise definition of this spline is important, and will be further elaborated upon in Section~\ref{TODO}, but for now it is sufficient to simply imagine the curves being 
 
-This idea of using an auxiliary graph to inform the bundling is the basis of the work in this chapter. We will first
-edge bundling and confluent drawing
-blurring the line between the two (one is more practical, one is more theoretical)
+but an example of this visualisation I created for the source code of the Unity game engine can be seen in Figure~\ref{TODO}. The hierarchical tree itself can be seen on the TODO hand side, to illustrate the layout and influence of the ARG on the final visualisation. It shows blah blah...
 
-
-Note that there is also a body of work on how to render links, once their trajectories are already known.
-
+This technique is so effective because the structure of the bundles is informed by human judgement. To continue within the call graph example, the hierarchy of folders and source files is literally designed by the programmers for organisational purposes, and so it is very likely to admit some utility for organising, say, a visualisation.
+This idea of using an auxiliary graph to inform bundling is the basis of the work in this chapter, except that I will instead investigate the more common situation of when this metadata is not included with the original data, and therefore must be inferred instead.
 
 \section{Hierarchical Clustering}
-clustering is a huge can of worms.
+The process of grouping similar datapoints together is known as \textit{clustering}, and is a vast field of study, not least as one of the primary objectives of the fast-growing discipline of machine learning. The subfield of clustering within the context of networks is large in its own right, due to its utility in datasets such as protein-protein interaction networks.
+There exist a wide variety of powerful and creative methods that have been developed to perform clustering on networks. For example, the Infomap algorithm optimises a cost function known as the \textit{map equation}, which (like pagerank) with a combination of greedy search and simulated annealing. The famous Louvain (given its name from the authors coming from the University of Louvain, Belgium) and its recently updated Leiden (Leiden University, Netherlands) attempt to optimise a cost function known as \textit{modularity}, which was developed by...
+and markov cluster...
+
+The work in this chapter will concentrate solely on \textit{hierarchical clustering}, which is a family of algorithms that starts by placing each datapoint in its own cluster, and then proceeds by greedily merging clusters together by picking the closest ones. 
+The benefit of this is that the result is a dendrogram, which can act as a hierarchy yay
+But before I continue with explaining, it is useful to 
+
+It is also very easily to interpret and understand what the algorithm is doing. I would always pick an algorithm that I fully understand for a visualisation over a black-box algorithm that produces slightly better results. But this is just opinion.
+NP-hard problem blah blah
+Unweighted is, perhaps confusingly, more precise than the weighted version (directly opposite to the case in weighted and unweighted shortest paths). 
+UPGMA WPGMA ward is better because of things
+
 it is very important to realise that there are two types of clusters, which will be henceforth referred to as 'community' and 'betweenness' structure. This can also be referred to as 'assortative' and 'disassortative'.
 some networks have both at the same time, and it is therefore difficult 
 hierarchical clustering comparison and new distance measure(s)
 
-mention the optimal ordering from scipy, around a circle
+\subsection{Distance measures}
+
+mention the optimal ordering from Scipy, Bar-Joseph et al.~\cite{TODO}, around a circle
 
 \begin{itemize}
     \item girvan-newman -- this results in long strands that \item
 \end{itemize}
 
 \section{Power-confluent Drawings}
-in confluent drawings the aforementioned tradeoff is actually attempted to be avoided
+in confluent drawings the aforementioned trade-off is actually attempted to be avoided
 fixing issues and improving speed
 \subsection{Splines}
 b-spline algorithms and things
 holten qualitatively said some desirable properties of b-splines, but the real benefit of them is the convex hull property, which helps to prevent crossings (explain why... because)
+The importance of this has been crucially missing in the literature
 examples of splines that are not convex hull is like the garland paper.
