@@ -22,7 +22,7 @@ layout:
     \begin{itemize}
         \item SGD is so fast that we use it on every topological change
         \item 3D vs 2D: originally used 3D, but we found that players could not quickly pick up the rotational interface. Nodes would also often become obscured in the center of the layout, so we switched to 2D instead. 
-        \item however this also made trophic level constraints more difficult to satisfy because there is one fewer dimension to move around in (previously all that was needed was to always keep the y-position. After many attempts, the best solution was to start the optimization in 3D, but to then slowly reduce the contribution of the z-axis to the magnitude in the calculations.
+        \item however this also made trophic level constraints more difficult to satisfy because there is one fewer dimension to move around in (previously all that was needed was to always keep the y-position. The best solution was to add 5 iterations of $\mu=1$ at the beginning, as an initialization step
         \item localised majorization is used every frame for one node in order to fine-tune layout
         \item we compare constrained to non-constrained to see who performs better. They both use the same initial layout (SGD constrained to trophic levels) but with either constrained or non-constrained majorization when fine tuning.
         \item TODO: procrustes then performed on each connected component
