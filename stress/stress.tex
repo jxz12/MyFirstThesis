@@ -1,11 +1,18 @@
-\chapter{Force-directed Layout}
-we present advances in stress
+\chapter{Force-directed Node Layout}
+If one were to ask a random group of people to draw a network on a piece of paper, it is likely that most would draw some dots to represent the nodes, and some lines joining the dots to represent the edges. This is a representation so intuitive that it is often synonymous with the abstract concept of a network entirely.
+This is the reason why I have chosen to focus this thesis on this `join-the-dots' representation, henceforth known as a node-link diagram.
+However it is useful to have an idea of other representations in order to gain a broader view of what network visualisation entails. A simple example of this includes the \emph{matrix plot}, which is simply a table where each vertex is represented by a row and a column, and each edge is a dot filled in at the intersection of a row and column.
+Another example is the \emph{disc graph}, where nodes are represented by circles and edges exist if the circles overlap. This sees common use as a Venn diagram, but without the connotation of being a network.
+A final, more obscure example is the \emph{string graph}, where each vertex is represented by a (possibly curved) line, and if they touch then 
+See Figure~\ref{TODO}
 
-\section{Background}
-Because of this difference between the abstract mathematical structure and its representation within a visualisation, I will henceforth refer to the data itself as vertices and edges, and the representation as nodes and links.
+In order to Because of this difference between the abstract mathematical structure and its representation within a visualisation, I will henceforth refer to the data itself as vertices and edges, and the representation as nodes and links.
 
 introduce different visualisations for graphs (matrix, coin) lead into node-link
 introduce types of node-link (like hive), lead into force-directed
+This first technical chapter of the thesis will explore the problem of network layout, which is 
+
+\section{Background}
 introduce stress, demonstrate that stress and force are actually both optimisation but that force is gradient descent (and shouldn't be called force, more like velocity)
 \subsection{Stress}
 \url{http://deleeuwpdx.net/pubfolders/converge/converge.html}
@@ -29,8 +36,8 @@ note that it does not really minimise a particular function because the weights 
 tweaks to the algorithm for various applications
 \subsection{Radial Layout}
 cool much more than usual for convergence
-\subsection{Vertical Constraints}
-should this go here or later?
+\subsection{Fixing one dimension}
+adding extra initial iterations can help
 \subsection{Regular Multidimensional Scaling}
 show the digits dataset (note that weights are all set to 1)
 try Phate classical MDS stuff
