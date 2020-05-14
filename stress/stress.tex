@@ -1,18 +1,46 @@
 \chapter{Force-directed Node Layout}
-If one were to ask a random group of people to draw a network on a piece of paper, it is likely that most would draw some dots to represent the nodes, and some lines joining the dots to represent the edges. This is a representation so intuitive that it is often synonymous with the abstract concept of a network entirely.
-This is the reason why I have chosen to focus this thesis on this `join-the-dots' representation, henceforth known as a node-link diagram.
-However it is useful to have an idea of other representations in order to gain a broader view of what network visualisation entails. A simple example of this includes the \emph{matrix plot}, which is simply a table where each vertex is represented by a row and a column, and each edge is a dot filled in at the intersection of a row and column.
-Another example is the \emph{disc graph}, where nodes are represented by circles and edges exist if the circles overlap. This sees common use as a Venn diagram, but without the connotation of being a network.
-A final, more obscure example is the \emph{string graph}, where each vertex is represented by a (possibly curved) line, and if they touch then 
-See Figure~\ref{TODO}
+If one were to ask a random group of people to draw a network on a piece of paper, it is likely that most would draw dots to represent the nodes, and lines joining the dots to represent the edges. This is a representation so intuitive that it is often synonymous with the abstract concept of a network entirely.
+This is the reason why this `join-the-dots' representation, henceforth known as a node-link diagram, is the most commonly studied, and is also why it has been chosen for the purposes of this thesis.
 
-In order to Because of this difference between the abstract mathematical structure and its representation within a visualisation, I will henceforth refer to the data itself as vertices and edges, and the representation as nodes and links.
+However it is useful to have an idea of other representations in order to gain a broader view of what network visualisation entails. A classical example of this includes the \emph{matrix plot}, which is a table where each vertex is represented by a row and a column, and each edge is a dot filled in at the intersection of a row and column~\cite{TODO}.
+A more obscure example is \emph{string graphs}, where each vertex is represented by a (possibly curved) line, and edges exist between vertices whose lines intersect.
+Specialised types of networks can also have similarly specialised representations. Trees, for example, can be depicted as packed rectangles or circles~\cite{TODO}.
+Graphs with low \emph{boxicity}, such as food webs~\cite{TODO}, can be drawn as \emph{intersection graphs} of overlapping lines or rectangles or cuboids\footnote{Or hypercuboids, although the usefulness of that for visualisation is likely limited.}
+A related and more common example is the \emph{disc graph}, where nodes are represented by circles and edges exist if the circles overlap. This sees widespread use as a Venn diagram, but usually without the connotation of network structure.
+A gallery of such examples can be seen in Figure~\ref{TODO}.
+% Because of the difference between the abstract mathematical structure and its representation within a visualisation, I will henceforth refer to the data itself as vertices and edges, and the representation as nodes and links.
 
-introduce different visualisations for graphs (matrix, coin) lead into node-link
-introduce types of node-link (like hive), lead into force-directed
-This first technical chapter of the thesis will explore the problem of network layout, which is 
+\begin{figure}
+\caption{ Each of these representations has its unique benefits and downsides. Matrix plots can show a very dense amount of data in a small space, but are very dependent on the ordering of rows and columns~\cite{TODO}.
+TODO: some comment on treemaps and circle packing
+The intersection-style graphs are intuitive, but cannot be drawn for all graphs~\cite{TODO}. }
+\label{graphrepresentations}
+\end{figure}
+
+Even within the subfield of node-link diagrams, there is a wide variety of options available.
+Examples of this include \emph{arc} or \emph{chord diagrams}, where nodes are placed on a line or around a circle, respectively. Links are then added by drawing the eponymous arcs or chords between nodes.
+A method that has recently gained popularity is the \emph{hive plot}, a simple but effective variant of parallel coordinate plots~\cite{TODO}, which places nodes on radial lines to draw curves between them, in a similar fashion to spider charts~\cite{TODO}. An important subtlety is that each node may or may not be placed on more than one line, and the order in which the nodes are spread across the line is also a conscious choice. This customisability is where the power of such a method lies.
+
+Hopefully the above examples give a taste of how varied the representation of a network can be. In this chapter we will focus on 
+"""
+ From the 1980s, industrial demand for graph drawing algorithms has grown
+– Software engineering: CASE systems, reverse engineering – Biology: PPI networks, gene regulatory networks
+– Physical networks: network management tools
+– Security: risk management, money movements
+– Social network analysis
+– Customer relationship management: value identification Many companies buy graph drawing algorithms, many code them.
+Currently the international market for graph drawing algorithms is in the hundreds of millions of dollars per year.
+"""
 
 \section{Background}
+the concept of graph drawing dates back as far as the 1920s, with Fary's theorem etc. Theoretical field that is still going strong to this day.
+The first \emph{algorithms} for drawing graphs emerged around the 1960s. Donald Knuth~\cite{TODO} and Tutte~\cite{TODO}.
+Tutte's algorithm is seen by many in the field as a seminal work, and brought with it an elegant theorem.
+
+Describe the energy interpretation of the theorem.
+Introduce Eades first force algorithm
+Introduce Kamada-Kawai and Fruchterman-Reingold
+
 introduce stress, demonstrate that stress and force are actually both optimisation but that force is gradient descent (and shouldn't be called force, more like velocity)
 \subsection{Stress}
 \url{http://deleeuwpdx.net/pubfolders/converge/converge.html}
@@ -38,6 +66,7 @@ tweaks to the algorithm for various applications
 cool much more than usual for convergence
 \subsection{Fixing one dimension}
 adding extra initial iterations can help
+setting $\mu_{\max}=1.1$ is good too
 \subsection{Regular Multidimensional Scaling}
 show the digits dataset (note that weights are all set to 1)
 try Phate classical MDS stuff
