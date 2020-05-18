@@ -1,24 +1,23 @@
-\chapter{Energy-based Node Layout}
+\chapter{Force-directed Node Layout}
 If one were to ask a random group of people to draw a network on a piece of paper, it is likely that most would draw dots to represent the nodes, and lines joining the dots to represent the edges. This is a representation so intuitive that it is often synonymous with the abstract concept of a network entirely.
 This is the reason why this `join-the-dots' representation, henceforth known as a node-link diagram, is the most commonly studied, and is also why it has been chosen for the purposes of this thesis.
 
-However it is useful to have an idea of other representations in order to gain a broader view of what network visualisation entails. A classical example of this includes the \emph{matrix plot}, which is a table where each vertex is represented by a row and a column, and each edge is a dot filled in at the intersection of a row and column~\cite{TODO}.
+However it is useful to have an idea of the other possible representations in order to gain a broader view of what network visualisation entails. A classical example of this includes the \emph{matrix plot}, which is a grid where each vertex is represented by a row and a column, and each edge is a dot filled in at the intersection of a row and column~\cite{TODO}.
 A more obscure example is \emph{string graphs}, where each vertex is represented by a (possibly curved) line, and edges exist between vertices whose lines intersect.
 Specialised types of networks can also have similarly specialised representations. Trees, for example, can be depicted as packed rectangles or circles~\cite{TODO}.
 Graphs with low \emph{boxicity}, such as food webs~\cite{TODO}, can be drawn as \emph{intersection graphs} of overlapping lines or rectangles or cuboids\footnote{Or hypercuboids, although the usefulness of that for visualisation is likely limited.}
 A related and more common example is the \emph{disc graph}, where nodes are represented by circles and edges exist if the circles overlap. This sees widespread use as a Venn diagram, but usually without the connotation of network structure.
-A gallery of such examples can be seen in Figure~\ref{TODO}.
-% Because of the difference between the abstract mathematical structure and its representation within a visualisation, I will henceforth refer to the data itself as vertices and edges, and the representation as nodes and links.
+A gallery of such examples can be seen in Figure~\ref{TODO}; because of the difference between the abstract mathematical structure of a network and its representation within a visualisation, I will henceforth refer to the data itself as drawing graphs comprised of vertices and edges, and their representation as visualising networks comprised of nodes and links\footnote{This is in line with the termininology chosen by the \emph{International Symposium on Graph Drawing and Network Visualisation} to separate its theoretical and applied submission tracks, and so I will attempt to adopt it here. However the distinction between the two can sometimes become blurred depending on the context.}.
 
 \begin{figure}
 \caption{Each of these representations has its unique benefits and downsides. Matrix plots can show a very dense amount of data in a small space, but are very dependent on the ordering of rows and columns~\cite{TODO}.
 TODO: some comment on treemaps and circle packing
-The intersection-style graphs are intuitive, but cannot be drawn for all graphs~\cite{TODO}. }
+The intersection-style graphs are intuitive, but cannot be drawn for all graphs~\cite{TODO}.}
 \label{graphrepresentations}
 \end{figure}
 
 Even within the subfield of node-link diagrams, there is a wide variety of options available.
-Examples of this include \emph{arc} or \emph{chord diagrams}, where nodes are placed on a line or around a circle, respectively. Links are then added by drawing the eponymous arcs or chords between nodes.
+Examples include \emph{arc} or \emph{chord diagrams}, where nodes are placed on a line or around a circle, respectively. Links are then added by drawing the eponymous arcs or chords between nodes.
 A method that has recently gained popularity is the \emph{hive plot}, a simple but effective variant of parallel coordinate plots~\cite{TODO}, which places nodes on radial lines to draw curves between them, in a similar fashion to spider charts~\cite{TODO}. An important subtlety is that each node may or may not be placed on more than one line, and the order in which the nodes are spread across the line is also a conscious choice. This customisability is where the power of such a method lies.
 
 Hopefully the above examples give a taste of how varied the representation of a network can be. In this chapter we will focus on 
@@ -31,15 +30,19 @@ Hopefully the above examples give a taste of how varied the representation of a 
 – Customer relationship management: value identification Many companies buy graph drawing algorithms, many code them.
 Currently the international market for graph drawing algorithms is in the hundreds of millions of dollars per year.
 """
+
+\section{Background}
+The formal study of drawing node-link diagrams dates back to least the 1920s. For example, F\'ary's theorem is a famous proof that any planar graph, defined as a graph that can be drawn without any intersecting links, can always be drawn in such a way without needing links to be curved. This proof is attributed to F\'ary who published it in 1948~\cite{TODO}, and was independently discovered by Steinitz in 1922~\cite{TODO}, as well as a host of other authors in the same era~\cite{wagner1936, koebe1936, stein1951}.
+The ensuing development of actual \emph{algorithms} for network layout emerged around the 1960s, with its seminal work commonly attributed to the barycentre algorithm of Tutte in 1963~\cite{TODO}. 
+Tutte's algorithm is very simple and elegant, and brought with it an elegant mathematical theorem as well, which can both be seen as .
+
+The theoretical side of graph drawing is a rich and active field to this day.
+
+
 """
 Force-directed methods account for 90\% of commercial and free graph drawing software for undirected graphs
 """
 
-\section{Background}
-The study of how to draw node-link diagrams dates back to least the 1920s. For example, Fary's theorem is a famous proof that any planar network, defined as a network that can be drawn using a node-link representation without any link intersections, never requires links to be curved to avoid these intersections.
-Theoretical field that is still going strong to this day.
-The first \emph{algorithms} for drawing graphs emerged around the 1960s. Donald Knuth~\cite{TODO} and Tutte~\cite{TODO}.
-Tutte's algorithm is seen by many in the field as a seminal work, and brought with it an elegant theorem.
 
 Describe the energy interpretation of the theorem.
     IT IS ALSO SPRINGS
