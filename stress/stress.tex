@@ -1,4 +1,4 @@
-\chapter{Force-directed Node Layout}
+\chapter{Energy-based Node Layout}
 If one were to ask a random group of people to draw a network on a piece of paper, it is likely that most would draw dots to represent the nodes, and lines joining the dots to represent the edges. This is a representation so intuitive that it is often synonymous with the abstract concept of a network entirely.
 This is the reason why this `join-the-dots' representation, henceforth known as a node-link diagram, is the most commonly studied, and is also why it has been chosen for the purposes of this thesis.
 
@@ -11,7 +11,7 @@ A gallery of such examples can be seen in Figure~\ref{TODO}.
 % Because of the difference between the abstract mathematical structure and its representation within a visualisation, I will henceforth refer to the data itself as vertices and edges, and the representation as nodes and links.
 
 \begin{figure}
-\caption{ Each of these representations has its unique benefits and downsides. Matrix plots can show a very dense amount of data in a small space, but are very dependent on the ordering of rows and columns~\cite{TODO}.
+\caption{Each of these representations has its unique benefits and downsides. Matrix plots can show a very dense amount of data in a small space, but are very dependent on the ordering of rows and columns~\cite{TODO}.
 TODO: some comment on treemaps and circle packing
 The intersection-style graphs are intuitive, but cannot be drawn for all graphs~\cite{TODO}. }
 \label{graphrepresentations}
@@ -31,20 +31,26 @@ Hopefully the above examples give a taste of how varied the representation of a 
 – Customer relationship management: value identification Many companies buy graph drawing algorithms, many code them.
 Currently the international market for graph drawing algorithms is in the hundreds of millions of dollars per year.
 """
+"""
+Force-directed methods account for 90\% of commercial and free graph drawing software for undirected graphs
+"""
 
 \section{Background}
-the concept of graph drawing dates back as far as the 1920s, with Fary's theorem etc. Theoretical field that is still going strong to this day.
+The study of how to draw node-link diagrams dates back to least the 1920s. For example, Fary's theorem is a famous proof that any planar network, defined as a network that can be drawn using a node-link representation without any link intersections, never requires links to be curved to avoid these intersections.
+Theoretical field that is still going strong to this day.
 The first \emph{algorithms} for drawing graphs emerged around the 1960s. Donald Knuth~\cite{TODO} and Tutte~\cite{TODO}.
 Tutte's algorithm is seen by many in the field as a seminal work, and brought with it an elegant theorem.
 
 Describe the energy interpretation of the theorem.
+    IT IS ALSO SPRINGS
+
 Introduce Eades first force algorithm
 Introduce Kamada-Kawai and Fruchterman-Reingold
 
 introduce stress, demonstrate that stress and force are actually both optimisation but that force is gradient descent (and shouldn't be called force, more like velocity)
 \subsection{Stress}
 \url{http://deleeuwpdx.net/pubfolders/converge/converge.html}
-admit that you have no idea about GEM 
+GEM is fructerma-reingold but with a zillion extra convergence heuristics
 
 \section{Stochastic Gradient Descent}
 SGD
