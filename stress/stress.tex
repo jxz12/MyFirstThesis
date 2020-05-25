@@ -1,18 +1,19 @@
-\chapter{Force-directed Node Layout}
+\chapter{Nodes}
 If one were to ask a random group of people to draw a network on a piece of paper, it is likely that most would draw dots to represent the nodes, and lines joining the dots to represent the edges. This is a representation so intuitive that it is often synonymous with the abstract concept of a network entirely.
-This is the reason why this `join-the-dots' representation, henceforth known as a node-link diagram, is the most commonly studied, and is also why it has been chosen for the purposes of this thesis.
+This is the reason why this `join-the-dots' representation, known as the node-link diagram, is the most commonly studied and applied, and is also why it has been chosen for the purposes of this thesis.
 
 However it is useful to have an idea of the other possible representations in order to gain a broader view of what network visualisation entails. A classical example of this includes the \emph{matrix plot}, which is a grid where each vertex is represented by a row and a column, and each edge is a dot filled in at the intersection of a row and column~\cite{TODO}.
 A more obscure example is \emph{string graphs}, where each vertex is represented by a (possibly curved) line, and edges exist between vertices whose lines intersect.
 Specialised types of networks can also have similarly specialised representations. Trees, for example, can be depicted as packed rectangles or circles~\cite{TODO}.
-Graphs with low \emph{boxicity}, such as food webs~\cite{TODO}, can be drawn as \emph{intersection graphs} of overlapping lines or rectangles or cuboids\footnote{Or hypercuboids, although the usefulness of that for visualisation is likely limited.}
+Graphs with low \emph{boxicity}, such as food webs~\cite{TODO}, can be drawn as \emph{intersection graphs} of overlapping lines or rectangles or cuboids.\footnote{Or hypercuboids, although the usefulness of that for visualisation is likely limited.}
 A related and more common example is the \emph{disc graph}, where nodes are represented by circles and edges exist if the circles overlap. This sees widespread use as a Venn diagram, but usually without the connotation of network structure.
-A gallery of such examples can be seen in Figure~\ref{TODO}; because of the difference between the abstract mathematical structure of a network and its representation within a visualisation, I will henceforth refer to the data itself as drawing graphs comprised of vertices and edges, and their representation as visualising networks comprised of nodes and links\footnote{This is in line with the termininology chosen by the \emph{International Symposium on Graph Drawing and Network Visualisation} to separate its theoretical and applied submission tracks, and so I will attempt to adopt it here. However the distinction between the two can sometimes become blurred depending on the context.}.
+A gallery of such examples can be seen in Figure~\ref{TODO}; because of the difference between the abstract mathematical structure of a network and its representation within a visualisation, I will henceforth refer to the abstract structure itself as drawing graphs comprised of vertices and edges, and their representation as visualising networks comprised of nodes and links.\footnote{This is in line with the termininology chosen by the \emph{International Symposium on Graph Drawing and Network Visualisation} to separate its theoretical and applied submission tracks, and so I will attempt to adopt it here. However the distinction between the two can sometimes become blurred depending on the context.}
 
 \begin{figure}
 \caption{Each of these representations has its unique benefits and downsides. Matrix plots can show a very dense amount of data in a small space, but are very dependent on the ordering of rows and columns~\cite{TODO}.
 TODO: some comment on treemaps and circle packing
-The intersection-style graphs are intuitive, but cannot be drawn for all graphs~\cite{TODO}.}
+The intersection-style graphs are intuitive, but cannot be drawn for all graphs~\cite{TODO}.
+TODO: place this at the beginning of the chapter, on the tile page}
 \label{graphrepresentations}
 \end{figure}
 
@@ -32,28 +33,60 @@ Currently the international market for graph drawing algorithms is in the hundre
 """
 
 \section{Background}
-The formal study of drawing node-link diagrams dates back to least the 1920s. For example, F\'ary's theorem is a famous proof that any planar graph, defined as a graph that can be drawn without any intersecting links, can always be drawn in such a way without needing links to be curved. This proof is attributed to F\'ary who published it in 1948~\cite{TODO}, and was independently discovered by Steinitz in 1922~\cite{TODO}, as well as a host of other authors in the same era~\cite{wagner1936, koebe1936, stein1951}.
-The ensuing development of actual \emph{algorithms} for network layout emerged around the 1960s, with its seminal work commonly attributed to the barycentre algorithm of Tutte in 1963~\cite{TODO}. 
-Tutte's algorithm is very simple and elegant, and brought with it an elegant mathematical theorem as well, which can both be seen as .
+The formal study of node-link diagrams dates back to least the 1920s. For example, F\'ary's theorem is a famous proof that any planar graph, defined as a graph that can be drawn without any intersecting links, can always be drawn in a planar way without needing links to be curved. This proof is attributed to F\'ary who published it in 1948~\cite{TODO}, and was independently discovered by Steinitz in 1922~\cite{TODO}, as well as a host of other authors in the same era~\cite{wagner1936, koebe1936, stein1951}.
+The ensuing development of actual \emph{algorithms} for network layout emerged around the 1960s, with its seminal work widely attributed to the barycentre algorithm of Tutte in 1963~\cite{TODO}. 
 
-The theoretical side of graph drawing is a rich and active field to this day.
+Tutte's algorithm is very simple, and boils down to solving a system of linear equations, each of which strives to set a single node to the barycentre (i.e.\ mean position) of its neighbours. This is defined as 
+\begin{equation}
+    \mathbf{X}_i = \frac{1}{|N(i)|}\sum_{j\in N(i)}\mathbf{X}_j
+\label{tutte}
+\end{equation}
+where $\mathbf{X}_i$ is the $i$\textsuperscript{th} row of the $n\times k$ matrix $\mathbf{X}$, with $n$ being the number of vertices and $k$ the dimensionality of the layout (usually $2$), and $N(i)$ is the set of vertices neighbouring $i$.
+Note that a necessary initial step is to fix the position of a selection of nodes around the boundary of the drawing, in order to avoid the trivial solution of placing all nodes in the same position.
+The powerful insight that Tutte revealed with his algorithm was a remarkable mathematical theorem attached to it. He proved that this barycentre algorithm will always produce a planar drawing, in the specific case that the graph is planar and tri-connected (i.e.\ the graph cannot be disconnected by removing two vertices, no matter which two are removed).
 
+This algorithm has served as the springboard for two main branches of node layout algorithms. Since planarity has been shown to be one of, if not the most important markers for readability in node-link diagrams~\cite{todo} One is a line of planarity based algorithms, such as TODO~\cite{deFraysseix-Pach-Pollack} \cite{Chrobak} independently \cite{Schnyder}
+A common problem with these methods is \emph{resolution}...
+$\mathcal{NP}$-hard
+
+The second branch comes from an intuitive interpretation of the algorithm: that each edge is analogous to a spring of natural length 0, where the solution to Tutte's system of linear equations can be seen as the point at which the elastic energy of these springs, according to Hooke's law~\cite{hooke}, is minimised. This energy is defined as
+\begin{equation}
+    \mathrm{energy}(\mathbf{X}) = \sum_{\{i,j\}\in E}||\mathbf{X}_i-\mathbf{X}_j||^2
+\label{tutte_energy}
+\end{equation}
+where $E$ is the set of all edges. Differentiating with respect to the position of a single vertex $\mathbf{X}_i$ results in
+\begin{equation}
+    \frac{d}{d\mathbf{X}_i}\mathrm{energy}(\mathbf{X}) = \sum_{j\in N(i)}2(\mathbf{X}_i-\mathbf{X}_j)
+\label{tutte_force}
+\end{equation}
+where it can be seen that setting the left-hand side to zero results in exactly Equation~\eqref{tutte}, corresponding to a configuration of minimum global energy in the system.
+
+This interpretation has been taken and advanced to alleviate the resolution problem present in planarity based methods, by introducing the trade-off of foregoing mathematical rigour. 
+This is done by using human intuition to formulate variations on Equation~\eqref{tutte_energy}, in what are known as \emph{force-directed} algorithms.
+
+The earliest of these algorithms was developed in 1984 by Eades~\cite{TODO}, who made two modifications. The first was to alter the edge springs in order to give them a non-zero natural length, avoiding having to fix an often arbitrary selection of nodes around the boundary. The second was to introduce a repulsive force between pairs of non-adjacent vertices to spread nodes evenly around the drawing.
+This is defined as
+\begin{equation}
+    \frac{d}{d\mathbf{X}_i}\mathrm{energy}(\mathbf{X}) = -\sum_{j\in N(i)}c_1\log(||\mathbf{X}_i-\mathbf{X}_j||)\frac{\mathbf{X}_i-\mathbf{X}_j}{||\mathbf{X}_i-\mathbf{X}_j||}
+    + \sum_{j\notin N(i)}\frac{c_2}{||\mathbf{X}_i-\mathbf{X}_j||^2}\frac{\mathbf{X}_i-\mathbf{X}_j}{||\mathbf{X}_i-\mathbf{X}_j||}
+\end{equation}
+where $c_1$ and $c_2$ are constants determining the relative strengths of these forces. The first summation defines the `springs', where the log attempts to maintain the spring at unit length by flipping to negative if the vertex pair gets too close together. The second summation is the repulsive force, which always pushes $i$ away from $j$ if there does not exist an edge between them, and decays according to an inverse square function in a fashion analogous to charged electrons obeying Coulomb's law~\cite{coulomb}.
+
+There are two important aspects to notice here. The first is that the left hand side is not the energy itself, but its derivative. The second is that this derivative can no longer be straightforwardly solved as in Equation~\eqref{tutte} because it has become \emph{non-linear}. How then is energy minimised? Through a method known as \emph{gradient descent}, which is as simple as iteratively moving vertices proportional to...
+
+This optimisation through gradient descent interpretation is not how the original was presentedd....
+There exists a common misconception that these layout algorithms fall into two categories: force-directed and energy-based models~\cite{find some examples of this shit}. The only difference between the two is in how their conceptions are interpreted, because stress and force are actually both optimisation but that force is gradient descent (and even shouldn't be called force if sticking with the physical analogy, a better name would be velocity-directed)
+
+A popular improvement to this came in 
+
+Introduce Kamada-Kawai 1989 and Fruchterman-Reingold 1991 GEM Frick 1995
+GEM is fruchterman-reingold but with a zillion extra convergence heuristics
 
 """
 Force-directed methods account for 90\% of commercial and free graph drawing software for undirected graphs
 """
+note that I did not mention trees or acyclic graphs for things like flow methods
 
-
-Describe the energy interpretation of the theorem.
-    IT IS ALSO SPRINGS
-
-Introduce Eades first force algorithm
-Introduce Kamada-Kawai and Fruchterman-Reingold
-
-introduce stress, demonstrate that stress and force are actually both optimisation but that force is gradient descent (and shouldn't be called force, more like velocity)
-\subsection{Stress}
-\url{http://deleeuwpdx.net/pubfolders/converge/converge.html}
-GEM is fructerma-reingold but with a zillion extra convergence heuristics
 
 \section{Stochastic Gradient Descent}
 SGD
