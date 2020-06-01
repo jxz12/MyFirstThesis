@@ -1,2 +1,14 @@
 *.pdf
 *.synctex.gz
+*.aux
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lot
+*.out
+*.preamble.aux
+*.toc
+
+fonts/
+.DS_Store
