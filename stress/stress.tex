@@ -45,12 +45,14 @@ where $\mathbf{X}_i$ is the $i$\textsuperscript{th} row of the $n\times k$ matri
 Note that a necessary initial step is to fix the position of a selection of nodes around the boundary of the drawing, in order to avoid the trivial solution of placing all nodes in the same position.
 The powerful insight that Tutte revealed with his algorithm was a remarkable mathematical theorem attached to it. He proved that this barycentre algorithm will always produce a planar drawing, in the specific case that the graph is planar and tri-connected (i.e.\ the graph cannot be disconnected by removing two vertices, no matter which two are removed).
 
-This algorithm has served as the springboard for two main branches of node layout algorithms. Since planarity has been shown to be one of, if not the most important markers for readability in node-link diagrams~\cite{purchase}, the first branch is a line of planarity-based algorithms which can guarantee planar node layouts. Early examples include Read~\cite{read} who leveraged F\'ary's theorem to... A common problem with such methods, including Tutte's algorithms, is node \emph{resolution}, which means that nodes may be placed arbitrarily close to each other without . A breakthrough here was by...~\cite{deFraysseix-Pach-Pollack} asymptotically optimal resolution $\mathcal{O}(n\times n)$ grid \cite{Chrobak} independently \cite{Schnyder}
-$\mathcal{NP}$-hard
+This algorithm has served as the springboard for two main branches of network layout algorithms. Since planarity has been shown to be one of, if not the most important markers for readability in node-link diagrams~\cite{purchase}, the first branch is a line of planarity-based algorithms which can guarantee planar node layouts. Examples include the algorithm of Read~\cite{read1987} which recursively removes nodes and adds dummy edges to maintain a triangulated graph at each step.  A problem with this method and Tutte's is \emph{node resolution}, which means that nodes may be placed exponentially close to each other, rendering the graph impossible to read in certain areas.
+A breakthrough for this problem came in 1990 by de Fraysseix et al.~\cite{deFraysseix-Pach-Pollack1990} who described the first layout algorithm achieve an asymptotically optimal node resolution of being able to layout nodes on an $\mathcal{O}(n\times n)$ grid~\cite{Chrobak}. This was done by constructing a \emph{canonical ordering} of the graph~\cite{todo} which is used to order nodes on the x-axis, and from there y-axis positions can be chosen such to avoid crossings.
+Improvements and refinements have been made with this algorithm in mind~\cite{Chrobak1995, Zhang2005}, but none have managed to solve the problem of poor \emph{angular resolution}, which means that adjacent edges form small angles between each other, another property that has been shown to impact the readability of layouts~\cite{Huang2008}.
+This issue exists until this day~\cite{eadeshowtodraw}, and is a primary reason why most network visualisation software uses algorithms based on a second, less mathematically rigorous branch of algorithms inspired by Tutte.
 
-The second branch comes from an intuitive interpretation of the algorithm: that each edge is analogous to a spring of natural length 0, where the solution to Tutte's system of linear equations can be seen as the point at which the elastic energy of these springs, according to Hooke's law~\cite{hooke}, is minimised. This energy is defined as
+This second branch comes from an intuitive interpretation of Tutte's algorithm: that each edge is analogous to a spring of natural length 0, where the solution to Tutte's system of linear equations can be seen as the point at which the elastic energy of these springs, according to Hooke's law~\cite{hooke}, is minimised. This energy is defined as
 \begin{equation}
-    \mathrm{energy}(\mathbf{X}) = \sum_{\{i,j\}\in E}||\mathbf{X}_j-\mathbf{X}_i||^2
+    \mathrm{energy}(\mathbf{X}) = \sum_{\{i,"j\}\in E}||\mathbf{X}_j-\mathbf{X}_i||^2
 \label{eq:tutte_energy}
 \end{equation}
 where $E$ is the set of all edges. Differentiating with respect to the position of a single node $\mathbf{X}_i$ results in
@@ -135,7 +137,7 @@ The energy function that will become the focus for the rest of this chapter is k
 where $w_{ij}$ and $d_{ij}$ are constants specific to each term in the summation. The intuition behind this formulation is that there are Hooke's law springs attached between all pairs of vertices, not just those connected by edges. Each of these springs is of natural length $d_{ij}$ and of stiffness $w_{ij}$. In practice, $d_{ij}$ is usually set to the shortest-path distance between vertices, and $w_{ij}$ is almost always set to $d_{ij}^{-2}$ in order to suppress the contribution from long-range springs that would otherwise obfuscate local detail~\cite{brandes_review}.
 
 Stress as an energy function is known to produce high-quality layouts~\cite{brandes_review, todo} without requiring extra input parameters such as those in Equation~\eqref{eq:eades}. However, it is known to be difficult to optimise due to an abundance of local minima~\cite{onedimensionalmds, hu}, and also does not scale well to larger graphs due to the quadratic number of terms in the summation~\cite{brandes_review, hu}.
-The subsequent work throughout this chapter will aim at addressing these issues through the application of an optimisation method widely used in other fields but not previously applied to Equation~\ref{eq:stress}, known as stochastic gradient descent.
+The subsequent work throughout this chapter will aim at addressing these issues through the application of an algorithm, widely used in other fields but not previously applied to Equation~\ref{eq:stress}, known as \emph{stochastic gradient descent}.
 Before describing sgd I will... first detail the history of optimisation techniques applied to~\eqref{eq:stress}
 TODO
 
@@ -186,7 +188,7 @@ Attractive forces can be used to keep clusters together
 cool much more than usual for convergence
 \subsection{Fixing one dimension}
 adding extra initial iterations can help
-setting $\mu_{\max}=1.1$ is good too
+setting $\mu_{\max}=1.1$ is good too, if not necessary
 \subsection{Regular Multidimensional Scaling}
 show the digits dataset (note that weights are all set to 1)
 try Phate classical MDS stuff
