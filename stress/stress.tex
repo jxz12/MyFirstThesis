@@ -12,7 +12,7 @@ A gallery of such examples can be seen in Figure~\ref{fig:graph_representations}
 \begin{figure}
 \caption{Each of these representations has its unique benefits and downsides. Matrix plots can show a very dense amount of data in a small space, but are very dependent on the ordering of rows and columns~\cite{Liiv2010}.
 The intersection-style graphs are intuitive, but cannot be drawn for all graphs~\cite{TODO}.}
-
+write something about treemaps
 \label{fig:graph_representations}
 \end{figure}
 
@@ -62,7 +62,7 @@ where $E$ is the set of all edges. Differentiating with respect to the position 
 \end{equation}
 where it can be seen that setting the left-hand side to zero results in Equation~\eqref{eq:tutte}, corresponding to an embedding of minimum global energy in the system.
 
-This interpretation has been taken and advanced to alleviate the resolution problem present in planarity based methods, by introducing the trade-off of foregoing mathematical rigour. 
+This interpretation has been taken and advanced to alleviate the resolution problem pre\-sent in planarity based methods, by introducing the trade-off of foregoing mathematical rigour. 
 This is done by using human intuition to formulate variations on Equation~\eqref{eq:tutte_energy}, in what are known as \emph{force-directed} algorithms.
 
 \subsection{\texorpdfstring{\st{Force-directed}{ Optimisation algorithms}}{}}
@@ -92,14 +92,12 @@ There are two important aspects to notice here. The first is that the left-hand 
 \label{eq:gradient_descent}
 \end{equation}
 where $\eta$ is a constant parameter.
-This operation, despite its simplicity, is theoretically proven to find a minimal energy embedding~\cite{Cauchy1847}, although it is important to note that this embedding may not be globally optimal because the energy function defined by~\eqref{eq:eades} is \emph{non-convex} and therefore may contain many \emph{local minima}. Many of the concepts introduced in this paragraph will be elaborated upon in Section~\ref{sec:stress_background}.
+This operation, despite its simplicity, is theoretically pro\-ven to find a minimal energy embedding~\cite{Cauchy1847}, although it is important to note that this embedding may not be globally optimal because the energy function defined by~\eqref{eq:eades} is \emph{non-convex} and therefore may contain many \emph{local minima}. Many of the concepts introduced in this paragraph will be elaborated upon in Section~\ref{sec:stress_background}.
 
 This optimisation through gradient descent interpretation is not how this type of algorithm is commonly presented, as  force-directed algorithms are often categorised into two families: force-balancing and energy-minimising models~\cite{Ortmann2017, Brandes2001}.
 Eades' model fits into the former, while others fit into the latter by directly defining an energy function such as in~\eqref{eq:tutte_energy}.
 Energy is then minimised by gradient descent as in Equation~\eqref{eq:gradient_descent} or by another optimisation technique, as will be further elaborated upon in Section~\ref{sec:stress_background}.
 With the view that the action of `force-balancing' is equivalent to gradient descent on another energy function, however, it is made clear that the two families are equivalent in the sense that both strive for the same goal: minimising energy.
-% This unification also reveals exactly why heuristics, such as the `adaptive cooling scheme' of Hu~\cite{hu_efficient}, work.
-%It is therefore possible to reverse-engineer the derivative into the energy function to objectively compare which optimisers do better
 
 This optimisation-centric viewpoint also allows a variety of linear algebra-based methods to be grouped into the same taxonomy.
 The high-dimensional embedding algorithm of Harel and Koren~\cite{Harel2004} first embeds a graph in a high-dimensional space, determined by a covariance matrix of graph-theoretic or shortest-path distances, and then finds an optimal projection down to two dimensions by means of principal components analysis (PCA)~\cite{Pearson1901}.
@@ -113,7 +111,7 @@ Specifically its energy upon a single dimension of the layout in the column vect
 \end{split}
 \label{eq:spectral}
 \end{align}
-where $w_{ij}$ is an optional weight given to each edge (previously all set to 1 in~\eqref{eq:tutte}) and $\overline{\mathbf{x}}$ is the mean of $\mathbf{x}$. The one-dimensional layout that minimises energy is equal to the second smallest eigenvector of the Laplacian matrix $\mathbf{L}$, defined as
+where $w_{ij}$ is an optional weight given to each edge (previously all set to 1 in~\eqref{eq:tutte}) and $\overline{\mathbf{x}}$ is the mean of $\mathbf{x}$. The one-dimensional layout that minimises energy is equal to the second smallest eigenvector of the Laplacian matrix $\mathbf{L}$, defined such that
 \begin{equation}
     \mathbf{x}^T\mathbf{Lx} = \mathrm{energy}(\mathbf{x})
 \end{equation}
@@ -122,7 +120,7 @@ All of these methods boil down to finding the eigendecomposition of a certain ma
 
 The linear nature of such methods is a double-edged sword, as it allows them to be calculated and/or approximated quickly and precisely, but they all suffer from the same issue that resulting layouts under-represent local detail~\cite{Brandes2009}, especially in examples such as the binary tree in Figure~\ref{fig:force_layouts}. However their effectiveness at capturing global structure consistently has led to them being commonly used as an initialisation step~\cite{Brandes2009}.
 
-Circling back to non-linear methods, there have been many attempts at improving Eades' original formulation. A widely-used alternative, developed in 1991, is the method of Fruchterman and Reingold~\cite{Fruchterman1991} who revert springs back to having a natural length of 0, but balance this out by applying the repulsive force between all pairs of vertices. Counterintuitively, increasing the number of repulsive terms also makes the summation more efficient to calculate, by taking inspiration from techniques used in physical simulations. More detail on scaling layout algorithms to large graphs can be found in Section~\ref{sec:large_graphs}.
+Circling back to non-linear methods, there have been many attempts at improving Eades' original formulation. A widely-used alternative, developed in 1991, is the method of Fruchterman and Reingold~\cite{Fruchterman1991} who revert springs back to having a natural length of 0, but balance this out by applying the repulsive force between all pairs of vertices. Counter-intuitively, increasing the number of repulsive terms also makes the summation more efficient to calculate, by taking inspiration from techniques used in physical simulations. More detail on scaling layout algorithms to large graphs can be found in Section~\ref{sec:large_graphs}.
 Another notable attempt came from Frick et al.~\cite{Frick1995} in 1995, who altered the calculations to never require a square root operation, and introduced a number of extra heuristics to speed up the convergence of the iterative optimisation. These heuristics were introduced on an intuitive and ad hoc basis, but have been shown to greatly speed up convergence in practice~\cite{Brandes2001}.
 % \begin{equation}
 %     \frac{d}{d\mathbf{X}_i}\mathrm{energy}(\mathbf{X}) = -\sum_{j\in N(i)}\frac{c^2}{||\mathbf{X}_j-\mathbf{X}_i||}\overrightarrow{\mathbf{X}_{ij}}
@@ -135,12 +133,12 @@ The energy function that will become the focus for the rest of this chapter is k
 \label{eq:stress}
 \end{equation}
 where $w_{ij}$ and $d_{ij}$ are constants specific to each term in the summation. The intuition behind this formulation is that there are Hooke's law springs attached between all pairs of vertices, not just those connected by edges. Each of these springs is of natural length $d_{ij}$ and of stiffness $w_{ij}$. In practice, $d_{ij}$ is usually set to the shortest-path distance between vertices, and $w_{ij}$ is almost always set to $d_{ij}^{-2}$ in order to suppress the contribution from long-range springs that would otherwise obfuscate local detail~\cite{Brandes2009}.
-This is a non-linear equation like the one in Equation~\eqref{eq:eades} or in~\cite{Fruchterman1991, Frick1995}, and so cannot be solved exactly using linear methods as with Equations~\eqref{eq:tutte} or~\eqref{eq:spectral}. However an immediate benefit to this formulation is that there are no extra parameters to 
 
-Stress as an energy function is known to produce high-quality layouts~\cite{Brandes2009} without requiring extra input parameters such as those in Equation~\eqref{eq:eades}. However, it is known to be difficult to optimise due to an abundance of local minima~\cite{DeLeeuw1988, Gansner2005}, and also does not scale well to larger graphs due to the quadratic number of terms in the summation~\cite{Brandes2009, Hu2005}.
-The subsequent work throughout this chapter will aim at addressing these issues through the application of an algorithm, widely used in other fields but not previously applied to Equation~\ref{eq:stress}, known as \emph{stochastic gradient descent}.
-Before describing sgd I will... first detail the history of optimisation techniques applied to~\eqref{eq:stress}
-TODO
+The derivative of this equation is non-linear, like Equation~\eqref{eq:eades} or in~\cite{Fruchterman1991, Frick1995}, and so cannot be solved exactly using linear solvers as for Equations~\eqref{eq:tutte_energy} or~\eqref{eq:spectral}.
+% However an immediate benefit to this formulation is that there are no extra input parameters for the user to decide, since $w_{ij}$ and $d_{ij}$ are both dependent on the structure of the graph itself.
+However, stress as an energy function is also generally known to produce high-quality layouts~\cite{Brandes2009}. It also does not require extra input parameters such as those in Equation~\eqref{eq:eades} because $d_{ij}$ and $w_{ij}$ are both derived from the structure of the graph itself.
+However, it is known to be difficult to optimise due to an abundance of local minima~\cite{DeLeeuw1988, Gansner2005}, and also does not scale well to larger graphs due to the quadratic number of terms in the summation~\cite{Brandes2009, Hu2005}.
+The subsequent work throughout this chapter will aim at addressing these issues through the application of an algorithm, widely used in other fields but not previously applied to Equation~\ref{eq:stress}, known as \emph{stochastic gradient descent} (SGD).
 
 % """
 % Force-directed methods account for 90\% of commercial and free graph drawing software for undirected graphs~\cite{eades_revisited}
@@ -149,16 +147,24 @@ TODO
 
 \subsection{Multidimensional Scaling}
 \label{sec:stress_background}
-Before 
+Before explaining the details of SGD, I will first outline the history of methods used to optimise Equation~\eqref{eq:stress}, as the performance of SGD will be evaluated through an experimental study comparing it to the previous state-of-the-art, known as \emph{majorization}.
+
+Equation~\eqref{eq:stress} was first utilised in a domain unrelated to graphs, but still for the purpose of visualisation, known as \emph{multidimensional scaling} (MDS). As the name implies, this involves taking high-dimensional data and scaling it down to fewer dimensions, usually two.
+The difficulty in this can be clearly seen through a simple example... tetrahedron... LSR
+
+\subsection{Majorization}
+Cholesky, local, conj
+
+\section{Stochastic Gradient Descent}
+\label{sec:sgd}
+This is where the novel stuff starts SGD
 
 \subsection{Constraint Relaxation}
 \label{sec:wcr}
 lol at the conception
 dwyer
 
-\section{Stochastic Gradient Descent}
-\label{sec:sgd}
-This is where the novel stuff starts SGD
+\subsection{Algorithm Description}
 
 \subsection{Experimental Results}
 comparison to majorization
