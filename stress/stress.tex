@@ -1,13 +1,13 @@
 \chapter{Nodes}
 If one were to ask a random group of people to draw a network on a piece of paper, it is likely that most would draw dots to represent the nodes, and lines joining the dots to represent the edges. This is a representation so intuitive that it is often synonymous with the abstract concept of a network entirely.
-This is the reason why this `join-the-dots' representation, known as the node-link diagram, is the most commonly studied and applied, and is also why it has been chosen for the purposes of this thesis.
+This is the reason why this `join-the-dots' representation, known as the node-link diagram, is the most commonly studied and applied~\cite{Ghoniem2004}, and is also why it has been chosen for the purposes of this thesis.
 
 However it is useful to have an idea of the other possible representations in order to gain a broader view of what network visualisation entails. A classical example of this includes the \emph{matrix plot}, which is a grid where each vertex is represented by a row and a column, and each edge is a dot filled in at the intersection of a row and column~\cite{Liiv2010}.
 A more obscure example is \emph{string graphs}, where each vertex is represented by a (possibly curved) line, and edges exist between vertices whose lines intersect.
 Specialised types of networks can also have similarly specialised representations. Trees, for example, can be depicted as packed rectangles~\cite{Johnson1991} or circles~\cite{Wang2006}.
 Graphs with low \emph{boxicity}, such as food webs~\cite{Eklof2013}, can be drawn as \emph{intersection graphs} of overlapping lines or rectangles or cuboids.\footnote{Or hypercuboids, although the usefulness of that for visualisation is likely limited.}
 A related and more common example is the \emph{disc graph}, where nodes are represented by circles and edges exist if the circles overlap. This sees widespread use as a Venn diagram, but usually without the connotation of network structure.
-A gallery of such examples can be seen in Figure~\ref{fig:graph_representations}; because of the difference between the abstract mathematical structure of a network and its representation within a visualisation, I will henceforth refer to the abstract structure itself as drawing graphs comprised of vertices and edges, and their representation as visualising networks comprised of nodes and links.\footnote{This is in line with the termininology chosen by the \emph{International Symposium on Graph Drawing and Network Visualisation} to separate its theoretical and applied submission tracks, and so I will attempt to adopt it here. However the distinction between the two can sometimes become blurred depending on the context.}
+A gallery of such examples can be seen in Figure~\ref{fig:graph_representations}; because of the difference between the abstract mathematical structure of a network and its representation within a visualisation, I will henceforth refer to the abstract structure itself as drawing graphs comprised of vertices and edges, and their representation as visualising networks comprised of nodes and links.\footnote{This is in line with the terminology chosen by the \emph{International Symposium on Graph Drawing and Network Visualisation} to separate its theoretical and applied submission tracks, and so I will attempt to adopt it here. However the distinction between the two can sometimes become blurred depending on the context.}
 
 \begin{figure}
 \caption{Each of these representations has its unique benefits and downsides. Matrix plots can show a very dense amount of data in a small space, but are very dependent on the ordering of rows and columns~\cite{Liiv2010}.
@@ -136,7 +136,9 @@ where $w_{ij}$ and $d_{ij}$ are constants specific to each term in the summation
 
 The derivative of this equation is non-linear, like Equation~\eqref{eq:eades} or in~\cite{Fruchterman1991, Frick1995}, and so cannot be solved exactly using linear solvers as for Equations~\eqref{eq:tutte_energy} or~\eqref{eq:spectral}.
 % However an immediate benefit to this formulation is that there are no extra input parameters for the user to decide, since $w_{ij}$ and $d_{ij}$ are both dependent on the structure of the graph itself.
-However, stress as an energy function is also generally known to produce high-quality layouts~\cite{Brandes2009}. It also does not require extra input parameters such as those in Equation~\eqref{eq:eades} because $d_{ij}$ and $w_{ij}$ are both derived from the structure of the graph itself.
+However, stress as an energy function is known to produce high-quality layouts~\cite{Brandes2009}. This is partly because it manages to avoid the \emph{peripheral effect}~\cite{Hu2005}, a common visual artifact of many force-directed methods where repulsive forces tend to push nodes towards the boundary of the layout. This can be seen in Figure~\ref{fig:force_layouts}, TODO Position, where the nodes of the tree are TODO. Stress avoids this by forgoing repulsive forces entirely in Equation~\eqref{eq:stress}.
+
+Stress also does not require extra input parameters such as those in Equation~\eqref{eq:eades} because $d_{ij}$ and $w_{ij}$ are both derived from the structure of the graph itself.
 However, it is known to be difficult to optimise due to an abundance of local minima~\cite{DeLeeuw1988, Gansner2005}, and also does not scale well to larger graphs due to the quadratic number of terms in the summation~\cite{Brandes2009, Hu2005}.
 The subsequent work throughout this chapter will aim at addressing these issues through the application of an algorithm, widely used in other fields but not previously applied to Equation~\ref{eq:stress}, known as \emph{stochastic gradient descent} (SGD).
 
@@ -150,7 +152,11 @@ The subsequent work throughout this chapter will aim at addressing these issues 
 Before explaining the details of SGD, I will first outline the history of methods used to optimise Equation~\eqref{eq:stress}, as the performance of SGD will be evaluated through an experimental study comparing it to the previous state-of-the-art, known as \emph{majorization}.
 
 Equation~\eqref{eq:stress} was first utilised in a domain unrelated to graphs, but still for the purpose of visualisation, known as \emph{multidimensional scaling} (MDS). As the name implies, this involves taking high-dimensional data and scaling it down to fewer dimensions, usually two.
-The difficulty in this can be clearly seen through a simple example... tetrahedron... LSR
+The difficulty in 
+A tetrahedron is a shape that can only be embedded `ideally' in three dimensions, where `ideally' is defined as having each of its edges embedded with equal length. This is clearly already impossible for a graph as simple as the tetrahedron... askdjalskdj
+\footnote{The rate at which such a problem can get out of hand is known as the \emph{curse of dimensionality}~\cite{Friedman2001}, which is range of phenomena caused by the exponential growth of a given problem space relative to each additional input dimension.}
+
+How then should a tetrahedron be layed out into two dimensions? 
 
 \subsection{Majorization}
 Cholesky, local, conj
@@ -196,6 +202,8 @@ cool much more than usual for convergence
 \subsection{Fixing one dimension}
 adding extra initial iterations can help
 setting $\mu_{\max}=1.1$ is good too, if not necessary
+\subsection{Pinning nodes}
+especially good if many are pinned (mention graphviz), because terms can be left out of the summation very easily (unlike majorization), which also means that disconnected components are easily dealt with by never adding those terms (rather than separate solvers for each component).
 \subsection{Regular Multidimensional Scaling}
 show the digits dataset (note that weights are all set to 1)
 try Phate classical MDS stuff
