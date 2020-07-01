@@ -36,6 +36,7 @@ What is needed is a method for of grouping similar datapoints together. This is 
 
 There exist a wide variety of powerful and creative methods that have been developed to perform clustering on networks. A common 
 Louvain (given its name from the authors coming from the University of Louvain, Belgium) and its recently updated Leiden (Leiden University, Netherlands) attempt to optimise a cost function known as \textit{modularity}, which was developed by...
+Modularity is the fraction of the edges that fall within the given clusters minus the expected fraction if edges were distributed at random.
 \begin{align}
 \begin{split}
     \mathbf{B}_{ij} &= \mathbf{A}_{ij} - \frac{|N(i)||N(j)|}{2|V|}\\
@@ -43,7 +44,8 @@ Louvain (given its name from the authors coming from the University of Louvain, 
 \end{split}
 \label{eq:modularity}
 \end{align}
-where b is the \emph{modularity matrix} s is a vector of $\{1,-1\}$ representing the clustering configuration being evaluated
+where b is the \emph{modularity matrix} s is a vector of representing the clustering configuration being evaluated
+All rows and columns of the modularity matrix sum to zero, which means that the modularity of an undivided network is also always zero.
 
 Modularity has problems such as resolution limit... CPM can avoid this
 Random walks are a popular the Infomap algorithm optimises a cost function known as the map equation, which (like pagerank) with a combination of greedy search and simulated annealing.
