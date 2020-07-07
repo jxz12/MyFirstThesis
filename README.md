@@ -1,12 +1,18 @@
 # TODO:
 
+# NOW:
+dad paper
+ecobuilder article
+ - ecobuilder press (gamasutra etc)
+ecobuilder kids (summer school)
+
 ## words
-change baths braces, symbols are probably fine
+change maths braces, symbols are probably fine
 make margins bigger
 remove first names from authors
+fix bbox errors
 
 ## work
-do tutte/spectral/spring layouts
 finish Unity in Unity figure
 try wasserstein and walktrap distances
 ECOBUILDER ANALYSIS
