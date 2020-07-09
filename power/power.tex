@@ -1,8 +1,8 @@
-\chapter{Edges}
+\chapter{Links}
 \begin{figure}
     \centering
     \includegraphics[width=.6\textwidth]{power/figures/metaunityplaceholder.png}
-    \caption{A visualisation of the Unity game engine, produced using the Unity game engine.}
+    \caption{A visualisation of the Unity game engine, produced using the Unity game engine. TODO: explanation of hierarchy and labels around perimeter.}
     \label{fig:metaunity}
 \end{figure}
 The previous chapter of was an exploration of how to position the nodes of a graph, and the natural question to then ask is how to deal with the only remaining component: the links. However this question is seemingly redundant at first, as the obvious answer is to simply draw straight lines between nodes with edges between them. While this by no means a poor choice, and is exactly how all node-link diagrams have been drawn thus far, this chapter will explore the possibility of drawing links using curves instead.
@@ -49,7 +49,7 @@ All rows and columns of the modularity matrix sum to zero, which means that the 
 
 Modularity has problems such as resolution limit... CPM can avoid this
 Random walks are a popular the Infomap algorithm optimises a cost function known as the map equation, which (like pagerank) with a combination of greedy search and simulated annealing.
-and markov cluster...
+and markov cluster...u
 link clustering
 
 % The variety of different methods available is in part due to one key characteristic of network clustering: it is an undefined problem.
@@ -59,34 +59,44 @@ However, even knowing that this is the goal does not make the problem easier, be
 % In fact, if you will allow me to go meta for a moment, the very act of collecting data itself into the form of a network is already technically a form of compression, as 
 It is therefore important to keep in mind that all metrics like the aforementioned modularity or map equation are simply attempts to quantify common characteristics of real-world data, and there is no `right answer' to the question of which one should be chosen. It depends on both the specific objective and dataset being examined. Nevertheless, they have been used to great effect in many applications~\cite{TODO}, and so confidence can be placed in their utility as a tool to help understand patterns in data.
 
-The work in this chapter will concentrate on \textit{agglomerative clustering}, which is a family of algorithms that starts by placing each datapoint in a separate cluster, and then proceeds by merging clusters together. 
-The benefit of this method is that the output is a \textit{dendrogram}, which is a binary tree that describes a hierarchical structure. Each branch in the tree represents a merge between two clusters, and the root therefore represents a single cluster containing the entire dataset. To perform the desired hierarchical edge bundling, as the name suggests, requires a hierarchy with multiple levels, not just a set of clusters, and so the output of an agglomerative clustering algorithm can be used directly as the hierarchical metadata needed.
+The work in this chapter will concentrate on \textit{hierarchical clustering}, which is a family of algorithms that where the output is a 
+\textit{dendrogram}: a binary tree used to describe a hierarchical structure. This can either be done from the bottom up, i.e.\ each node starts in its own cluster and clusters are merged one at a time, or top down, i.e every node starts in the same cluster and it is progressively divided into two halves. The former is known as \emph{agglomerative} clustering, and the latter as \emph{divisive} clustering.
+This output fits well with our purposes, since our goal is to construct a hierarchical edge bundling visualisation without a prior hierarchy to work with. The dendrogram produced from an agglomerative clustering algorithm can be used directly as the hierarchical tree used to inform the bundling behaviour.
 
 % Another benefit to agglomerative methods is that it is easy to interpret and understand what the algorithm is doing. I would always pick an algorithm that I fully understand for a visualisation over a black-box algorithm that produces slightly better results. But this is just opinion.
+% it is very important to realise that there are two types of clusters, which will be henceforth referred to as 'community' and 'betweenness' structure. This can also be referred to as 'assortative' and 'disassortative'.
+% some networks have both at the same time, and it is therefore difficult
+
+The idea of generating a hierarchy from the data was previously explored by Jia et al.~\cite{TODO}\footnote{bad splines}, who produce a hierarchy using the popular divisive of Girvan and Newman~\cite{TODO}. This method removes one edge from the network at a time, specifically the one with the most \emph{betweenness centrality} i.e.\ the edge traversed the most often when mapping the shortest paths between all pairs of vertices. This naturally splits clusters when the removal of an edge leads to components being separated from each other. The problem with this method can be seen in figure~\ref{TODO} and will be discussed in greater detail in the following section, where I will present a study of agglomerative methods we require. 
+
+
+\subsection{Agglomerative clustering}
 Within agglomerative clustering there are 
 NP-hard problem blah blah
 Unweighted is, perhaps confusingly, more precise than the weighted version (directly opposite to the case in weighted and unweighted shortest paths). 
 UPGMA WPGMA ward is better because of things
 
-% it is very important to realise that there are two types of clusters, which will be henceforth referred to as 'community' and 'betweenness' structure. This can also be referred to as 'assortative' and 'disassortative'.
-% some networks have both at the same time, and it is therefore difficult
-
-The idea of generating a hierarchy from the data was previously explored by Jia et al.~\cite{TODO}\footnote{bad splines}, who produce a hierarchy using a method known as \textit{divisive clustering} by Girvan and Newman~\cite{TODO}. This method also forms a dendrogram, but in the reverse order: it starts with one big cluster and iteratively splits it in order to form the dendrogram from the top-down instead of bottom-up. This divisive method specifically removes one edge from the network at a time, which naturally splits clusters when the removal of an edge leads to components being separated from each other. The problem with this method can be seen in figure~\ref{TODO} will be discussed in the following section, where I will present an exploration of the agglomerative methods we require. 
 
 \subsection{Distance measures}
 
 mention the optimal ordering from Scipy, Bar-Joseph et al.~\cite{TODO}, around a circle
 
-try WASSERSTEIN
+wasserstein sucks
+walktrap is pretty good
+let's see with caltech
+compare karate,football,caltech
 
 \begin{itemize}
-    \item girvan-newman -- this results in long strands that \item
+    \item divisive girvan-newman -- this results in long strands that
+    \item
 \end{itemize}
 
 \section{Power-confluent Drawings}
 in confluent drawings the aforementioned trade-off is actually attempted to be avoided
 it is likened to lossless compression.
-fixing issues and improving speed
+
+2 parts: finding the power groups, then converting to a confluent drawing. The results here improve the speed and quality of the first part, and fix theoretical issues with the second.
+The nested structure of power-groups is hierarchical, and so an agglomerative method is used.
 \subsection{Splines}
 b-spline algorithms and things
 holten qualitatively said some desirable properties of b-splines, but the real benefit of them is the convex hull property, which helps to prevent crossings (explain why... because)
