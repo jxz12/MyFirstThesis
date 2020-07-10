@@ -4,7 +4,7 @@
 dad paper
 ecobuilder article
  - ecobuilder press (gamasutra etc)
-ecobuilder kids (summer school)
+send data regardless of login
 
 ## words
 change maths braces, symbols are probably fine
