@@ -1,12 +1,11 @@
 # TODO:
 
-# NOW:
-dad paper
-ecobuilder article
- - ecobuilder press (gamasutra etc)
+## NOW:
+EcoBuilder video
+make bundling figures
 send data regardless of login
 
-## words
+## word
 change maths braces, symbols are probably fine
 make margins bigger
 remove first names from authors
@@ -14,5 +13,4 @@ fix bbox errors
 
 ## work
 finish Unity in Unity figure
-try wasserstein and walktrap distances
 ECOBUILDER ANALYSIS
