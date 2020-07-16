@@ -1,10 +1,5 @@
 # TODO:
 
-## NOW:
-EcoBuilder video
-make bundling figures
-send data regardless of login
-
 ## word
 change maths braces, symbols are probably fine
 make margins bigger
