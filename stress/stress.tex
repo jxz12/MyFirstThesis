@@ -130,7 +130,7 @@ Another notable attempt came from Frick et al.~\cite{Frick1995} in 1995, who alt
 
 The energy function that will become the focus for the rest of this chapter is known as \emph{stress}, and was popularised within the context of graph layout in 1989 by Kamada and Kawai \cite{Kamada1989}. Its energy is defined as
 \begin{equation}
-    \mathrm{stress}(\mathbf{X}) = \sum_{\{i,j\}\:i<j}w_{ij}(||\mathbf{X}_j-\mathbf{X}_i||-d_{ij})^2
+    \mathrm{stress}(\mathbf{X}) = \sum_{\{i,j\}:i<j}w_{ij}(||\mathbf{X}_j-\mathbf{X}_i||-d_{ij})^2
 \label{eq:stress}
 \end{equation}
 where $w_{ij}$ and $d_{ij}$ are constants specific to each term in the summation. The intuition behind this formulation is that there are Hooke's law springs attached between all pairs of vertices, not just those connected by edges. Each of these springs is of natural length $d_{ij}$ and of stiffness $w_{ij}$. In practice, $d_{ij}$ is usually set to the shortest-path distance between vertices, and $w_{ij}$ is almost always set to $d_{ij}^{-2}$ in order to suppress the contribution from long-range springs that would otherwise obfuscate local detail \cite{Brandes2009}.

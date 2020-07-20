@@ -1,11 +1,11 @@
-\chapter{Links}
+\chapter{Edges}
 \begin{figure}
     \centering
     \includegraphics[width=.6\textwidth]{power/figures/metaunityplaceholder.png}
     \caption{A visualisation of the Unity game engine, produced using the Unity game engine. TODO: explanation of hierarchy and labels around perimeter. Also move this to the start of the chapter}
     \label{fig:metaunity}
 \end{figure}
-The previous chapter of was an exploration of how to position the nodes of a graph, and the natural question to then ask is how to deal with the only remaining component: the links. However this question is seemingly redundant at first, as the obvious answer is to simply draw straight lines between nodes with edges between them. While this by no means a poor choice, and is exactly how all node-link diagrams have been drawn thus far, this chapter will explore the possibility of drawing links using curves instead.
+The previous chapter of was an exploration of how to position the vertices of a graph, and the natural question to then ask is how to deal with the only remaining component: the edges. However this question is seemingly redundant at first, as the obvious answer is to simply draw straight lines between adjacent nodes. While this by no means a poor choice, and is exactly how all node-link diagrams have been drawn thus far, this chapter will explore the possibility of drawing links using curves instead.
 
 \section{Background}
 The curving of links in the context of a node-link diagram is known as \textit{edge bundling}. It is a technique that has been developed because many networks, when processed through a standard force-directed layout, result in a seemingly random layout with no discernable structure. See Figure~\ref{TODO} for an example. The similarity of such layouts to tangled piles of hair has led to them being colloquially termed \textit{hairballs}.
@@ -22,73 +22,83 @@ The same premise behind force-directed node layout is also used in force-directe
 Another effective approach is \emph{kernel density estimation} by Hurter et al.~\cite{Hurter2012}, who iteratively apply a convolutional filter over a density map of links in an already rendered diagram. This method belongs to the subfield of image-based bundling methods \cite{Telea2018,TODO}. A diverse gallery of edge bundling algorithms applied to the same dataset can be see in the review of Luilier et al.~\cite[Fig.~4]{Luilier2017}.
 However all of the aforementioned methods share a key similarity: they apply bundling upon the assumption that node positions are predetermined and will not be moved. This is perfectly fine and even desirable in many common use cases where nodes have a predefined location, such as geographical maps, but methods such as force-directed layouts were never designed to place similar edges in parallel. In fact, the angular resolution of edges sharing nodes is sometimes used as part of the optimised cost function \cite{Argyriou2010}) and so common layout methods usually do not help, if not worsen, the bundling quality of their visualisations.
 
-This is why one of the most powerful network visualisation techniques is method known as \emph{hierarchical edge bundling}, published by Holten in 2006 \cite{Holten2006}, recognised by a `Test of Time' award at the conference IEEE VIS in 2016.
-An example of this technique in action can be seen in Figure~\ref{fig:metaunity}, which contains this visualisation applied to the source code of the Unity game engine.
-The reason behind its effectiveness is that it uses extra metadata in order to inform the nature of the bundling; specifically every vertex in the visualised graph also exists as a leaf vertex in a hierarchical tree. As an example, the common and effective use case used in Figure~\ref{fig:metaunity} is to visualise the call graph of a piece of software. Each function is a vertex, and is connected by an edge to any other function that calls it. The metadata in this case is the hierarchy of folders and source files within.
+This is why one of the most powerful network visualisation techniques is method known as \emph{hierarchical edge bundling}, published by Holten in 2006 \cite{Holten2006}\footnote{Its effectiveness was recognised by a `Test of Time' award at the IEEE VIS conference in 2016.}
+An example of this in action can be seen in Figure~\ref{fig:metaunity}, which contains the method applied to the source code of the Unity game engine. The graph being visualised is a call graph, where each class is a vertex, and is connected by an edge to any other class it depends on. 
 
-The trick to the bundling is as follows: the hierarchy, not the call graph itself, is first layed out as a tree. Then, since this tree contains extra nodes to represent the folders and source files, these extra nodes are erased from the final visualisation. However their coordinates are instead used as an auxiliary routing graph (ARG) through which the call graph edges are routed through.
-More precisely, this process of routing involves taking every edge in the call graph, and rendering each one using a spline curve whose control points consist of a path through the ARG. The precise definition of this spline is important, and will be further elaborated upon in Section~\ref{TODO}, but for now the important thing to note is that this produces bundling behaviour because vertices close to each other in the hierarchy will often share control points for their splines, to curve their rendered links towards each other.
-This hierarchical tree extracted from the Unity game engine can be seen on the TODO hand side, to illustrate its influence on the final visualisation. Since the ordering of leaf nodes and the bundling of edges is both controlled by this tree...
+The trick to the bundling comes from the fact that we have extra metadata available: the hierarchy of folders and source files that holds the code.
+This hierarchy, not the call graph itself, is first layed out as a tree. Then, since this tree includes extra nodes to represent the folders and source files, these extra nodes are erased from the final visualisation. However their coordinates are instead used as an auxiliary routing graph (ARG) through which the call graph edges are routed through.
+More precisely, this process of routing involves taking every edge in the call graph, and rendering each one using a spline curve whose control points consist of a path through the ARG. The precise definition of this spline is important, and will be further elaborated upon in Section~\ref{TODO}, but for now the important thing to note is that this produces bundling behaviour because vertices close to each other in the hierarchy will share control points for their splines, thus curving their rendered links towards each other.
+The hierarchical tree extracted from the Unity game engine can be seen on the TODO hand side, to illustrate its influence on the final visualisation. 
 
-This technique is so effective because the structure of the bundles is informed by human judgement. To continue within the call graph example, the hierarchy of folders and source files is literally designed by the programmers for organisational purposes, and so it is very likely to admit some utility for organising, say, a visualisation.
-This idea of using an auxiliary graph to inform bundling is the basis of the work in this chapter, except that I will instead investigate the more common situation of when this metadata is not included with the original data, and therefore must be inferred instead.
+This technique is so effective because the structure of the bundles is informed by human judgement. To continue within the call graph example, the hierarchy of folders and source files is literally designed by the programmers for organisational purposes, and so it is very likely to admit some utility for also organising, say, a visualisation.
+Additionally, not only is the curvature links influenced by the ARG, but so is the position of the nodes. Since each node is a leaf in the tree-shaped ARG, their positions around the circle are also influenced by the topology of the tree, which on its own already vastly improves the quality of the layout.
+This idea of using an auxiliary hierarchy to inform bundling is the basis of the work in this chapter, except that I will instead investigate the more common situation of when this metadata is not included with the original data. It must therefore must be generated by the algorithm itself as a preprocessing step.
 
 \subsection{Clustering}
-What is needed is a method for of grouping similar datapoints together. This is known as \textit{clustering}, and is a vast field of study, not least as one of the primary objectives of the fast-growing discipline of machine learning. The subfield of clustering within the context of networks is large in its own right, due to its utility in common datasets such as protein--protein interaction or social networks.
+What is needed is a way of grouping similar datapoints together. This is known as \textit{clustering}, and is a vast field of study, not least as one of the primary objectives of the fast-growing discipline of machine learning. The subfield of clustering just within the context of networks is large in its own right, due to its utility in common datasets such as protein--protein interaction or social networks.
 
-There exist a wide variety of powerful and creative methods that have been developed to perform clustering on networks. A common 
+There exist a wide variety of powerful and creative methods that have been developed to perform clustering on networks. A widely used method is to define an equation that can be used to numerically measure the quality of a given clustering, and to attempt to maximise this quality. This is reminiscent of the optimisation-based methods described in Section~\ref{sec:force_background}.
+A popular version of this is known as \emph{modularity}, defined as
 \begin{equation}
-\mathrm{modularity} = \frac{1}{|E|}\sum_{i,j}\left(\mathbf{A}_{ij} - \frac{|N(i)||N(j)|}{|E|}\right)\delta(i,j)
+Q = \frac{1}{|E|}\sum_{i,j}\left(\mathbf{A}_{ij} - \frac{|N(i)||N(j)|}{|E|}\right)\mathbf{C}_{ij}
 \label{eq:modularity}
 \end{equation}
-where $\delta(i,j)$ equals 1 if vertices $i$ and $j$ are in the same community and 0 otherwise.
-Louvain (given its name from the authors coming from the University of Louvain, Belgium) and its recently updated Leiden (Leiden University, Netherlands) attempt to optimise a cost function known as \textit{modularity}, which was developed by...
+where $\mathbf{A}$ is the adjacency matrix where $\mathbf{A}_{ij}$ equals 1 if vertices $i$ and $j$ are connected by an edge, and $\mathbf{C}_{ij}$ equals 1 if vertices $i$ and $j$ are in the same cluster and 0 otherwise.
+The value of $Q$ lies between $-1$ and 1, and it can be intuitively understood as the fraction of the edges that fall within the given clusters minus the expected fraction if edges were distributed at random.
 
-Modularity is the fraction of the edges that fall within the given clusters minus the expected fraction if edges were distributed at random.
-Modularity has problems such as resolution limit... CPM can avoid this
-Random walks are a popular the Infomap algorithm optimises a cost function known as the map equation, which (like pagerank) with a combination of greedy search and simulated annealing.
-and markov cluster...
-link clustering
+This was introduced by Newman and Girvan \cite{Newman2004} to evaluate a separate clustering algorithm, and later directly optimised by Newman \cite{Newman2006} with two methods that both initialise the network as one big cluster, and recursively splits clusters into half until no further gain in modularity is possible. The first finds the split by calculating eigenvectors of the \emph{modularity matrix}, and another that finds the split by repeatedly moving vertices between the two sides of the split until modularity is maximised, akin to a hill-climbing method.
+Optimising modularity in general is $\mathcal{NP}$-hard \cite{Brandes2007a}, but its intuitive interpretation has led to various other authors to develop methods to optimise it. The Louvain algorithm (given its name from the authors coming from the University of Louvain, Belgium) \cite{Blondel2008} and its recent improvement to the Leiden algorithm (from Leiden University, Netherlands) \cite{Traag2019} both start by placing every vertex in a singleton cluster and successively merging clusters whilst also moving vertices between clusters, also until modularity cannot be improved further.
+All these methods for modularity maximisation can be seen as greedy algorithms.
+
+The behaviour of random walks along the graph has also been used to great effect for clustering. For example, the \emph{markov cluster} algorithm of Enright et al.~\cite{Enright2002} simulates a random walk process through a series of matrix multiplications on the markov chain of the graph.
+The \emph{infomap} algorithm of Rosvall and Bergstrom \cite{Rosvall2008} optimises a cost function known as the map equation, which applies information-theoretic concepts such as entropy to the behaviour of random walkers. It is optimised through a combination of greedy search and simulated annealing.
+Other types of algorithms include statistical inference methods such as Bayesian inference \cite{Hastings2006} and block-modelling \cite{Reichardt2007}.
+Another perspective on clustering includes grouping together edges instead of vertices, which means that a single vertex may belong to many overlapping clusters, an idea explored by Evans and Lambiotte \cite{Evans2009}.
+The growing number of graph-shaped datasets being used in machine learning has also led to a number of supervised and semi-supervised methods for clustering and general dimensionality reduction, such as \emph{DeepWalk} \cite{Perozzi2014} which treats each vertex as a `word' to generate `sentences' using random walks across vertices. These sentences are then taken and applied to techniques originally designed for language processing. Attempts to transfer the success of convolutional neural networks have also been generalised to apply to graphs of any topology \cite{Kipf2016}, as well as many other architectures depending on the task at hand \cite{Battaglia2018, Wu2020}.
 
 % The variety of different methods available is in part due to one key characteristic of network clustering: it is an undefined problem.
-One reason why there is such a variety of clustering algorithms is in part due to it being an inherently difficult problem.
+One reason why there is such a variety of clustering algorithms is in part due to it being an undefined problem.
 Clustering can be likened to data compression, as the goal is to describe a given network with less information than, say, viewing the source and target of every individual edge. Such compression would be impossible in a random network, but because real-world data does have structure, underlying patterns can be leveraged to group together similar components within the data.
 However, even knowing that this is the goal does not make the problem easier, because these underlying patterns are not known to us. The real world is complex, and so any data collected from it is not likely to be straightforward to understand. Much of the data collected may not even contain any order in the first place.
 % In fact, if you will allow me to go meta for a moment, the very act of collecting data itself into the form of a network is already technically a form of compression, as 
-It is therefore important to keep in mind that all metrics like the aforementioned modularity or map equation are simply attempts to quantify common characteristics of real-world data, and there is no `right answer' to the question of which one should be chosen. It depends on both the specific objective and dataset being examined. Nevertheless, they have been used to great effect in many applications \cite{TODO}, and so confidence can be placed in their utility as a tool to help understand patterns in data.
+It is therefore important to keep in mind that clustering algorithms are attempts to quantify common characteristics of real-world data, and there is generally no `right answer' to the question of which one should be chosen.
+It depends on both the specific objective and dataset being examined. Nevertheless, they have been used to great effect in many applications \cite{Fortunato2016}, and so confidence can be placed in their utility as a tool to help understand patterns in data.
 
-The work in this chapter will concentrate on \textit{hierarchical clustering}, which is a family of algorithms that where the output is a 
-\textit{dendrogram}: a binary tree used to describe a hierarchical structure. This can either be done from the bottom up, i.e.\ each node starts in its own cluster and clusters are merged one at a time, or top down, i.e every node starts in the same cluster and it is progressively divided into two halves. The former is known as \emph{agglomerative} clustering, and the latter as \emph{divisive} clustering.
-This output fits well with our purposes, since our goal is to construct a hierarchical edge bundling visualisation without a prior hierarchy to work with. The dendrogram produced from an agglomerative clustering algorithm can be used directly as the hierarchical tree used to inform the bundling behaviour.
+The work in this chapter will focus on \emph{hierarchical clustering}, a family of algorithms where the output is a  \textit{dendrogram}: a binary tree used to describe a hierarchical structure.
+This can either be done from the bottom up, i.e.\ each node starts in its own cluster and pairs of clusters are progressively merged until only one remains, or top down, i.e\ every node starts in the same cluster that is recursively split into two halves. The former is known as \emph{agglomerative} clustering, and the latter as \emph{divisive} clustering.
+The output fits well with our purposes, since our goal is to construct a hierarchical edge bundling visualisation like the one in Figure~\ref{fig:metaunity} but without a prior hierarchy included with the data; the dendrogram produced from such a clustering algorithm can be used as this missing hierarchy.
 
-% Another benefit to agglomerative methods is that it is easy to interpret and understand what the algorithm is doing. I would always pick an algorithm that I fully understand for a visualisation over a black-box algorithm that produces slightly better results. But this is just opinion.
-% it is very important to realise that there are two types of clusters, which will be henceforth referred to as 'community' and 'betweenness' structure. This can also be referred to as 'assortative' and 'disassortative'.
-% some networks have both at the same time, and it is therefore difficult
+This idea of using the output dendrogram of a clustering algorithm to produce hierarchical edge bundling has been previously explored by Jia et al.~\cite{Jia2011}\footnote{TODO: bad splines}, who produce a hierarchy using the algorithm of Girvan and Newman \cite{Newman2004}. This method removes one edge from the network at a time, specifically the one with the most \emph{betweenness centrality} i.e.\ the edge traversed the most often when mapping the shortest paths between all pairs of vertices. This naturally splits clusters when an edge is removed that is the final bridge between two clusters.
+Unfortunately Jia et al.\ did not perform any quantitative analysis to evaluate the performance of their clustering algorithm, and only present results when using one clustering method. The work in the following Section will aim to extend their work by evaluating the performance of a number of hierarchical clustering methods, against a small benchmark of graphs where the ground truth is known.
 
-The idea of generating a hierarchy from the data was previously explored by Jia et al.~\cite{TODO}\footnote{bad splines}, who produce a hierarchy using the popular divisive of Girvan and Newman \cite{TODO}. This method removes one edge from the network at a time, specifically the one with the most \emph{betweenness centrality} i.e.\ the edge traversed the most often when mapping the shortest paths between all pairs of vertices. This naturally splits clusters when the removal of an edge leads to components being separated from each other.
-The problem with this method can be seen in figure~\ref{TODO} and will be discussed in greater detail in the following section, where I will present a study of agglomerative methods we require. 
-
-
-\section{Agglomerative Clustering}
+\section{Hierarchical Clustering}
+\label{sec:hierarchicalclustering}
+Hierarchical clustering 
 Within agglomerative clustering there are 
-NP-hard problem blah blah
+$\mathcal{NP}$-hard problem blah blah
 Unweighted is, perhaps confusingly, more precise than the weighted version (directly opposite to the case in weighted and unweighted shortest paths). 
 UPGMA WPGMA ward is better because of things
+% louvain does pretty well in our benchmark, infomap not so much
 
+The following work in this chapter will concentrate on \textit{agglomerative dissimilarity clustering}, where the input is a matrix of \emph{dissimilarities} between vertices and the output is a \textit{dendrogram}: a binary tree used to describe a hierarchical structure. The word agglomerative means that the clustering is done from the bottom up, so that each node starts in its own cluster and clusters are merged one at a time until only one supercluster remains.
+What exactly these dissimilarities are will be further explained in Section~\ref{sec:dissimilarities}.
 
-\subsection{Distance measures}
+\subsection{Dissimiliarities}
+\label{sec:dissimilarities}
 
 mention the optimal ordering from Scipy, Bar-Joseph et al.~\cite{TODO}, around a circle
 
+clustering is actually an undefined problem. So I will test against ground truth data and ignore modularity in Equation~\eqref{eq:modularity}
+
 overall:
 wasserstein sucks
-ECT sucks less
+ECT sucks less \cite{Albano2012}
 walktrap is pretty good
 compare karate,football,caltech
 
 \subsubsection{Random Walks}
 The first step is to embed in high dimensional space.
-Compare walktrap embedding vs our new thingy
+an extra benefit is that we can use edge weights (unlike other algorithms, see Figure~\ref{fig:lesmis}
 say laplacian is kirchoff
 
 damped or snapshot
@@ -108,6 +118,15 @@ best answer is walktrap 5, and original authors seemed to agree...
 \end{figure}
 
 \subsection{Pruning}
+\label{sec:pruning}
+\begin{figure}
+    \caption{Caption}
+    \label{fig:lesmis}
+\end{figure}
+However the problem with using a dendrogram is that, as a binary tree, it contains as many branch nodes as leaves, which means that the resulting splines have far too many control points to be meaningful. An example of this can be seen in Figure~\ref{fig:lesmis}.
+Jia et al.~\cite{Jia2011} attempt to alleviate this by introducing 
+but GN complexity is also ridiculous
+
 merge branches in tree to make pretty
 optimal leaf ordering also pretty
 Garland paper does pruning of top down
@@ -115,7 +134,11 @@ mention that pruning is not the only way to do things e.g. skipping more control
 
 END THIS CHAPTER WITH PSEUDOCODE
 
+\subsection{Discussion}
 but this is all kind of besides the point for HEB because the kind of structure we want to reveal is not clique structure, but biclique structure.
+% Another benefit to agglomerative methods is that it is easy to interpret and understand what the algorithm is doing. I would always pick an algorithm that I fully understand for a visualisation over a black-box algorithm that produces slightly better results. But this is just opinion.
+% it is very important to realise that there are two types of clusters, which will be henceforth referred to as 'community' and 'betweenness' structure. This can also be referred to as 'assortative' and 'disassortative'.
+% some networks have both at the same time, and it is therefore difficult
 
 \section{Power-confluent Drawings}
 in confluent drawings the aforementioned trade-off is actually attempted to be avoided
