@@ -19,7 +19,7 @@ The literature is rich with various different methods for performing this bundli
 More modern algorithms for performing bundling automatically include multilevel agglomerative edge bundling (MINGLE) by Gansner et al.~\cite{Gansner2011} which greedily merges pairs of links at a time by selecting the pairs that minimise a cost function based on the amount of `ink' used to draw links. A more complex cost function is used in metro-style bundling by Pupyrev et al.~\cite{Pupyrev2016}, which is based on multiple criteria including ink, individual edge lengths and node separations. 
 The same premise behind force-directed node layout is also used in force-directed edge bundling by Holten and van Wijk \cite{Holten2009}, which bundles links by defining forces between adjacent links instead of nodes. As shown previously in Section~\ref{sec:force_background}, force-based methods are in fact gradient descent optimisation methods where the gradient is defined before the cost function itself, and this edge bundling technique is no different.
 
-Another effective approach is \emph{kernel density estimation} by Hurter et al.~\cite{Hurter2012}, who iteratively apply a convolutional filter over a density map of links in an already rendered diagram. This method belongs to the subfield of image-based bundling methods \cite{Telea2018,TODO}. A diverse gallery of edge bundling algorithms applied to the same dataset can be see in the review of Luilier et al.~\cite[Fig.~4]{Luilier2017}.
+Another effective approach is \emph{kernel density estimation} by Hurter et al.~\cite{Hurter2012}, who iteratively apply a convolutional filter over a density map of links in an already rendered diagram. This method belongs to the subfield of image-based bundling methods \cite{Lhuillier2017,Telea2018}. A diverse gallery of edge bundling algorithms applied to the same dataset can be see in the review of Lhuilier et al.~\cite[Fig.~4]{Lhuillier2017}.
 However all of the aforementioned methods share a key similarity: they apply bundling upon the assumption that node positions are predetermined and will not be moved. This is perfectly fine and even desirable in many common use cases where nodes have a predefined location, such as geographical maps, but methods such as force-directed layouts were never designed to place similar edges in parallel. In fact, the angular resolution of edges sharing nodes is sometimes used as part of the optimised cost function \cite{Argyriou2010}) and so common layout methods usually do not help, if not worsen, the bundling quality of their visualisations.
 
 This is why one of the most powerful network visualisation techniques is method known as \emph{hierarchical edge bundling}, published by Holten in 2006 \cite{Holten2006}\footnote{Its effectiveness was recognised by a `Test of Time' award at the IEEE VIS conference in 2016.}
@@ -44,49 +44,48 @@ Q = \frac{1}{|E|}\sum_{i,j}\left(\mathbf{A}_{ij} - \frac{|N(i)||N(j)|}{|E|}\righ
 \label{eq:modularity}
 \end{equation}
 where $\mathbf{A}$ is the adjacency matrix where $\mathbf{A}_{ij}$ equals 1 if vertices $i$ and $j$ are connected by an edge, and $\mathbf{C}_{ij}$ equals 1 if vertices $i$ and $j$ are in the same cluster and 0 otherwise.
-The value of $Q$ lies between $-1$ and 1, and it can be intuitively understood as the fraction of the edges that fall within the given clusters minus the expected fraction if edges were distributed at random.
+The value of $Q$ lies between $-\frac{1}{2}$ and 1 \cite{Brandes2007a}, and it can be intuitively understood as the fraction of the edges that fall within the given clusters minus the expected fraction if edges were distributed at random.
 
-This was introduced by Newman and Girvan \cite{Newman2004} to evaluate a separate clustering algorithm, and later directly optimised by Newman \cite{Newman2006} with two methods that both initialise the network as one big cluster, and recursively splits clusters into half until no further gain in modularity is possible. The first finds the split by calculating eigenvectors of the \emph{modularity matrix}, and another that finds the split by repeatedly moving vertices between the two sides of the split until modularity is maximised, akin to a hill-climbing method.
-Optimising modularity in general is $\mathcal{NP}$-hard \cite{Brandes2007a}, but its intuitive interpretation has led to various other authors to develop methods to optimise it. The Louvain algorithm (given its name from the authors coming from the University of Louvain, Belgium) \cite{Blondel2008} and its recent improvement to the Leiden algorithm (from Leiden University, Netherlands) \cite{Traag2019} both start by placing every vertex in a singleton cluster and successively merging clusters whilst also moving vertices between clusters, also until modularity cannot be improved further.
-All these methods for modularity maximisation can be seen as greedy algorithms.
+This was introduced by Newman and Girvan \cite{Newman2004} to evaluate a separate clustering algorithm, and later directly optimised by Newman \cite{Newman2006} with two methods that both initialise the network as one big cluster that is recursively split into half until no further gain in modularity is possible. The first finds the split by calculating eigenvectors of the \emph{modularity matrix}, and another that finds the split by repeatedly moving vertices between the two sides of the split until modularity is maximised, akin to a hill-climbing method.
+Optimising modularity in general is $\mathcal{NP}$-complete \cite{Brandes2007a}, but its intuitive interpretation has led to various other authors to develop methods to optimise it. The Louvain algorithm (given its name from the authors coming from the University of Louvain, Belgium) \cite{Blondel2008} and its recent improvement to the Leiden algorithm (from Leiden University, Netherlands) \cite{Traag2019} both start by placing every vertex in a singleton cluster and successively merging clusters whilst also moving vertices between clusters, also until modularity cannot be improved further.
 
 The behaviour of random walks along the graph has also been used to great effect for clustering. For example, the \emph{markov cluster} algorithm of Enright et al.~\cite{Enright2002} simulates a random walk process through a series of matrix multiplications on the markov chain of the graph.
 The \emph{infomap} algorithm of Rosvall and Bergstrom \cite{Rosvall2008} optimises a cost function known as the map equation, which applies information-theoretic concepts such as entropy to the behaviour of random walkers. It is optimised through a combination of greedy search and simulated annealing.
 Other types of algorithms include statistical inference methods such as Bayesian inference \cite{Hastings2006} and block-modelling \cite{Reichardt2007}.
 Another perspective on clustering includes grouping together edges instead of vertices, which means that a single vertex may belong to many overlapping clusters, an idea explored by Evans and Lambiotte \cite{Evans2009}.
-The growing number of graph-shaped datasets being used in machine learning has also led to a number of supervised and semi-supervised methods for clustering and general dimensionality reduction, such as \emph{DeepWalk} \cite{Perozzi2014} which treats each vertex as a `word' to generate `sentences' using random walks across vertices. These sentences are then taken and applied to techniques originally designed for language processing. Attempts to transfer the success of convolutional neural networks have also been generalised to apply to graphs of any topology \cite{Kipf2016}, as well as many other architectures depending on the task at hand \cite{Battaglia2018, Wu2020}.
+The growing number of graph-shaped datasets being used in machine learning has also led to a number of supervised and semi-supervised methods for clustering and general dimensionality reduction, such as \emph{DeepWalk} \cite{Perozzi2014} which treats each vertex as a `word' to generate `sentences' using random walks across vertices. These sentences are then taken and applied to techniques originally designed for language processing. Attempts to transfer the success of convolutional neural networks have also been generalised to apply to graphs of any topology \cite{Kipf2016, LeCun2017}, as well as many other architectures depending on the task at hand \cite{Battaglia2018, Wu2020}.
 
 % The variety of different methods available is in part due to one key characteristic of network clustering: it is an undefined problem.
-One reason why there is such a variety of clustering algorithms is in part due to it being an undefined problem.
+One reason why there is such a variety of clustering algorithms is due in part to it being an undefined problem.
 Clustering can be likened to data compression, as the goal is to describe a given network with less information than, say, viewing the source and target of every individual edge. Such compression would be impossible in a random network, but because real-world data does have structure, underlying patterns can be leveraged to group together similar components within the data.
 However, even knowing that this is the goal does not make the problem easier, because these underlying patterns are not known to us. The real world is complex, and so any data collected from it is not likely to be straightforward to understand. Much of the data collected may not even contain any order in the first place.
 % In fact, if you will allow me to go meta for a moment, the very act of collecting data itself into the form of a network is already technically a form of compression, as 
 It is therefore important to keep in mind that clustering algorithms are attempts to quantify common characteristics of real-world data, and there is generally no `right answer' to the question of which one should be chosen.
 It depends on both the specific objective and dataset being examined. Nevertheless, they have been used to great effect in many applications \cite{Fortunato2016}, and so confidence can be placed in their utility as a tool to help understand patterns in data.
 
-The work in this chapter will focus on \emph{hierarchical clustering}, a family of algorithms where the output is a  \textit{dendrogram}: a binary tree used to describe a hierarchical structure.
+The work in this chapter will focus on \emph{hierarchical clustering}, the family of clustering algorithms where the output is a \textit{dendrogram}: a binary tree used to describe a hierarchical structure.
 This can either be done from the bottom up, i.e.\ each node starts in its own cluster and pairs of clusters are progressively merged until only one remains, or top down, i.e\ every node starts in the same cluster that is recursively split into two halves. The former is known as \emph{agglomerative} clustering, and the latter as \emph{divisive} clustering.
-The output fits well with our purposes, since our goal is to construct a hierarchical edge bundling visualisation like the one in Figure~\ref{fig:metaunity} but without a prior hierarchy included with the data; the dendrogram produced from such a clustering algorithm can be used as this missing hierarchy.
+The output fits well with our purposes, since our goal is to construct a hierarchical edge bundling visualisation like the one in Figure~\ref{fig:metaunity}, but without a prior hierarchy included with the data; the dendrogram produced from such a clustering algorithm can be used as this missing hierarchy.
 
 This idea of using the output dendrogram of a clustering algorithm to produce hierarchical edge bundling has been previously explored by Jia et al.~\cite{Jia2011}\footnote{TODO: bad splines}, who produce a hierarchy using the algorithm of Girvan and Newman \cite{Newman2004}. This method removes one edge from the network at a time, specifically the one with the most \emph{betweenness centrality} i.e.\ the edge traversed the most often when mapping the shortest paths between all pairs of vertices. This naturally splits clusters when an edge is removed that is the final bridge between two clusters.
-Unfortunately Jia et al.\ did not perform any quantitative analysis to evaluate the performance of their clustering algorithm, and only present results when using one clustering method. The work in the following Section will aim to extend their work by evaluating the performance of a number of hierarchical clustering methods, against a small benchmark of graphs where the ground truth is known.
+Unfortunately Jia et al.\ did not perform any quantitative analysis to evaluate the performance of their clustering algorithm, and only present results when using one clustering method. The work in the following section will aim to extend their work by evaluating the performance of a number of hierarchical clustering methods, against a benchmark of graphs where the ground truth cluster configuration is known.
 
 \section{Hierarchical Clustering}
 \label{sec:hierarchicalclustering}
-Hierarchical clustering 
+To assess the quality of the divisive Girvan-Newman algorithm used by Jia et al.~\cite{Jia2011}, it will be compared with \emph{agglomerative dissimilarity clustering}.
+This is a family of algorithms where the input is a matrix of \emph{dissimilarities} between individual datapoints, in this case the vertices of a graph, and the output is a dendrogram as required. Similarly to the stress-based layout explored in the previous chapter, it is a more general algorithm that can be applied to general datasets, not just graphs. It is also closely related to the class of multidimensional scaling methods that stress belongs to, because they both take dissimilarities as input.
+Not only does this fit thematically with the topics explored in previous chapters, but a key benefit to using dissimilarity clustering is that the output dendrogram contains extra information to describe the `quality' of the merge. This information is vital as it can be used to `prune' the hierarchical tree in order to make the resulting edge bundles more salient. This will be further elaborated upon in Section~\ref{sec:pruning}.
+
+Two other questions must first be answered before we can proceed with performing this clustering: what exactly are the dissimilarities to be used as our input, and how will the algorithm proceed with processing these dissimilarities to merge clusters? These questions will both be answered in the following section.u
+
+\subsection{Dissimiliarity clustering}
+\label{sec:dissimilarities}
+
 Within agglomerative clustering there are 
 $\mathcal{NP}$-hard problem blah blah
 Unweighted is, perhaps confusingly, more precise than the weighted version (directly opposite to the case in weighted and unweighted shortest paths). 
 UPGMA WPGMA ward is better because of things
 % louvain does pretty well in our benchmark, infomap not so much
-
-The following work in this chapter will concentrate on \textit{agglomerative dissimilarity clustering}, where the input is a matrix of \emph{dissimilarities} between vertices and the output is a \textit{dendrogram}: a binary tree used to describe a hierarchical structure. The word agglomerative means that the clustering is done from the bottom up, so that each node starts in its own cluster and clusters are merged one at a time until only one supercluster remains.
-What exactly these dissimilarities are will be further explained in Section~\ref{sec:dissimilarities}.
-
-\subsection{Dissimiliarities}
-\label{sec:dissimilarities}
-
-mention the optimal ordering from Scipy, Bar-Joseph et al.~\cite{TODO}, around a circle
 
 clustering is actually an undefined problem. So I will test against ground truth data and ignore modularity in Equation~\eqref{eq:modularity}
 
@@ -126,6 +125,8 @@ best answer is walktrap 5, and original authors seemed to agree...
 However the problem with using a dendrogram is that, as a binary tree, it contains as many branch nodes as leaves, which means that the resulting splines have far too many control points to be meaningful. An example of this can be seen in Figure~\ref{fig:lesmis}.
 Jia et al.~\cite{Jia2011} attempt to alleviate this by introducing 
 but GN complexity is also ridiculous
+
+mention the optimal ordering from Scipy, Bar-Joseph et al.~\cite{Bar-Joseph2001}, around a circle
 
 merge branches in tree to make pretty
 optimal leaf ordering also pretty
