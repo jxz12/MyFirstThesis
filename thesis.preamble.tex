@@ -136,7 +136,9 @@
  \end{figure}
 }
 
+%%%%%%%%%%%%%%
 % Jonny stuff
+
 \setcounter{chapter}{-1}
 \usepackage{soul}
 \usepackage{mathspec}
@@ -148,3 +150,18 @@
 
 % for making lines fit
 \emergencystretch=.5em
+
+% for only using forename initials in bibliography
+\usepackage[style=alphabetic,
+    citestyle=alphabetic,
+    giveninits=true,
+    doi=false,
+    isbn=false,
+    url=false
+]{biblatex}
+\addbibresource{references.bib}
+
+% for getting a coloured text box
+\usepackage[svgnames]{xcolor}
+\usepackage{enumitem}
+\usepackage{mdframed}
