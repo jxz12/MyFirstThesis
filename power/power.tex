@@ -1,4 +1,5 @@
 \chapter{Edges}
+\label{sec:edges_background}
 \begin{figure}
     \centering
     \includegraphics[width=.6\textwidth]{power/figures/metaunityplaceholder.png}
@@ -67,50 +68,91 @@ The work in this chapter will focus on \emph{hierarchical clustering}, the famil
 This can either be done from the bottom up, i.e.\ each node starts in its own cluster and pairs of clusters are progressively merged until only one remains, or top down, i.e\ every node starts in the same cluster that is recursively split into two halves. The former is known as \emph{agglomerative} clustering, and the latter as \emph{divisive} clustering.
 The output fits well with our purposes, since our goal is to construct a hierarchical edge bundling visualisation like the one in Figure~\ref{fig:metaunity}, but without a prior hierarchy included with the data; the dendrogram produced from such a clustering algorithm can be used as this missing hierarchy.
 
-This idea of using the output dendrogram of a clustering algorithm to produce hierarchical edge bundling has been previously explored by Jia et al.~\cite{Jia2011}\footnote{TODO: bad splines}, who produce a hierarchy using the algorithm of Girvan and Newman \cite{Newman2004}. This method removes one edge from the network at a time, specifically the one with the most \emph{betweenness centrality} i.e.\ the edge traversed the most often when mapping the shortest paths between all pairs of vertices. This naturally splits clusters when an edge is removed that is the final bridge between two clusters.
+This idea of using the output dendrogram of a clustering algorithm to produce hierarchical edge bundling has been previously explored by Jia et al.~\cite{Jia2011}\footnote{TODO: bad splines}, who produce a hierarchy using the algorithm of Newman and Girvan \cite{Newman2004}, known commonly as the Girvan-Newman algorithm. This method removes one edge from the network at a time, specifically the one with the most \emph{betweenness centrality} i.e.\ the edge traversed the most often when mapping the shortest paths between all pairs of vertices. This naturally splits clusters when an edge is removed that is the final bridge between two clusters.
 Unfortunately Jia et al.\ did not perform any quantitative analysis to evaluate the performance of their clustering algorithm, and only present results when using one clustering method. The work in the following section will aim to extend their work by evaluating the performance of a number of hierarchical clustering methods, against a benchmark of graphs where the ground truth cluster configuration is known.
 
 \section{Hierarchical Clustering}
-\label{sec:hierarchicalclustering}
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{power/figures/lesmis.png}
+    \caption{An example of the target: edges have weights, todo: move circle to bottom with plus sign}
+    \label{fig:lesmis}
+\end{figure}
 To assess the quality of the divisive Girvan-Newman algorithm used by Jia et al.~\cite{Jia2011}, it will be compared with \emph{agglomerative dissimilarity clustering}.
-This is a family of algorithms where the input is a matrix of \emph{dissimilarities} between individual datapoints, in this case the vertices of a graph, and the output is a dendrogram as required. Similarly to the stress-based layout explored in the previous chapter, it is a more general algorithm that can be applied to general datasets, not just graphs. It is also closely related to the class of multidimensional scaling methods that stress belongs to, because they both take dissimilarities as input.
-Not only does this fit thematically with the topics explored in previous chapters, but a key benefit to using dissimilarity clustering is that the output dendrogram contains extra information to describe the `quality' of the merge. This information is vital as it can be used to `prune' the hierarchical tree in order to make the resulting edge bundles more salient. This will be further elaborated upon in Section~\ref{sec:pruning}.
+This is a family of algorithms where the input is a matrix of \emph{dissimilarities} between individual datapoints, in this case the vertices of a graph, and the output is a dendrogram as required. Similarly to the stress-based layout explored in the previous chapter, it is a more general algorithm that can be applied to any numerical datasets and not just graphs, unlike the methods previously outlined in Section~\ref{sec:edges_background}. It is also closely related to the class of multidimensional scaling methods that stress minimisation belongs to, as both procedures take a matrix of dissimilarities as input.
 
-Two other questions must first be answered before we can proceed with performing this clustering: what exactly are the dissimilarities to be used as our input, and how will the algorithm proceed with processing these dissimilarities to merge clusters? These questions will both be answered in the following section.u
+Not only does this fit thematically with the topics explored in previous chapters, but a key benefit to using dissimilarity clustering is that the output dendrogram contains extra information to describe the `quality' of the merge at that point. This information is vital as it can be used to `prune' the hierarchical tree in order to make the resulting edge bundles more salient. This will be elaborated upon in Section~\ref{sec:pruning}.
+Two other questions must first be answered before we can proceed with performing this clustering: what exactly are the dissimilarities to be used as our input, and how will the algorithm proceed to process these dissimilarities to merge clusters? These will both be answered in the following section.
 
-\subsection{Dissimiliarity clustering}
+\subsection{Dissimiliarity Clustering}
 \label{sec:dissimilarities}
+General hierarchical clustering based on dissimilarities can be done in both an agglomerative and divisive way, but the work here will focus on agglomerative methods. Agglomerative methods are more popular among practitioners \cite{Roux2018} due largely to the divisive version having $\mathcal{O}(2^n)$ possible splits for a cluster of size $n$, as each datapoint can be placed in either one half or the other. This results in an exponential runtime complexity per split, whereas the agglomerative method has only to chose from pairs of datapoints per merge, giving an $\mathcal{O}(n^2)$ complexity.
 
-Within agglomerative clustering there are 
-$\mathcal{NP}$-hard problem blah blah
+There do exist heuristics to speed up the divisive method to bring the complexity down to polynomial, such as using algorithms like k-means to decide the split instead \cite{Lamrous2006}.
+% It can also be argued that a divisive method can take a more global approach.
+However, since we already have a graph-specific divisive method in the Girvan-Newman algorithm to compare to, the work on this chapter will focus on comparing it to its agglomerative counterparts.
+
+\subsubsection{Greedy Agglomeration}
+The agglomerative process is as follows:
+% \begin{tabular}
+% \cellcolor{green!15}{
+% }
+% \end{tabular}
+
+\begin{mdframed}[backgroundcolor=WhiteSmoke]
+\begin{enumerate}[leftmargin=*]
+    \item Calculate the distances between all pairs of datapoints. \label{item:agglomerate_calculate}
+    \item Place each datapoint into its own singleton cluster.
+    \item Iterate over each pair of clusters, and merge the closest pair into a single cluster. \label{item:agglomerate_pairs}
+    \item Recalculate the distances between the newly merged cluster and the remaining unmerged clusters. \label{item:agglomerate_recalculate}
+    \item Repeat steps \ref{item:agglomerate_pairs} and \ref{item:agglomerate_recalculate} until only one supercluster remains.
+\end{enumerate}
+\end{mdframed}
+On the surface this is a simple procedure, but it is not immediately clear how to calculate distances between datapoints or between clusters in steps \ref{item:agglomerate_calculate} or \ref{item:agglomerate_recalculate}.
+There are an abundance of choices for what to use for step \ref{item:agglomerate_calculate}, which is the same first step as used in stress-minimisation from Section~\ref{sec:stress_background}. There, the graph-theoretic shortest-path was used as the dissimilarity, but it will soon be made clear that this is far from an optimal choice. An experimental comparison between I will start by assuming that we have a dissimilarity already defined between graph vertices, and first discuss how to recalculate
+
 Unweighted is, perhaps confusingly, more precise than the weighted version (directly opposite to the case in weighted and unweighted shortest paths). 
-UPGMA WPGMA ward is better because of things
-% louvain does pretty well in our benchmark, infomap not so much
+UPGMA WPGMA
+ward is simply better because of things, and so it is the only type we will test here
+% Another benefit to agglomerative methods is that it is easy to interpret and understand what the algorithm is doing, even if the answer is suboptimal. I would always pick an algorithm that I fully understand for a visualisation over a black-box algorithm that produces slightly better results. But this is just opinion.
 
-clustering is actually an undefined problem. So I will test against ground truth data and ignore modularity in Equation~\eqref{eq:modularity}
+describe lance-williams to derive complexity!
 
-overall:
-wasserstein sucks
-ECT sucks less \cite{Albano2012}
-walktrap is pretty good
-compare karate,football,caltech
+Shortest paths were used in the previous chapter, but they don't work here because...
+We therefore use the variation - multiply by jaccard distance
+note that Ward strictly requires a distance metric
 
-\subsubsection{Random Walks}
+
+\subsubsection{Random Walks as Dissimilarities}
 The first step is to embed in high dimensional space.
 an extra benefit is that we can use edge weights (unlike other algorithms, see Figure~\ref{fig:lesmis}
-say laplacian is kirchoff
+say laplacian is kirchoff for commute distance
 
 damped or snapshot
  - I expect damped to be more smooth
  - I also expect both to converge to the same result (damp=1 vs steps=inf
 
-\begin{itemize}
-    \item divisive girvan-newman -- this results in long strands that suck
-    \item
-\end{itemize}
+note that walktrap only merges along edges, so it does not require the $n^2$ calculation every time
 
 best answer is walktrap 5, and original authors seemed to agree...
 
+\subsection{Experimental Study}
+\label{sec:clustering_experiment}
+since clustering is actually an undefined problem. So I will test against ground truth data
+describe datasets that have ground truths along with citations
+\begin{itemize}
+    \item karate
+    \item football
+    \item caltech
+    \item lfr
+\end{itemize}
+describe ARI
+\begin{itemize}
+    \item divisive girvan-newman -- this results in long strands that suck
+    \item embedding methods: walktrap + KL + wasserstein
+    \item jaccardsp, commute
+    \item also tested louvain and infomap, although they do not generally produce a dendrogram
+\end{itemize}
 \begin{figure}
     \caption{TODO: big grid of ARI}
     \label{fig:ARI}
@@ -120,7 +162,7 @@ best answer is walktrap 5, and original authors seemed to agree...
 \label{sec:pruning}
 \begin{figure}
     \caption{Caption}
-    \label{fig:lesmis}
+    \label{fig:pruning}
 \end{figure}
 However the problem with using a dendrogram is that, as a binary tree, it contains as many branch nodes as leaves, which means that the resulting splines have far too many control points to be meaningful. An example of this can be seen in Figure~\ref{fig:lesmis}.
 Jia et al.~\cite{Jia2011} attempt to alleviate this by introducing 
@@ -137,11 +179,14 @@ END THIS CHAPTER WITH PSEUDOCODE
 
 \subsection{Discussion}
 but this is all kind of besides the point for HEB because the kind of structure we want to reveal is not clique structure, but biclique structure.
-% Another benefit to agglomerative methods is that it is easy to interpret and understand what the algorithm is doing. I would always pick an algorithm that I fully understand for a visualisation over a black-box algorithm that produces slightly better results. But this is just opinion.
 % it is very important to realise that there are two types of clusters, which will be henceforth referred to as 'community' and 'betweenness' structure. This can also be referred to as 'assortative' and 'disassortative'.
 % some networks have both at the same time, and it is therefore difficult
 
 \section{Power-confluent Drawings}
+\begin{figure}
+    \caption{TODO: teaser image in pconfluent paper}
+    \label{fig:power_teaser}
+\end{figure}
 in confluent drawings the aforementioned trade-off is actually attempted to be avoided
 it is likened to lossless compression.
 
