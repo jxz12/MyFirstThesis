@@ -94,47 +94,88 @@ However, since we already have a graph-specific divisive method in the Girvan-Ne
 
 \subsubsection{Greedy Agglomeration}
 The agglomerative process is as follows:
-% \begin{tabular}
-% \cellcolor{green!15}{
-% }
-% \end{tabular}
-
 \begin{mdframed}[backgroundcolor=WhiteSmoke]
 \begin{enumerate}[leftmargin=*]
-    \item Calculate the distances between all pairs of datapoints. \label{item:agglomerate_calculate}
+    \item Calculate the dissimilarities between all pairs of datapoints. \label{item:agglomerate_calculate}
     \item Place each datapoint into its own singleton cluster.
     \item Iterate over each pair of clusters, and merge the closest pair into a single cluster. \label{item:agglomerate_pairs}
-    \item Recalculate the distances between the newly merged cluster and the remaining unmerged clusters. \label{item:agglomerate_recalculate}
+    \item Recalculate the dissimilarities between the newly merged cluster and the remaining unmerged clusters. \label{item:agglomerate_recalculate}
     \item Repeat steps \ref{item:agglomerate_pairs} and \ref{item:agglomerate_recalculate} until only one supercluster remains.
 \end{enumerate}
 \end{mdframed}
-On the surface this is a simple procedure, but it is not immediately clear how to calculate distances between datapoints or between clusters in steps \ref{item:agglomerate_calculate} or \ref{item:agglomerate_recalculate}.
-There are an abundance of choices for what to use for step \ref{item:agglomerate_calculate}, which is the same first step as used in stress-minimisation from Section~\ref{sec:stress_background}. There, the graph-theoretic shortest-path was used as the dissimilarity, but it will soon be made clear that this is far from an optimal choice. An experimental comparison between I will start by assuming that we have a dissimilarity already defined between graph vertices, and first discuss how to recalculate
+On the surface this is a simple procedure, but it is not immediately clear how to calculate dissimilarities between datapoints or between clusters in steps \ref{item:agglomerate_calculate} or \ref{item:agglomerate_recalculate}.
+There are an abundance of choices for what to use for step \ref{item:agglomerate_calculate}, which is the same first step as used in stress-minimisation from Section~\ref{sec:stress_background}. There, the graph-theoretic shortest-path was used as the dissimilarity, but there exist a wide variety of other measures that can be used that result in higher quality results. This will be shown in the experimental comparison in Section~\ref{sec:clustering_experiment} and discussed later in this section. Here I will start by assuming that we have a dissimilarity already defined between datapoints, and discuss how they are recalculated when clusters are merged.
 
-Unweighted is, perhaps confusingly, more precise than the weighted version (directly opposite to the case in weighted and unweighted shortest paths). 
-UPGMA WPGMA
-ward is simply better because of things, and so it is the only type we will test here
-% Another benefit to agglomerative methods is that it is easy to interpret and understand what the algorithm is doing, even if the answer is suboptimal. I would always pick an algorithm that I fully understand for a visualisation over a black-box algorithm that produces slightly better results. But this is just opinion.
+There are also many choices for recalculating dissimilarities between clusters, and each choice can be thought of as a different heuristic for the greedy choice of which pair of clusters to merge together.
+The most commonly used methods fall into three categories: using one member of a cluster as a representative, averaging over all cluster members, and measuring the variance of members within a cluster \cite{Roux2018}.
+Choosing a single representative member is the most straightforward; when calculating the distance between two clusters, one can take the best-case scenario by choosing the closest pair of inter-cluster points, or the worst-case by choosing the farthest pair. These are known as single- and complete-linkage algorithms, respectively \cite{TODO}.
+One can also choose to take an average over the members of both clusters. This can be done by taking the mean distance between all inter-cluster pairs, and and is known as UPGMA (Unweighted Pair Group Method with Arithmetic mean). Its `weighted' counterpart, known as WPGMA, is more efficient, as when a cluster is merged it `forgets' that it was made up of other elements and becomes treated as a single datapoint itself \cite{TODO}. The reason it is called weighted is, perhaps confusingly, because the original datapoints `lose weight' by being merged into a cluster, whereas in the unweighted version each original datapoint still contributes the same amount to each merging decision.
+
+The third category is known as the Ward method, and is based on minimising the within-cluster variance. This is the same objective function that k-means uses.
+\footnote{The best description of these types is the shape of clusters. single linkage is an amoeba, complete is a hypersphere, upgma is, wpgma, ward is a 'type' see \url{https://stats.stackexchange.com/questions/195456/how-to-select-a-clustering-method-how-to-validate-a-cluster-solution-to-warran/195481\#195481}}
+
+Note that the distance of a merge is extra information! This is stored as the height of the dendrogram.
+But this is also a source of trouble for ward, because it will only guarantee a monotonically increasing tree height if the input is a \emph{distance}, not just a dissimilarity. 
+\begin{equation}
+    distance vs dissimilarity
+\end{equation}
+but in practice this does not happen very often (point to results). The experimental results here will cover both, and it will be noted when we use both throughout.
+
 
 describe lance-williams to derive complexity!
+lance-williams means that the algorithm does not actually have to know stuffs. Remarkably, all the above algorithms can be fit into a distance update algorithm with only a couple of parameter changes.
 
-Shortest paths were used in the previous chapter, but they don't work here because...
-We therefore use the variation - multiply by jaccard distance
-note that Ward strictly requires a distance metric
+\begin{equation}
+    lance williams pls
+\end{equation}
 
+% Another benefit to agglomerative methods is that it is easy to interpret and understand what the algorithm is doing, even if the answer is suboptimal. I would always pick an algorithm that I fully understand for a visualisation over a black-box algorithm that produces slightly better results. But this is just opinion.
 
 \subsubsection{Random Walks as Dissimilarities}
-The first step is to embed in high dimensional space.
-an extra benefit is that we can use edge weights (unlike other algorithms, see Figure~\ref{fig:lesmis}
+The first step before performing the agglomeration is to calculate the pairwise dissimilarities between individual datapoints. As previously noted, the shortest path distance was used in the context of optimising stress, but it will soon be shown that this is far from optimal in a clustering context.
+The reason for this that there is not enough \emph{local} information to differentiate vertices successfully.    
+For example, imagine a graph with two fully connected cliques, but with one edge connecting a single inter-cluster pair. Since the shortest path between the pair is 1, it means that the pair is considered just as similar to each other as to the other vertices in their respective cliques.
+Similarly, in a biclique vertices in the same group are not connected at all, and so within-cluster pairs would be considered even less similar than inter-cluster pairs.
+These examples are illustrated in Figure~\ref{fig:bacon_bad}.
+
+\begin{figure}
+    \caption{TODO: show why bacon is bad with 2 cliques and a biclique}
+    \label{fig:bacon_bad}
+\end{figure}
+
+A commonly used distance to capture local detail is the Jaccard index. It is defined as
+\begin{equation}
+d_{ij} = 1 - \frac{|N(i) \cap N(j)|}{|N(i) \cup N(j)|}
+\label{eq:jaccard}
+\end{equation}
+and can be interpreted as the proportion of neighbours shared between vertices $i$ and $j$. However, this has the exact opposite problem to using shortest paths, as it fails to capture any \emph{global} detail, because any pair of vertices more than two hops away can never share any neighbours, and so will always have a maximum dissimilarity of 1.
+An ad hoc solution to this problem is to combine the two measures by simply multiplying them together, following Zheng et al.~\cite{TODO}. Note that the resulting dissimilarities will not be a distance metric, but this is not a problem for convergence in our experiment.
+
+A popular method of graph clustering that uses dissimilarities as input is the \emph{cluster walktrap} method of Pons and Latapy \cite{Pons2006}. They use \emph{random walks} to first construct a high-dimensional embedding of each vertex, and simply take the Euclidean distance between high-dimensional points as a dissimilarity measure. It therefore automatically also qualifies as a distance measure.
+To construct the high-dimensional embedding, the \emph{Markov chain} matrix of the graph is calculated, defined as
+\begin{equation}
+    markov
+\end{equation}
+where...
+However, this is not directly used as the high-dimensional embedding because of the same problem as the Jaccard coefficient in Equation~\eqref{eq:jaccard}, in that it only captures local detail. This matrix is therefore multiplied by itself a number of times in order to simulate a longer random walk. However, multiplying too many times results in a matrix converging to a state only dependent on the in degree of each vertex \cite{TODO}, and so the length of the walk is left as an input parameter that should be set to an intermediate value.
+The distance is therefore defined as
+\begin{equation}
+    walktrap
+\end{equation}
+where...
+Notice that this is not simply the Euclidean distance, but weighted by the degree of the target vertex. This was done in order to offset the effect of degrees on the matrix, but I will compare both because I am cool.
+The algorithm then proceeds by applying agglomerative clustering using the Ward method, but with one difference: it only merges clusters connected by an edge. This reduces computation time and likely improves the modularity of the resulting clusters, but since our end goal is to produce bundles, we also want to keep open the possibility of edges existing in between clusters so that they will be bundled in the resulting layout. The results here therefore use the more general algorithm that is unaware of edges between clusters.
+
+Random walks have many nice properties, including the 
+an extra benefit is that we can use edge weights.
+The weights on the graph in Figure~\ref{fig:lesmis} describe how many times characters appeared together, which means that a larger weight means they are closer. This is the opposite to the normal interpretation of edge weights meaning longer distances.
+The fact that the Markov chain matrix is a probability distribution also allows it to naturally be applied to measures such as KL and Wasserstein, which are both natural and popular dissimilarities in the context of probability. I will try both of them alongside Euclidean.
+
+It is also not necessary to be restricted to having the embedding capture the random walker at a single walk length. Another type of embedding I will look at is to take a weighted average over all walk lengths. However this would also converge to the same matrix as an infinite length walk, by virtue of the Markov matrix converging to only depend on in-degrees as previously mentioned. In this case we include a damping factor, similar to the one used in PageRank \cite{TODO} and infomap \cite{Rosvall2008} to simulate a random walker losing a proportion of its energy on each step and eventually coming to a stop. This is another input parameter, and both will be systematically tested in the following section.
+ 
+One further distance based on random walks that has been applied before to clustering applications is the Euclidean commute time (ECT) distance.
 say laplacian is kirchoff for commute distance
 
-damped or snapshot
- - I expect damped to be more smooth
- - I also expect both to converge to the same result (damp=1 vs steps=inf
-
-note that walktrap only merges along edges, so it does not require the $n^2$ calculation every time
-
-best answer is walktrap 5, and original authors seemed to agree...
 
 \subsection{Experimental Study}
 \label{sec:clustering_experiment}
@@ -157,6 +198,7 @@ describe ARI
     \caption{TODO: big grid of ARI}
     \label{fig:ARI}
 \end{figure}
+best answer is walktrap 5, and original authors seemed to agree...
 
 \subsection{Pruning}
 \label{sec:pruning}
