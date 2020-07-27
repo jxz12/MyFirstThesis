@@ -179,7 +179,16 @@
     urlcolor=teal,
 }
 
+% fix margins
 \usepackage[inner=1.25in, outer=1in, vmargin=1.75in]{geometry}
 
+% allow captions
 \usepackage{caption} 
-\captionsetup[table]{skip=5pt}
+\captionsetup[table]{skip=7pt}
+
+% to make algorithm2e work in figure
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+% to make it work in figure
+\makeatletter
+\newcommand{\removeAlgorithmFigureError}{\let\@latex@error\@gobble}
+\makeatother

@@ -44,7 +44,7 @@ A popular version of this is known as \emph{modularity}, defined as
 \label{eq:modularity}
 \end{equation}
 where $\mathbf{A}$ is the adjacency matrix where $\mathbf{A}_{ij}$ equals 1 if vertices $i$ and $j$ are connected by an edge, and $\mathbf{C}_{ij}$ equals 1 if vertices $i$ and $j$ are in the same cluster and 0 otherwise.
-The value of $Q$ lies between $-\frac{1}{2}$ and 1 \cite{Brandes2007a}, and it can be intuitively understood as the fraction of the edges that fall within the given clusters minus the expected fraction if edges were distributed at random.
+The value of $Q$ lies between $\text{--}\sfrac{1}{2}$ and 1 \cite{Brandes2007a}, and it can be intuitively understood as the fraction of the edges that fall within the given clusters minus the expected fraction if edges were distributed at random.
 
 This was introduced by Newman and Girvan \cite{Newman2004} to evaluate a separate clustering algorithm, and later directly optimised by Newman \cite{Newman2006} with two methods that both initialise the network as one big cluster that is recursively split into half until no further gain in modularity is possible. The first finds the split by calculating eigenvectors of the \emph{modularity matrix}, and another that finds the split by repeatedly moving vertices between the two sides of the split until modularity is maximised, akin to a hill-climbing method.
 Optimising modularity in general is $\mathcal{NP}$-complete \cite{Brandes2007a}, but its intuitive interpretation has led to various other authors to develop methods to optimise it. The Louvain algorithm (given its name from the authors coming from the University of Louvain, Belgium) \cite{Blondel2008} and its recent improvement to the Leiden algorithm (from Leiden University, Netherlands) \cite{Traag2019} both start by placing every vertex in a singleton cluster and successively merging clusters whilst also moving vertices between clusters, also until modularity cannot be improved further.
@@ -67,7 +67,7 @@ The work in this chapter will focus on \emph{hierarchical clustering}, the famil
 This can either be done from the bottom up, i.e.\ each node starts in its own cluster and pairs of clusters are progressively merged until only one remains, or top down, i.e\ every node starts in the same cluster that is recursively split into two halves. The former is known as \emph{agglomerative} clustering, and the latter as \emph{divisive} clustering.
 The output fits well with our purposes, since our goal is to construct a hierarchical edge bundling visualisation like the one in Figure~\ref{fig:metaunity}, but without a prior hierarchy included with the data; the dendrogram produced from such a clustering algorithm can be used as this missing hierarchy.
 
-This idea of using the output dendrogram of a clustering algorithm to produce hierarchical edge bundling has been previously explored by Jia et al.\ \cite{Jia2011}\footnote{TODO: bad splines}, who produce a hierarchy using the algorithm of Newman and Girvan \cite{Newman2004}, known commonly as the Girvan-Newman algorithm. This method removes one edge from the network at a time, specifically the one with the most \emph{betweenness centrality} i.e.\ the edge traversed the most often when mapping the shortest paths between all pairs of vertices. This naturally splits clusters when an edge is removed that is the final bridge between two clusters.
+This idea of using the output dendrogram of a clustering algorithm to produce hierarchical edge bundling has been previously explored by Jia et al.\ \cite{Jia2011}\footnote{TODO: bad splines} who produce a hierarchy using the algorithm of Girvan and Newman \cite{Girvan2002}. This method removes one edge from the network at a time, specifically the one with the most \emph{betweenness centrality} i.e.\ the edge traversed the most often when mapping the shortest paths between all pairs of vertices. This naturally splits clusters when an edge is removed that is the final bridge between two clusters.
 Unfortunately Jia et al.\ did not perform any quantitative analysis to evaluate the performance of their clustering algorithm, and only present results when using one clustering method. The work in the following section will aim to extend their work by evaluating the performance of a number of hierarchical clustering methods, against a benchmark of graphs where the ground truth cluster configuration is known.
 
 \section{Hierarchical Clustering}
@@ -141,21 +141,20 @@ Recalculating the dissimilarity matrix after a merge therefore takes $\mathcal{O
 \subsubsection{Random Walks as Dissimilarities}
 The first step before performing the agglomeration is to calculate the pairwise dissimilarities between individual datapoints. As previously noted, the shortest path distance was used in the context of optimising stress, but it be shown here that this is far from optimal in a clustering context.
 The reason for this that there is not enough \emph{local} information to differentiate vertices successfully.    
-For example, imagine a graph with two fully connected cliques, but with one edge connecting a single inter-cluster pair. Since the shortest path between the pair is 1, it means that the pair is considered just as similar to each other as to the other vertices in their respective cliques.
+For example, imagine a graph with two fully connected cliques, but with one edge connecting a single inter-cluster pair. Since the shortest path between the pair is one hop, it means that the pair is considered just as similar to each other as to the other vertices in their respective cliques.
 Similarly, in a biclique vertices in the same group are not connected at all, and so within-cluster pairs would be considered even less similar than inter-cluster pairs.
-These examples are illustrated in Figure~\ref{fig:bacon_bad}.
-
-\begin{figure}
-    \caption{TODO: show why bacon is bad with 2 cliques and a biclique}
-    \label{fig:bacon_bad}
-\end{figure}
+% These examples are illustrated in Figure~\ref{fig:bacon_bad}.
+% \begin{figure}
+%     \caption{TODO: show why bacon is bad with 2 cliques and a biclique}
+%     \label{fig:bacon_bad}
+% \end{figure}
 
 A commonly used distance to capture local detail is the Jaccard index
 \begin{equation}
     d_{ij} = 1 - \frac{|N(i) \cap N(j)|}{|N(i) \cup N(j)|}
 \label{eq:jaccard}
 \end{equation}
-which can be interpreted as the proportion of neighbours shared between vertices $i$ and $j$. However, this has the exact opposite problem to using shortest paths, as it fails to capture any \emph{global} detail, because any pair of vertices more than two hops away can never share any neighbours, and so will always have a maximum dissimilarity of 1.
+which can be interpreted as the proportion of neighbours shared between vertices $i$ and $j$. However, this has the exact opposite problem to using shortest paths, as it fails to capture any \emph{global} detail, because any pair of vertices more than two hops away can never share any neighbours, and so will always have a maximum dissimilarity of one.
 An ad hoc solution to this problem is to combine the two measures by simply multiplying them together, following Zheng et al.\ \cite{Zheng2018}. Note that despite shortest paths and Jaccard index both being distance metrics \cite{Clarkson2006}, it is not guaranteed the resulting dissimilarities will also be.
 
 A popular method of graph clustering that uses dissimilarities as input is the \emph{cluster walktrap} method of Pons and Latapy \cite{Pons2006}. They use \emph{random walks} to first construct a high-dimensional embedding of each vertex.
@@ -163,7 +162,7 @@ To construct the high-dimensional embedding, the \emph{Markov chain} transition 
 \begin{equation}
     \mathbf{P} = \mathbf{D}^{-1} \mathbf{A}
 \end{equation}
-where $\mathbf{D}$ is a diagonal matrix of degrees, where the entries are the sum of the corresponding row in $\mathbf{A}$, which is the adjacency matrix of the graph that is not necessarily binary if edges have weights. $\mathbf{P}$ is essentially a normalised $\mathbf{A}$ where rows sum up to 1.
+where $\mathbf{D}$ is a diagonal matrix of degrees, where the entries are the sum of the corresponding row in $\mathbf{A}$, which is the adjacency matrix of the graph that is not necessarily binary if edges have weights. $\mathbf{P}$ is essentially a normalised $\mathbf{A}$ where rows sum up to one.
 
 However, this is not directly used as the high-dimensional embedding because of the same problem as the Jaccard coefficient in Equation~\eqref{eq:jaccard}, that is it only captures local detail. This matrix is therefore multiplied by itself a number of times in order to simulate a longer random walk. However, multiplying too many times results in a matrix converging to a state only dependent on the in-degree of each vertex \cite{Pons2006}, and so the length of the walk is left as an input parameter that should be set to an intermediate value.
 The distance is defined as
@@ -172,7 +171,8 @@ The distance is defined as
 \label{eq:walktrap}
 \end{equation}
 where $t>0$ is an input parameter that determines how many times $\mathbf{P}$ should be multiplied by itself.
-Notice that this is very close to being simply the Euclidean distance between columns in $\mathbf{P}$, except with a factor consisting of $\mathbf{D}_{kk}^{\text{--}\sfrac{1}{2}}$. This was done presumably in order to undercompensate for high-degree vertices, but \cite{Pons2006} did not study whether it performs better quantitatively, as will be done here in Section~\ref{sec:clustering_experiment}.
+Notice that this is very close to being simply the Euclidean distance between columns in $\mathbf{P}$, except with a factor consisting of $\mathbf{D}_{kk}^{\text{--}\sfrac{1}{2}}$. This was done presumably in order to undercompensate for high-degree vertices, although they state that their distance ``can also be seen as the $L^2$ distance between the two probability distributions'' \cite{Pons2006} without mentioning this factor. However a look into their provided source code confirms the use of the factor.
+\cite{Pons2006} did not study whether the inclusion of this factor performs better quantitatively, and my results show that the performance on the benchmark used here is in fact higher when this factor is left out. I will therefore use Equation~\eqref{eq:walktrap} without including it, i.e.\ simply $\sqrt{\sum_{k}(\mathbf{P}_{ik}^t - \mathbf{P}_{jk}^t)^2}$. This will be referred to as the \emph{snapshot} embedding, as it captures the random walker state at a single step length.
 Since this measure can also be written as the Euclidean distance between columns in the matrix $\mathbf{D}^{\text{--}\sfrac{1}{2}}\mathbf{P}^t$, it automatically also qualifies as a distance metric.
 
 The algorithm then proceeds by applying agglomerative clustering using the Ward method, but with one difference: it only merges clusters connected by an edge. This reduces computation time and likely improves the modularity of the resulting clusters, but since our end goal is to produce bundles, edges between clusters are acceptable as they will be bundled. The results here will therefore use the more general algorithm that is unaware of edges between clusters.
@@ -180,8 +180,9 @@ The algorithm then proceeds by applying agglomerative clustering using the Ward 
 It is also not necessary to be restricted to having the embedding capture the random walker at a single walk length. Another type of embedding I will look at is the weighted average over all walk lengths. However this would also converge to the same matrix as an infinite length walk, by virtue of the Markov matrix converging to only depend on in-degrees as previously mentioned. In this case we include a \emph{damping factor}, similar to the one used in PageRank \cite{Page1999} and infomap clustering \cite{Rosvall2008} to simulate a random walker losing a proportion of its energy on each step and eventually coming to a stop. This is defined as
 \begin{equation}
     \mathbf{P}' = \sum_{k=0}^\infty t^k\mathbf{P}^{k}
+\label{eq:damped}
 \end{equation}
-where $0<t\leq 1$ is an input parameter to represent the proportion of walkers that move on to take another step. A range of values for $t$ from Equation~\eqref{eq:walktrap} will be systematically tested in the Section~\ref{sec:clustering_experiment}.
+where $0<t\leq 1$ is an input parameter to represent the proportion of walkers that move on to take another step. This will be referred to as the \emph{damped} embedding, as it captures the random walker state damped over a range of step lengths. A range of values for $t$ from Equation~\eqref{eq:walktrap} will be systematically tested in the Section~\ref{sec:clustering_experiment}.
 
 Random walks have many nice properties, including the 
 an extra benefit of interpreting heavier edge weights as bringing vertices closer rather than farther away, as would be done in a standard shortest paths algorithm. This is more common in real world datasets, for example in a social network where an edge weight could indicate the frequency of two friends messaging each other, or in a food web where to indicate the strength of an interaction between two species.
@@ -197,7 +198,7 @@ Another popular measure is the Wasserstein distance
     d_{ij} = \int_{-\infty}^{\infty}|\mathbf{F}(i) - \mathbf{F}(j)|
 \end{equation}
 where $\mathbf{F}_i$ denotes the cumulative probability distributions of $i$ and $j$ \cite{Ramdas2017}. This can be interpreted by imagining the area under the curve of one distribution as mass to be moved, and measuring the amount of work needed to transform that mass into the second distribution.
-Both are natural and popular dissimilarities in the context of probability that are commonly used in the field of machine learning \cite{Goodfellow2014, Arjovsky2017}. The Wasserstein distance is already a distance metric \cite{Villani2003} and so can safely be used as an input. KL is not even a dissimilarity in Equation~\ref{eq:kullbackleibler} as it is not symmetric, and so it is commonly symmetrised by adding the two directions together $d'_{ij} = d_{ij} + d_{ji}$ \cite{Kullback1951}.
+Both are natural and popular dissimilarities in the context of probability that are commonly used in the field of machine learning \cite{Goodfellow2014, Arjovsky2017}. The Wasserstein distance is already a distance metric \cite{Villani2003} and so can safely be used as an input. KL is not even a dissimilarity in Equation~\ref{eq:kullbackleibler} as it is not symmetric, and so it is commonly symmetrised by adding the two directions together as $d'_{ij} = d_{ij} + d_{ji}$ \cite{Kullback1951}.
  
 One final dissimilarity based on random walks that has been applied before to clustering applications is the Euclidean commute time distance \cite{Yen2005}. This is defined as the average time it takes for a random walker to travel from a one vertex to the other and then back again.
 It is also a distance metric \cite{Qiu2007}, and can be found in closed form using the Moore-Penrose pseudoinverse of the Laplacian matrix $\mathbf{L} = \mathbf{D}-\mathbf{A}$ as
@@ -213,63 +214,77 @@ The distances derived from Equations~\eqref{eq:jaccard}--\eqref{eq:commute} will
 \label{sec:clustering_experiment}
 Since clustering is an undefined problem, the quality of a clustering algorithm is also undefined. I will therefore measure the quality of clusters by using a benchmark set of graphs where a ground truth clustering configuration is known. 
 
-\begin{table}%[h]
+\begin{table}
 \centering
-\caption{The graphs used for the experiment in Section~\ref{sec:clustering_experiment}}
-\setlength{\tabcolsep}{0.5em} % for the horizontal padding
+\caption{The graphs used for the experiment in Section~\ref{sec:clustering_experiment}, where $|C|$ denotes the number of clusters in the ground truth of the data.}
+\setlength{\tabcolsep}{1em} % for the horizontal padding
 {\renewcommand{\arraystretch}{1.2}% for the vertical padding
 \begin{tabular}{|c|c|c|c|}
     \hline
     Name & $|V|$ & $|E|$ & $|C|$
     \\\hline\hline
-    karate & 34 & 78 & 2
+    \texttt{karate} & 34 & 78 & 2
     \\\hline
-    football & 115 & 613 & 19
+    \texttt{footballTSE} & 115 & 613 & 19
     \\\hline
-    caltech & 762 & 16651 & 9
+    \texttt{caltech} & 762 & 16651 & 9
     \\\hline
-    lfr & 250 & 472 & 10
+    \texttt{lfr} & 250 & 472 & 10
     \\\hline
 \end{tabular}}
 \label{tab:bundle_graphs}
 \end{table}
 
-Table~\ref{tab:bundle_graphs}
-karate is a classic graph used everywhere
-football is corrected \cite{Evans2010}, and 8 of its teams are singleton clusters
-caltech is facebook social network with clique structure \cite{Nocaj2015} where the clusters are the dorms. Largest connected component
-lfr is a benchmark that in theory can be parameterised. In practice it is not very robust to changes in parameters $\alpha=?$
-all graphs are undirected
+Table~\ref{tab:bundle_graphs} contains the four graphs used in this study.
+The graph \texttt{karate} is a classic dataset that has been extensively studied in the network research literature \cite{Fortunato2016}, originally presented by Zachary \cite{Zachary1977}. It is a social network containing relationships between members of a karate club, in which a rift between two club leaders caused the club to split into two new clubs, where the resulting members of the two clubs form the ground truth clustering of the data.
+The \texttt{footballTSE} graph is a network of American football games between Colleges in the US, where the ground truth is the conference in which they belong. It was originally studied by Girvan and Newman \cite{Girvan2002} in the same paper as the Girvan-Newman algorithm here was presented. The ground truth data we use is a version corrected by Evans \cite{Evans2010}, as the original data clusters were assigned from the 2001 season instead of the correct 2000 season. 
+The \texttt{caltech} graph is a social network of students at the California Institute of Technology, extracted from the website Facebook and originally studied by Traud et al.\ \cite{Traud2012}. It has been shown to demonstrate clique structure \cite{Nocaj2015}, where the ground truth used here are the dorms in which students were living. This is the most messy data and so the dorm ground truth is the least well matched by the clustering algorithms used.
+% The original graph contains 769 vertices, so the largest connected component was used here.
+The \texttt{lfr} graph is a sample graph from the LFR benchmark \cite{Lancichinetti2008} which is a model to generate graphs given a number of parameters to account for power law distributions in cluster size and degree distribution. The parameters used here were $\tau_1=3$, $\tau_2=1.5$, and $\mu=0.1$. They represent the degree distribution, community size, and fraction of edges to place between communities, respectively. The LFR benchmark was developed in order to improve the popular random model of Girvan and Newman \cite{Girvan2002}.
+%In practice the \texttt{networkx} implementation is not very robust to changes in parameters $\alpha=?$
+All graphs are undirected and unweighted.
 
-\begin{itemize}
-    \item divisive girvan-newman
-    \item random walk embedding methods: walktrap + KL + wasserstein
-    \item random walk commute time
-    \item jaccardsp
-    % \item also tested louvain and infomap, although they do not generally produce a dendrogram
-\end{itemize}
+These four graphs were run through each of the agglomerative methods presented in Section~\ref{sec:dissimilarities}. For methods that first require a high dimensional embedding, a range of parameters were used for the values of $t$ for Equations~\eqref{eq:walktrap} and~\eqref{eq:damped}.
+To assess the quality of the results, the adjusted random index (ARI) was used to compare a ground truth clustering against the clusters predicted by the algorithm. The benefit of using ARI is that it is robust to cluster labels being swapped, avoiding the situation where the clusters are correct but the order of labels is not.
+ARI is bounded between $-1$ and $1$, where a value of $1$ denotes perfect clustering, $0$ denotes a randomly shuffled clustering, and $-1$ denotes an even worse match than the expected value of a random shuffle.
+A problem with hierarchical clustering is that, to extract flat clusters to match the ground truth, the resulting dendrogram must be cut. The results here give the benefit of the doubt by measuring ARI at all cutting points and taking the maximum ARI of all cuts, to essentially assume that the algorithm always chooses its cut perfectly.
 
-we used \texttt{scipy.cluster.hierarchy}
+The package \texttt{scipy.cluster.hierarchy} \cite{Virtanen2020} was used to perform all dissimilarity-based clustering.
+Results are presented in Figures~\ref{fig:ARI1} and~\ref{fig:ARI2}, where all dissimilarity measures are clustered with each of the five linkage methods presented in Section~\ref{sec:dissimilarities}.
 
 \begin{figure}
     \centering
-    \makebox[\textwidth][c]{\includegraphics[width=1.1\textwidth]{power/figures/ARI.pdf}}
-    \caption{Results of different clustering stuffs}
-    \label{fig:ARI}
+    \includegraphics[height=\textheight]{power/figures/ARI1.pdf}
+    \caption{Results for \texttt{karate} and \texttt{footballTSE}. Each linkage method is denoted by a different color and symbol.
+    ARI is on y-axis, all clusterings on x-axis.
+    Girvan-Newman is GN. Average and best ARI for all runs is in bottom right. Missing values for KL are due to probabilities of 0.}
+    \label{fig:ARI1}
 \end{figure}
-Ward is consistently high - with the highest average ARI score for all embedding and distance parameter settings.
-Although UPGMA with KL divergence on damped0p1 gave the best average score over all graphs.
-Ward also gives the best hierarchical structure in terms of , which is difficult to measure but results in the best bundles.
-Best dissimilarity for Ward is snapshotI 5, and original authors seemed to agree with 5 as a choice, although it is interesting that we found better results with a straight probability embedding rather than . 
+\begin{figure}
+    \centering
+    \includegraphics[height=\textheight]{power/figures/ARI2.pdf}
+    \caption{Results for \texttt{caltech} and \texttt{lfr}.}
+    \label{fig:ARI2}
+\end{figure}
+
+\subsubsection{Results}
+The aim of this study is to answer two questions: which dissimilarity measure is best, and which linkage method is best for clustering this dissimilarity?
+Unfortunately there is no clear-cut answer to either question, but the results can be interpreted to give some recommendations. Looking at the bottom right panels for each graph, it is immediately clear that single linkage is the least effective and should be avoided. The best scores for the remaining linkage methods generally hover around the same value, and so it is clear that the remaining four linkage methods all \emph{can} result in high quality results. Looking at the mean ARI scores, however, it becomes apparent that Ward's method produces the best results on average. 
+
+% A more qualitative observation is that Ward also tends to give the best hierarchical structure in terms of neat trees without branches that, which is difficult to measure but results in the best bundles.
+The best dissimilarity for Ward over all graphs is Euclidean on snapshot embedding with $t=5$ in Equation~\eqref{eq:walktrap}, and it seems the original authors in \cite{Pons2006} agree with this choice as they performed most of their analysis using the same value.
+Despite being a distance metric, the performance of Wasserstein is consistently poorer than both Euclidean and KL. It is worth noting, however, that it consistently rises as the value of $t$ rises for both snapshot and damped embeddings. Both sets of parameters converge to the same 
+
 This is what we will use for plotting results
 
 \subsection{Pruning}
 \label{sec:pruning}
+The final step to producing a hierarchical edge bundling visualisation is to 
 However the problem with using a dendrogram is that, as a binary tree, it contains as many branch nodes as leaves, which means that the resulting splines have far too many control points to be meaningful. An example of this can be seen in Figure~\ref{fig:lesmis}.
 Jia et al.\ \cite{Jia2011} attempt to alleviate this by introducing 
 but GN complexity is also ridiculous
 
-mention the optimal ordering from Scipy, Bar-Joseph et al.\ \cite{Bar-Joseph2001}, around a circle
+mention the optimal ordering from Scipy, Bar-Joseph et al.\ \cite{Bar-Joseph2001}, around a circle. This could be used to, for example, optimise an edge bundling specific objective function.
 
 merge branches in tree to make pretty (following \cite{Pons2006}), but this is not always high quality, as it can potentially merge every single 
 ideally cuts can be human driven \cite{Vogogias2016}
@@ -281,10 +296,11 @@ mention that pruning is not the only way to do things e.g. skipping more control
 
 
 \begin{figure}
-    % \centering
-    \includegraphics[width=.85\textwidth]{power/figures/bundled.pdf}
-    \caption{Drawings of the graphs in Table~\ref{tab:bundle_graphs} using both a stress layout (left) and with hierarchical edge bundling (right). Colours of nodes correspond to the ground truth clusters included in the data.}
-    \label{fig:pruning}
+    \centering
+    \includegraphics[height=.9\textheight]{power/figures/bundled.pdf}
+    \caption{Drawings of the graphs in Table~\ref{tab:bundle_graphs} using both a stress layout (left) and with hierarchical edge bundling (right). Colours of nodes correspond to the ground truth clusters included in the data.
+    For football, 8 of its teams are singleton clusters in independent divisions, and for caltech ??? are unassigned to dorms}
+    \label{fig:untangled_hairballs}
 \end{figure}
 
 END THIS CHAPTER WITH PSEUDOCODE
@@ -292,9 +308,42 @@ END THIS CHAPTER WITH PSEUDOCODE
 \begin{figure}
     % \centering
     % \includegraphics{}
-    \caption{Caption}
-    \label{fig:untangled_hairballs}
+     \caption{TODO: show pruning example}
+     \label{fig:pruning}   
 \end{figure}
+
+\begin{figure}
+    \removeAlgorithmFigureError
+    \DontPrintSemicolon
+    \begin{algorithm}[H]
+    \SetKwInOut{Input}{inputs}
+    \SetKwInOut{Output}{output}
+    \SetKwFor{ForEach}{foreach}{}{}
+    \SetKwRepeat{Do}{do}{while}
+    \SetKwIF{If}{ElseIf}{Else}{if}{}{else if}{else}{}
+    \Input{graph $G=(V,E)$}
+    \Output{drawing $A$}
+    
+    $M \leftarrow \{(\emptyset,\,N(v))\ |\ v\in V\}$
+    
+    \Do{$\kappa_\text{best}>0$}{
+        $\kappa_\text{best}\leftarrow0$
+        
+        \ForEach{\emph{pair of modules} $\{m,n\}\in M_\text{top}\times M_\text{top}$}{
+        \label{pseudo:top}
+            $\kappa_\text{best} \leftarrow \max(\kappa(m,n),\,\kappa_\text{best})$
+            \label{pseudo:kappa}
+        }
+        $\textsc{merge}(\{m,n\}_\text{best})$
+        \label{pseudo:merge}
+    }
+    
+    \caption{\textsc{Hierarchical Edge Bundling}}
+    \label{algo:heb}
+    \end{algorithm}
+    \caption{hi}
+    \label{pgd_pseudo}
+\end{figure} 
 
 \subsection{Discussion}
 Girvan-Newman has a higher runtime complexity. Calculating betweenness-centrality is $\mathcal{O}(|V||E|)$ \cite{Brandes2001a}. Since this must be done within 
@@ -302,6 +351,7 @@ but this is all kind of besides the point for HEB because the kind of structure 
 % it is very important to realise that there are two types of clusters, which will be henceforth referred to as 'community' and 'betweenness' structure. This can also be referred to as 'assortative' and 'disassortative'.
 % some networks have both at the same time, and it is therefore difficult
 In any case, this is a small test set and the correct 
+Applying hierarchical edge bundles to the test set leads to smaller edges being within clusters and larger ones being across the 
 
 % Another benefit to agglomerative methods is that it is easy to interpret and understand what the algorithm is doing, even if the answer is suboptimal. I would always pick an algorithm that I fully understand for a visualisation over a black-box algorithm that produces slightly better results. But this is just opinion.
 
