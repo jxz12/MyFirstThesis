@@ -141,12 +141,15 @@
 
 \setcounter{chapter}{-1}
 \usepackage{soul}
-\usepackage{mathspec}
-\setallmainfonts[Path = fonts/,
+
+\usepackage{unicode-math}
+\usepackage{fontspec}
+\setmainfont[Path = fonts/,
     UprightFont = *-Regular,
     ItalicFont = *-Italic,
     BoldFont = *-Bold
 ]{softing}
+\setmathfont{STIX Two Math}
 
 % for making lines fit
 \emergencystretch=.5em
@@ -160,6 +163,7 @@
     url=false
 ]{biblatex}
 \addbibresource{references.bib}
+\usepackage{xfrac}
 
 % for getting a coloured text box
 \usepackage[svgnames]{xcolor}
@@ -174,3 +178,8 @@
     filecolor=magenta,
     urlcolor=teal,
 }
+
+\usepackage[inner=1.25in, outer=1in, vmargin=1.75in]{geometry}
+
+\usepackage{caption} 
+\captionsetup[table]{skip=5pt}
