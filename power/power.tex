@@ -27,7 +27,7 @@ An example of this in action can be seen in Figure \ref{fig:metaunity}, which co
 
 The trick to the bundling comes from the fact that we have extra metadata available: the hierarchy of folders and source files that holds the code.
 This hierarchy, not the call graph itself, is first layed out as a tree. Then, since this tree includes extra nodes to represent the folders and source files, these extra nodes are erased from the final visualisation. However their coordinates are instead used as an auxiliary routing graph (ARG) through which the call graph edges are routed through.
-More precisely, this process of routing involves taking every edge in the call graph, and rendering each one using a spline curve whose control points consist of a path through the ARG. The precise definition of this spline is important, and will be further elaborated upon in Section~\ref{TODO}, but for now the important thing to note is that this produces bundling behaviour because vertices close to each other in the hierarchy will share control points for their splines, thus curving their rendered links towards each other.
+More precisely, this process of routing involves taking every edge in the call graph, and rendering each one using a spline curve whose control points consist of a path through the ARG. The precise definition of this spline is important, and will be further elaborated upon in Section~\ref{sec:bspline_details}, but for now the important thing to note is that this produces bundling behaviour because vertices close to each other in the hierarchy will share control points for their splines, thus curving their rendered links towards each other.
 The hierarchical tree extracted from the Unity game engine can be seen on the TODO hand side, to illustrate its influence on the final visualisation. 
 
 This technique is so effective because the structure of the bundles is informed by human judgement. To continue within the call graph example, the hierarchy of folders and source files is literally designed by the programmers for organisational purposes, and so it is very likely to admit some utility for also organising, say, a visualisation.
@@ -47,21 +47,26 @@ where $\mathbf{A}$ is the adjacency matrix where $\mathbf{A}_{ij}$ equals 1 if v
 The value of $Q$ lies between $\text{--}\sfrac{1}{2}$ and 1 \cite{Brandes2007a}, and it can be intuitively understood as the fraction of the edges that fall within the given clusters minus the expected fraction if edges were distributed at random.
 
 This was introduced by Newman and Girvan \cite{Newman2004} to evaluate a separate clustering algorithm, and later directly optimised by Newman \cite{Newman2006} with two methods that both initialise the network as one big cluster that is recursively split into half until no further gain in modularity is possible. The first finds the split by calculating eigenvectors of the \emph{modularity matrix}, and another that finds the split by repeatedly moving vertices between the two sides of the split until modularity is maximised, akin to a hill-climbing method.
-Optimising modularity in general is $\mathcal{NP}$-complete \cite{Brandes2007a}, but its intuitive interpretation has led to various other authors to develop methods to optimise it. The Louvain algorithm (given its name from the authors coming from the University of Louvain, Belgium) \cite{Blondel2008} and its recent improvement to the Leiden algorithm (from Leiden University, Netherlands) \cite{Traag2019} both start by placing every vertex in a singleton cluster and successively merging clusters whilst also moving vertices between clusters, also until modularity cannot be improved further.
+Optimising modularity in general is $\mathcal{NP}$-complete \cite{Brandes2007a}, but its intuitive interpretation has led to various other authors to develop methods to optimise it. The Louvain algorithm (given its name from the authors coming from the University of Louvain, Belgium) \cite{Blondel2008} and its recent improvement to the Leiden algorithm (from Leiden University, Netherlands) \cite{Traag2019} both start by placing every vertex in a singleton cluster, followed by successively merging clusters whilst also moving vertices between clusters, also until modularity cannot be improved further.
 
 The behaviour of random walks along the graph has also been used to great effect for clustering. For example, the \emph{markov cluster} algorithm of Enright et al.\ \cite{Enright2002} simulates a random walk process through a series of matrix multiplications on the markov chain of the graph.
 The \emph{infomap} algorithm of Rosvall and Bergstrom \cite{Rosvall2008} optimises a cost function known as the map equation, which applies information-theoretic concepts such as entropy to the behaviour of random walkers. It is optimised through a combination of greedy search and simulated annealing.
 Other types of algorithms include statistical inference methods such as Bayesian inference \cite{Hastings2006} and block-modelling \cite{Reichardt2007}.
 Another perspective on clustering includes grouping together edges instead of vertices, which means that a single vertex may belong to many overlapping clusters, an idea explored by Evans and Lambiotte \cite{Evans2009}.
+
 The growing number of graph-shaped datasets being used in machine learning has also led to a number of supervised and semi-supervised methods for clustering and general dimensionality reduction, such as \emph{DeepWalk} \cite{Perozzi2014} which treats each vertex as a `word' to generate `sentences' using random walks across vertices. These sentences are then taken and applied to techniques originally designed for language processing. Attempts to transfer the success of convolutional neural networks have also been generalised to apply to graphs of any topology \cite{Kipf2016, LeCun2017}, as well as many other architectures depending on the task at hand \cite{Battaglia2018, Wu2020}.
 
-% The variety of different methods available is in part due to one key characteristic of network clustering: it is an undefined problem.
-One reason why there is such a variety of clustering algorithms is due in part to it being an undefined problem.
-Clustering can be likened to data compression, as the goal is to describe a given network with less information than, say, viewing the source and target of every individual edge. Such compression would be impossible in a random network, but because real-world data does have structure, underlying patterns can be leveraged to group together similar components within the data.
-However, even knowing that this is the goal does not make the problem easier, because these underlying patterns are not known to us. The real world is complex, and so any data collected from it is not likely to be straightforward to understand. Much of the data collected may not even contain any order in the first place.
+One reason why there is such a variety of clustering algorithms is due in part to it being an undefined problem. A simple example of two equally valid but opposing definitions for a cluster would be to compare a clique vs.\ a biclique. A definition that attempts to keep edges within clusters, such as Equation~\ref{eq:modularity} perfectly captures cliques, but fails completely for bicliques, as none of the edges are within the clusters, instead all falling between them.
+There are also
+\begin{figure}
+    % \centering
+    % \includegraphics{}
+    \caption{show a clique vs biclique to show difficulty in clustering. Also maybe show overlapping communities?}
+    \label{fig:clique_vs_biclique}
+\end{figure}
 % In fact, if you will allow me to go meta for a moment, the very act of collecting data itself into the form of a network is already technically a form of compression, as 
-It is therefore important to keep in mind that clustering algorithms are attempts to quantify common characteristics of real-world data, and there is generally no `right answer' to the question of which one should be chosen.
-It depends on both the specific objective and dataset being examined. Nevertheless, they have been used to great effect in many applications \cite{Fortunato2016}, and so confidence can be placed in their utility as a tool to help understand patterns in data.
+It is therefore important to keep in mind that clustering algorithms are attempts to quantify common characteristics of real-world data, and there is generally no `right answer' to the question of which one should be chosen; It depends on both the specific objective and dataset being examined. 
+Nevertheless, they have been used to great effect in many applications \cite{Fortunato2016}, and so confidence can be placed in their utility as a tool to help understand patterns in data.
 
 The work in this chapter will focus on \emph{hierarchical clustering}, the family of clustering algorithms where the output is a \textit{dendrogram}: a binary tree used to describe a hierarchical structure.
 This can either be done from the bottom up, i.e.\ each node starts in its own cluster and pairs of clusters are progressively merged until only one remains, or top down, i.e\ every node starts in the same cluster that is recursively split into two halves. The former is known as \emph{agglomerative} clustering, and the latter as \emph{divisive} clustering.
@@ -110,7 +115,7 @@ The most commonly used methods fall into three categories: using one member of a
 Choosing a single representative member is the most straightforward; when calculating the dissimilarity between two clusters, one can take the best-case scenario by choosing the closest pair of inter-cluster points, or the worst-case by choosing the farthest pair. These are known as single- and complete-linkage algorithms, respectively \cite{Sibson1973, Defays1977}.
 One can also choose to take an average over the members of both clusters. This can be done by taking the mean dissimilarity between all inter-cluster pairs, and and is known as UPGMA (Unweighted Pair Group Method with Arithmetic mean). Its `weighted' counterpart, known as WPGMA, is more efficient, as when a cluster is merged it `forgets' that it was made up of other elements and becomes treated as a single datapoint itself \cite{Sneath1973}. The reason it is called weighted is, perhaps confusingly, because the original datapoints `lose weight' by being merged into a cluster, whereas in the unweighted version each original datapoint still contributes the same amount to each merging decision.
 
-The third category is known as the Ward method, and is based on minimising variance within clusters. The dissimilarity between clusters in this case is the increase in total within-cluster variance if they were to be merged. This is the same objective function that k-means clustering attempts to minimise \cite{Friedman2001a}.
+The third category is known as Ward's method \cite{WardJr1963}, and is based on minimising variance within clusters. The dissimilarity between clusters in this case is the increase in total within-cluster variance if they were to be merged. This is the same objective function that k-means clustering attempts to minimise \cite{Friedman2001a}.
 \footnote{The best description of these types is the shape of clusters. single linkage is an amoeba, complete is a hypersphere, upgma is, wpgma, ward is a 'type' see \url{https://stats.stackexchange.com/questions/195456/how-to-select-a-clustering-method-how-to-validate-a-cluster-solution-to-warran/195481\#195481}}
 
 Note that since each merge is based on the dissimilarity between clusters, this extra information that can be stored in the resulting dendrogram as the height of the branch. This is a direct benefit of using dissimilarity clustering, and is usually used to decide where to cut the dendrogram if flat clusters are needed. It will be leveraged to simplify the resulting dendrogram in Section~\ref{sec:pruning}.
@@ -172,8 +177,8 @@ The distance is defined as
 \end{equation}
 where $t>0$ is an input parameter that determines how many times $\mathbf{P}$ should be multiplied by itself.
 Notice that this is very close to being simply the Euclidean distance between columns in $\mathbf{P}$, except with a factor consisting of $\mathbf{D}_{kk}^{\text{--}\sfrac{1}{2}}$. This was done presumably in order to undercompensate for high-degree vertices, although they state that their distance ``can also be seen as the $L^2$ distance between the two probability distributions'' \cite{Pons2006} without mentioning this factor. However a look into their provided source code confirms the use of the factor.
-\cite{Pons2006} did not study whether the inclusion of this factor performs better quantitatively, and my results show that the performance on the benchmark used here is in fact higher when this factor is left out. I will therefore use Equation~\eqref{eq:walktrap} without including it, i.e.\ simply $\sqrt{\sum_{k}(\mathbf{P}_{ik}^t - \mathbf{P}_{jk}^t)^2}$. This will be referred to as the \emph{snapshot} embedding, as it captures the random walker state at a single step length.
 Since this measure can also be written as the Euclidean distance between columns in the matrix $\mathbf{D}^{\text{--}\sfrac{1}{2}}\mathbf{P}^t$, it automatically also qualifies as a distance metric.
+\cite{Pons2006} did not study whether the inclusion of this factor performs better quantitatively, and my results showed that the performance on the benchmark used in Section~\ref{sec:clustering_experiment} is in fact higher when this factor is left out. I will therefore use Equation~\eqref{eq:walktrap} without including it, i.e.\ simply $\sqrt{\sum_{k}(\mathbf{P}_{ik}^t - \mathbf{P}_{jk}^t)^2}$. This will be referred to as the \emph{snapshot} embedding, as it captures the random walker state after a fixed number of steps $t$.
 
 The algorithm then proceeds by applying agglomerative clustering using the Ward method, but with one difference: it only merges clusters connected by an edge. This reduces computation time and likely improves the modularity of the resulting clusters, but since our end goal is to produce bundles, edges between clusters are acceptable as they will be bundled. The results here will therefore use the more general algorithm that is unaware of edges between clusters.
 
@@ -246,7 +251,7 @@ All graphs are undirected and unweighted.
 
 These four graphs were run through each of the agglomerative methods presented in Section~\ref{sec:dissimilarities}. For methods that first require a high dimensional embedding, a range of parameters were used for the values of $t$ for Equations~\eqref{eq:walktrap} and~\eqref{eq:damped}.
 To assess the quality of the results, the adjusted random index (ARI) was used to compare a ground truth clustering against the clusters predicted by the algorithm. The benefit of using ARI is that it is robust to cluster labels being swapped, avoiding the situation where the clusters are correct but the order of labels is not.
-ARI is bounded between $-1$ and $1$, where a value of $1$ denotes perfect clustering, $0$ denotes a randomly shuffled clustering, and $-1$ denotes an even worse match than the expected value of a random shuffle.
+ARI is bounded between --$1$ and $1$, where a value of $1$ denotes perfect clustering, $0$ denotes a randomly shuffled clustering, and --$1$ denotes an even worse match than the expected value of a random shuffle.
 A problem with hierarchical clustering is that, to extract flat clusters to match the ground truth, the resulting dendrogram must be cut. The results here give the benefit of the doubt by measuring ARI at all cutting points and taking the maximum ARI of all cuts, to essentially assume that the algorithm always chooses its cut perfectly.
 
 The package \texttt{scipy.cluster.hierarchy} \cite{Virtanen2020} was used to perform all dissimilarity-based clustering.
@@ -254,7 +259,7 @@ Results are presented in Figures~\ref{fig:ARI1} and~\ref{fig:ARI2}, where all di
 
 \begin{figure}
     \centering
-    \includegraphics[height=\textheight]{power/figures/ARI1.pdf}
+    \includegraphics[height=.95\textheight]{power/figures/ARI1.pdf}
     \caption{Results for \texttt{karate} and \texttt{footballTSE}. Each linkage method is denoted by a different color and symbol.
     ARI is on y-axis, all clusterings on x-axis.
     Girvan-Newman is GN. Average and best ARI for all runs is in bottom right. Missing values for KL are due to probabilities of 0.}
@@ -262,54 +267,59 @@ Results are presented in Figures~\ref{fig:ARI1} and~\ref{fig:ARI2}, where all di
 \end{figure}
 \begin{figure}
     \centering
-    \includegraphics[height=\textheight]{power/figures/ARI2.pdf}
+    \includegraphics[height=.95\textheight]{power/figures/ARI2.pdf}
     \caption{Results for \texttt{caltech} and \texttt{lfr}.}
     \label{fig:ARI2}
 \end{figure}
 
 \subsubsection{Results}
 The aim of this study is to answer two questions: which dissimilarity measure is best, and which linkage method is best for clustering this dissimilarity?
-Unfortunately there is no clear-cut answer to either question, but the results can be interpreted to give some recommendations. Looking at the bottom right panels for each graph, it is immediately clear that single linkage is the least effective and should be avoided. The best scores for the remaining linkage methods generally hover around the same value, and so it is clear that the remaining four linkage methods all \emph{can} result in high quality results. Looking at the mean ARI scores, however, it becomes apparent that Ward's method produces the best results on average. 
+Unfortunately there is no clear-cut answer to either question, but the results can be interpreted to give some recommendations. Looking at the bottom right panels for each graph, it is immediately clear that single linkage is the least effective and should be avoided. The best scores for the remaining linkage methods generally hover around the same value, and so it is clear that the remaining four linkage methods all \emph{can} result in high quality results. Looking at the mean ARI scores, however, it becomes apparent that Ward's method produces the best results on average. This is consistent with the choice made my Pons and Latapy \cite{Pons2006} for their clustering method, now with quantitative results to verify their choice.
 
 % A more qualitative observation is that Ward also tends to give the best hierarchical structure in terms of neat trees without branches that, which is difficult to measure but results in the best bundles.
 The best dissimilarity for Ward over all graphs is Euclidean on snapshot embedding with $t=5$ in Equation~\eqref{eq:walktrap}, and it seems the original authors in \cite{Pons2006} agree with this choice as they performed most of their analysis using the same value.
-Despite being a distance metric, the performance of Wasserstein is consistently poorer than both Euclidean and KL. It is worth noting, however, that it consistently rises as the value of $t$ rises for both snapshot and damped embeddings. Both sets of parameters converge to the same 
+Despite being a distance metric, the performance of Wasserstein is consistently poorer than both Euclidean and KL. It is however worth noting that it consistently improves as the value of $t$ rises for both snapshot and damped embeddings. Both sets of parameters converge to the same embedding (the stationary distribution of the Markov chain) for $t\rightarrow \infty$ and $t\rightarrow 1$, respectively, so it seems that Wasserstein is effective on this stationary distribution, at least on this benchmark.
 
-This is what we will use for plotting results
+The alternative dissimilarities in the bottom left panels do not reach the same best values as the embeddings do, but they possess the important benefit not not needing to tune an extra parameter $t$, which is of great importance to practitioners. This is especially true given the variance of some of the lines in the top plots in Figures~\ref{fig:ARI1} and ~\ref{fig:ARI2}.
+The Jaccard index combined with UPGMA consistently scored high in each of the test graphs, and so is also worth a recommendation as an interpretable and robust choice.
+The remaining results in this chapter will use Ward's method on Euclidean distance over a snapshot embedding with $t=5$, due to the reasons outlined above.
 
 \subsection{Pruning}
 \label{sec:pruning}
-The final step to producing a hierarchical edge bundling visualisation is to 
-However the problem with using a dendrogram is that, as a binary tree, it contains as many branch nodes as leaves, which means that the resulting splines have far too many control points to be meaningful. An example of this can be seen in Figure~\ref{fig:lesmis}.
-Jia et al.\ \cite{Jia2011} attempt to alleviate this by introducing 
-but GN complexity is also ridiculous
+The final step to producing a hierarchical edge bundling visualisation is to convert the resulting dendrogram into an edge bundled diagram. This is done by first laying out the hierarchy as a tree, and then redrawing the original edges back on top as splines routed up and down the hierarchy.
+However a problem with using a dendrogram is that, as a binary tree, it contains as many branch nodes as leaves, which means that the resulting splines end up being routed through too many control points to separate individual edges. See Figure~\ref{fig:pruning} for an example of this on the \texttt{lesmis} graph.
+The process of tidying up this tree such that it is suitable for use in hierarchical bundling will be referred to as \emph{pruning}. 
 
-mention the optimal ordering from Scipy, Bar-Joseph et al.\ \cite{Bar-Joseph2001}, around a circle. This could be used to, for example, optimise an edge bundling specific objective function.
+\begin{figure}
+    % \centering
+    % \includegraphics{}
+     \caption{TODO: show pruning example on lesmis, worse than Figure~\ref{fig:lesmis}}
+     \label{fig:pruning}   
+\end{figure}
 
-merge branches in tree to make pretty (following \cite{Pons2006}), but this is not always high quality, as it can potentially merge every single 
-ideally cuts can be human driven \cite{Vogogias2016}
-trees can be interactively explored using \cite{Archambault2008}
+Jia et al.\ \cite{Jia2011} also encountered the same problem when producing their hierarchical bundles using the resulting dendrogram from the Girvan-Newman algorithm. They alleviate this issue by applying a branch-merging procedure that leverages the fact that each branch corresponds to a disconnected subgraph, due to the progressive removal of edges at each step in the algorithm.
+This cannot be applied to a general dendrogram, and so we instead make use of another property of dissimilarity clustering: the fact that each parent cluster can store the dissimilarity between its two child clusters before the merge. This is usually thought of as the height of each branch in the dendogram, and can be used to recursively merge branches in the hierarchy if their height difference falls below a certain threshold. This follows a similar idea to Pons and Latapy \cite{Pons2006} who use the same branch height information to determine an optimal cutting point for forming flat clusters.
 
-optimal leaf ordering also pretty
-Garland paper does pruning of top down
-mention that pruning is not the only way to do things e.g. skipping more control points. YMMV
+The next step is to lay out the hierarchy itself as a tree. Following Holten \cite{Holten2006}, a radial tree layout is chosen, and since each leaf of the tree represents a vertex of the original graph, they are first placed around the circumference of the circle. The order in which leaves are placed around the circle is very important, as it directly affects the proximity of edges to be bundles together. This is a similar problem to seriation in matrix plots \cite{Liiv2010}.
+Obviously any cousin vertices should be placed next to each other, but this still leaves an exponential number of orderings because the order within groups of cousins is still undecided.
+Fortunately, a neat solution exists to this problem, as there exists an algorithm that can find an optimal ordering. The definition of optimal in this case is the ordering that minimises the sum of the dissimilarity of adjacent leaves.
+Remarkably, this can be computed in polynomial time using the algorithm of Bar-Joseph et al.\ \cite{Bar-Joseph2001}, which leverages the structure of the hierarchical dendrogram to formulate the task as a dynamic programming problem.
+% This would not be applicable without a dendrogram, and so is another 
 
+The next step is to position the branches of the tree. I tried many methods for determining branch placement, including the use of force-directed methods such as Tutte's algorithm as in Figure~\ref{fig:misc_force_layouts}, but the method settled upon was to use polar coordinates.
+The angle of a parent is set to the mean of the angles of its children, and its distance from center is set proportional to the total number of leaves below it in the hierarchy. This means that the height of a branch corresponds to the size of its corresponding cluster, which is extra information embedded in the final visualisation.
+
+The final step is to render the bundles itself. With the tree layout determined, this step is exactly the same as that of Holten \cite{Holten2006}. Important subtleties include relaxing bundles to prevent splines from overlapping too much, and skipping the lowest common ancestor as a control point in order to reduce clutter around common parent nodes.
+The resulting visualisations for the four benchmark graphs in Table~\ref{tab:bundle_graphs} can be seen in Figure~\ref{fig:untangled_hairballs}, and pseudocode for the entire process can be seen in Figure~\ref{fig:algorithm_heb}.
 
 \begin{figure}
     \centering
     \includegraphics[height=.9\textheight]{power/figures/bundled.pdf}
     \caption{Drawings of the graphs in Table~\ref{tab:bundle_graphs} using both a stress layout (left) and with hierarchical edge bundling (right). Colours of nodes correspond to the ground truth clusters included in the data.
-    For football, 8 of its teams are singleton clusters in independent divisions, and for caltech ??? are unassigned to dorms}
+    For \texttt{football}, 8 of its teams are singleton clusters in independent divisions, and for \texttt{caltech} ??? are unassigned to dorms.
+    branch merge distance = 0.1 of total height
+    branch distance from center = number of leaves cubed}
     \label{fig:untangled_hairballs}
-\end{figure}
-
-END THIS CHAPTER WITH PSEUDOCODE
-
-\begin{figure}
-    % \centering
-    % \includegraphics{}
-     \caption{TODO: show pruning example}
-     \label{fig:pruning}   
 \end{figure}
 
 \begin{figure}
@@ -342,33 +352,53 @@ END THIS CHAPTER WITH PSEUDOCODE
     \label{algo:heb}
     \end{algorithm}
     \caption{hi}
-    \label{pgd_pseudo}
+\label{fig:algorithm_heb}
 \end{figure} 
 
 \subsection{Discussion}
 Girvan-Newman has a higher runtime complexity. Calculating betweenness-centrality is $\mathcal{O}(|V||E|)$ \cite{Brandes2001a}. Since this must be done within 
+but GN complexity is also ridiculous
+
+Ward is good, and also tends to give dendrograms that lend themselves more to the pruning in Section. The 
+Pruning is not always high quality, and it can potentially merge every single branch into one if branch height differences are even. However this also corresponds to a poor quality clustering in general because it means that the algorithm could not find large groups of datapoints that were all close to each other.
+ideally cuts can be human driven \cite{Vogogias2016}
+trees can be interactively explored using \cite{Archambault2008}
+
 but this is all kind of besides the point for HEB because the kind of structure we want to reveal is not clique structure, but biclique structure.
 % it is very important to realise that there are two types of clusters, which will be henceforth referred to as 'community' and 'betweenness' structure. This can also be referred to as 'assortative' and 'disassortative'.
 % some networks have both at the same time, and it is therefore difficult
 In any case, this is a small test set and the correct 
 Applying hierarchical edge bundles to the test set leads to smaller edges being within clusters and larger ones being across the 
+Future work should include trying a larger benchmark, with more bipartite graphs (both real-world and generated).
+Our benchmark also measures clustering, not bundling quality. Optimising a different loss function that directly relates to bundling, rather than a cluster definition would also be good.
 
-% Another benefit to agglomerative methods is that it is easy to interpret and understand what the algorithm is doing, even if the answer is suboptimal. I would always pick an algorithm that I fully understand for a visualisation over a black-box algorithm that produces slightly better results. But this is just opinion.
+Another benefit to agglomerative methods is that it is easy to interpret and understand what the algorithm is doing, even if the answer is suboptimal. I would always pick an algorithm that I fully understand for a visualisation over a black-box algorithm that produces slightly better results. But this is just opinion.
+mention that pruning is not the only way to do things e.g. skipping more control points or using a different type of spline. YMMV
 
 interaction is MEGA IMPORTANT. Being able to switch between different bundles and see where each node goes interactively is the only way these. A possible study to test the actual effectiveness of bundles could be to ask participants to try and identify ground truth cliques and/or bicliques from different bundling configurations.
 For a practitioner, this kind of technique depends greatly on the data input.
+
+The use of b-splines is also worth exploring, as will be done in Section~\ref{sec:bspline_details}.
+
+END THIS CHAPTER WITH PSEUDOCODE
+\url{github.com/jxz12/MyFirstThesis}
 
 \section{Power-confluent Drawings}
 \begin{figure}
     \caption{TODO: teaser image in pconfluent paper}
     \label{fig:power_teaser}
 \end{figure}
-in confluent drawings the aforementioned trade-off is actually attempted to be avoided
+Clustering can be likened to data compression, as the goal is to describe a given network with less information than, say, viewing the source and target of every individual edge. Such compression would be impossible in a random network, but because real-world data does have structure, underlying patterns can be leveraged to group together similar components within the data.
+However, even knowing that this is the goal does not make the problem easier, because these underlying patterns are not known to us. The real world is complex, and so any data collected from it is not likely to be straightforward to understand. Much of the data collected may not even contain any order in the first place.
+
+If the previous section was lossy compression, confluent drawing is lossless.
+in confluent drawings the trade-off of less clutter vs information loss is actually attempted to be avoided
 it is likened to lossless compression.
 
 2 parts: finding the power groups, then converting to a confluent drawing. The results here improve the speed and quality of the first part, and fix theoretical issues with the second.
 The nested structure of power-groups is hierarchical, and so an agglomerative method is used.
 \subsection{Splines}
+\label{sec:bspline_details}
 b-spline algorithms and things
 holten qualitatively said some desirable properties of b-splines, but the real benefit of them is the convex hull property, which helps to prevent crossings (explain why... because)
 The importance of this has been crucially missing in the literature
