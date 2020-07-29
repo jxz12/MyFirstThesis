@@ -10,7 +10,7 @@ A related and more common example is the \emph{disc graph}, where nodes are repr
 A gallery of such examples can be seen in Figure~\ref{fig:graph_representations}; because of the difference between the abstract mathematical structure of a network and its representation within a visualisation, I will henceforth refer to the abstract structure itself as drawing graphs comprised of vertices and edges, and their representation as visualising networks comprised of nodes and links.\footnote{This is in line with the terminology chosen by the \emph{International Symposium on Graph Drawing and Network Visualisation} to separate its theoretical and applied submission tracks, and so I will attempt to adopt it here. However the distinction between the two can sometimes become blurred depending on the context.}
 
 \begin{figure}
-\caption{Each of these representations has its unique benefits and downsides. Matrix plots can show a very dense amount of data in a small space, but are very dependent on the ordering of rows and columns \cite{Liiv2010}.
+\caption[A gallery of graph representations]{Each of these representations has its unique benefits and downsides. Matrix plots can show a very dense amount of data in a small space, but are very dependent on the ordering of rows and columns \cite{Liiv2010}.
 The intersection-style graphs are intuitive, but cannot be drawn for all graphs \cite{TODO}.}
 write something about treemaps
 \label{fig:graph_representations}
@@ -71,7 +71,7 @@ I will now present an overview of the various methods that have been sprouted fr
 It will also lead more cogently into the novel contributions described in Section~\ref{sec:sgd}.
 
 \begin{figure}
-    \caption{A binary tree of depth TODO visualised using some of the algorithms described in Section~\ref{sec:force_background}. The corresponding equations from left to right are: Tutte~\eqref{eq:tutte}, Eades~\eqref{eq:eades}, spectral~\eqref{eq:spectral}, and stress~\eqref{eq:stress}}.
+    \caption[A gallery of node layout methods]{A binary tree of depth TODO visualised using some of the algorithms described in Section~\ref{sec:force_background}. The corresponding equations from left to right are: Tutte~\eqref{eq:tutte}, Eades~\eqref{eq:eades}, spectral~\eqref{eq:spectral}, and stress~\eqref{eq:stress}}.
     Note that...
     \label{fig:misc_force_layouts}
 \end{figure}
@@ -133,7 +133,7 @@ The energy function that will become the focus for the rest of this chapter is k
     \mathrm{stress}(\mathbf{X}) = \sum_{\{i,j\}:i<j}w_{ij}(||\mathbf{X}_j-\mathbf{X}_i||-d_{ij})^2
 \label{eq:stress}
 \end{equation}
-where $w_{ij}$ and $d_{ij}$ are constants specific to each term in the summation. The intuition behind this formulation is that there are Hooke's law springs attached between all pairs of vertices, not just those connected by edges. Each of these springs is of natural length $d_{ij}$ and of stiffness $w_{ij}$. In practice, $d_{ij}$ is usually set to the shortest-path distance between vertices, and $w_{ij}$ is almost always set to $d_{ij}^{-2}$ in order to suppress the contribution from long-range springs that would otherwise obfuscate local detail \cite{Brandes2009}.
+where $w_{ij}$ and $d_{ij}$ are constants specific to each term in the summation. The intuition behind this formulation is that there are Hooke's law springs attached between all pairs of vertices, not just those connected by edges. Each of these springs is of natural length $d_{ij}$ and of stiffness $w_{ij}$. In practice, $d_{ij}$ is usually set to the shortest-path distance between vertices, and $w_{ij}$ is almost always set to $d_{ij}^{\text{--}2}$ in order to suppress the contribution from long-range springs that would otherwise obfuscate local detail \cite{Brandes2009}.
 
 The derivative of this equation is non-linear, like Equation~\eqref{eq:eades} or in \cite{Fruchterman1991, Frick1995}, and so cannot be solved exactly using linear solvers as for Equations~\eqref{eq:tutte_energy} or~\eqref{eq:spectral}.
 % However an immediate benefit to this formulation is that there are no extra input parameters for the user to decide, since $w_{ij}$ and $d_{ij}$ are both dependent on the structure of the graph itself.
@@ -148,7 +148,7 @@ The subsequent work throughout this chapter will aim at addressing these issues 
 % """
 % this is because they are intuitive and easily modified to include domain-specific features \cite{magnets and shit}.
 
-\subsection{Multidimensional Scaling}
+\subsection{Multidimensional scaling}
 \label{sec:stress_background}
 Before explaining the details of SGD, I will first outline the history of methods used to optimise Equation~\eqref{eq:stress}, as the performance of SGD will be evaluated through an experimental study comparing it to the previous state-of-the-art, known as \emph{majorization}.
 
@@ -162,18 +162,18 @@ How then should a tetrahedron be layed out into two dimensions?
 \subsection{Majorization}
 Cholesky, local, conj
 
-\section{Stochastic Gradient Descent}
+\section{Stochastic gradient descent}
 \label{sec:sgd}
 This is where the novel stuff starts SGD
 
-\subsection{Constraint Relaxation}
+\subsection{Constraint relaxation}
 \label{sec:wcr}
 lol at the conception
 dwyer
 
-\subsection{Algorithm Description}
+\subsection{Algorithm description}
 
-\subsection{Experimental Results}
+\subsection{Experimental comparison}
 comparison to majorization
 
 \subsection{Parameterisation}
@@ -182,7 +182,7 @@ finding $\eta_{\max}$ and $\varepsilon$.
 \subsection{Randomisation}
 random bits
 
-\section{Large Graphs}
+\section{Large graphs}
 \label{sec:large_graphs}
 various bottlenecks
 khoury low rank stress majorization is different from subspace optimisation in graphviz
@@ -198,14 +198,15 @@ tweaks to the algorithm for various applications
 Nails can be used to hold a node in place \cite{something}
 Magnetic fields or magnetised springs can be used to align nodes in various ways
 Attractive forces can be used to keep clusters together
-\subsection{Radial Layout}
+\subsection{Radial layout}
 cool much more than usual for convergence
 \subsection{Fixing one dimension}
 adding extra initial iterations can help
 setting $\mu_{\max}=1.1$ is good too, if not necessary
 \subsection{Pinning nodes}
 especially good if many are pinned (mention graphviz), because terms can be left out of the summation very easily (unlike majorization), which also means that disconnected components are easily dealt with by never adding those terms (rather than separate solvers for each component).
-\subsection{Regular Multidimensional Scaling}
+\subsection{General multidimensional scaling}
 show the digits dataset (note that weights are all set to 1)
+show lesmis graph
 try Phate classical MDS stuff
 graphviz optimises in a subspace first?
