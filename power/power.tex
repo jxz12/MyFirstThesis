@@ -92,7 +92,7 @@ Two other questions must first be answered before we can proceed with performing
 
 \subsection{Dissimiliarity clustering}
 \label{sec:dissimilarities}
-General hierarchical clustering based on dissimilarities can be done in both an agglomerative and divisive way, but the work here will focus on agglomerative methods. Agglomerative methods are more popular among practitioners \cite{Roux2018} due largely to the divisive version having $\mathcal{O}(2^n)$ possible splits for a cluster of size $n$, as each datapoint can be placed in either one half or the other. This results in an exponential runtime complexity per split, whereas the agglomerative method has only to chose from pairs of datapoints, giving an $\mathcal{O}(n^2)$ complexity per merge.
+General hierarchical clustering based on dissimilarities can be done in both an agglomerative and divisive way, but the work here will focus on agglomerative methods. Agglomerative methods are more popular among practitioners \cite{Roux2018} due largely to the divisive version having $\mathcal{O}(2^{|V|})$ possible splits for a cluster of size $|V|$, as each datapoint can be placed in either one half or the other. This results in an exponential runtime complexity per split, whereas the agglomerative method has only to chose from pairs of datapoints, giving an $\mathcal{O}(|V|^2)$ complexity per merge.
 
 There do exist heuristics to speed up the divisive method to bring the complexity down to polynomial, such as using algorithms like k-means to decide the split instead \cite{Lamrous2006}.
 % It can also be argued that a divisive method can take a more global approach.
@@ -136,9 +136,10 @@ Since Ward's method is based on variance, a concept that only makes geometric se
 The results in Section~\ref{sec:clustering_experiment} will include both distances and dissimilarities, both applied to Ward's method and the others reviewed in this section.
 In practice, any reasonable dissimilarity does not often result in negative branch lengths with Ward's method, even if it does not satisfy the criteria of a distance. None of the results presented on the benchmark used here have this problem, but it is important to note the possibility of it happening in practice.
 
-The final thing to discuss before moving onto how to choose a dissimilarity is the computational complexity on recalculating dissimilarities between clusters when they are merged. Remarkably, all of the above methods can be recalculated based on the equation
+The final thing to discuss before moving onto how to choose a dissimilarity is the computational complexity on recalculating dissimilarities between clusters when they are merged. Remarkably, all of the above methods can be recalculated based on the Lance-Williams equation
 \begin{equation}
     \;d_{\{i\cup j\}k} = \alpha_i d_{ik} + \alpha_j d_{jk} + \beta d_{ij} + \gamma|d_{ik}-d_{jk}|
+    \label{eq:lancewilliams}
 \end{equation}
 where $d_{\{i\cup j\}k}$ is the new distance between $k$ and a newly merged cluster containing $i$ and $j$, and the values of $\alpha$, $\beta$, and $\gamma$ can all be calculated in constant time.
 Recalculating the dissimilarity matrix after a merge therefore takes $\mathcal{O}(|V|)$ time. Searching through this matrix to find the best merge takes $\mathcal{O}(|V|^2)$ time, but this can be reduced to $\mathcal{O}(|V|\log(|V|)$ with a priority queue. Since forming a complete dendrogram requires $\mathcal{O}(|V|)$ merges, the overall complexity of greedy agglomerative clustering is $\mathcal{O}(|V|^2\log(|V|)$ .
@@ -300,7 +301,7 @@ This cannot be applied to a general dendrogram, and so we instead make use of an
 The next step is to lay out the hierarchy itself as a tree. Following Holten \cite{Holten2006}, a radial tree layout is chosen, and since each leaf of the tree represents a vertex of the original graph, they are first placed around the circumference of the circle. The order in which leaves are placed around the circle is very important, as it directly affects the proximity of edges to be bundled together. This is a similar problem to seriation in matrix plots \cite{Liiv2010}.
 Obviously any cousin vertices in the tree should be placed next to each other, but this still leaves an exponential number of orderings because the order within groups of cousins is still undecided.
 Fortunately, a neat solution exists to this problem, as there exists an algorithm that can find an optimal ordering. The definition of optimal in this case is to minimise the total dissimilarity between leaves ordered next to each other.
-Remarkably, this can be computed in polynomial time using the algorithm of Bar-Joseph et al.\ \cite{Bar-Joseph2001}, which leverages the structure of the hierarchical dendrogram to formulate the task as a dynamic programming problem. All resulting layouts presented here use this optimal ordering, although its complexity of $\mathcal{O}(n^4)$ makes it prohibitively slow for datasets any larger than the graphs studied here.
+Remarkably, this can be computed in polynomial time using the algorithm of Bar-Joseph et al.\ \cite{Bar-Joseph2001}, which leverages the structure of the hierarchical dendrogram to formulate the task as a dynamic programming problem. All resulting layouts presented here use this optimal ordering, although its complexity of $\mathcal{O}(|V|^4)$ makes it prohibitively slow for datasets any larger than the graphs studied here.
 % This would not be applicable without a dendrogram, and so is another benefit of a hierarchical methodology.
 
 The next step is to position the branches of the tree. Many methods were tested for determining branch placement, including the use of force-directed methods such as Tutte's algorithm as in Figure~\ref{fig:misc_force_layouts}, but the method settled upon was to use polar coordinates, in the following manner.
@@ -348,32 +349,81 @@ The current benchmark also measures the quality of clustering, but not bundling 
 % Another benefit to agglomerative methods is that it is easy to interpret and understand what the algorithm is doing, even if the answer is suboptimal. I would always pick an algorithm that I fully understand for a visualisation over a black-box algorithm that produces slightly better results. But this is just opinion.
 
 \section{Power-confluent drawing}
-Edge bundling can be likened to data compression on the graph, as the goal is to describe a given network without having to know the source and target for every individual edge. Such compression would be impossible in a random network, but because real-world data does have structure, underlying patterns can be leveraged to group together similar components within the data.
+Edge bundling can be likened to data compression on the graph, as the goal is to describe a given network without having to know the source and target for every individual edge. 
+Such compression would be impossible in a random network, but because real-world data does have structure, underlying patterns can be leveraged to group together similar components within the data.
 % However, even knowing that this is the goal does not make the problem easier, because these underlying patterns are not known to us. The real world is complex, and so any data collected from it is not likely to be straightforward to understand. Much of the data collected may not even contain any order in the first place.
 % In fact, if you will allow me to go meta for a moment, the very act of collecting data itself into the form of a network is already technically a form of compression, as 
 
-The hierarchical edge bundling of the previous section can be interpreted as \emph{lossy} compression, because the bundling of edges can obscure the exact endpoints of each edge. This is another reason why 
-confluent drawing is lossless.
-in confluent drawings the trade-off of less clutter vs information loss is actually attempted to be avoided
-it is likened to lossless compression.
+The hierarchical edge bundling of the previous section can be interpreted as \emph{lossy} compression, because the bundling of edges can obscure the exact endpoints of each edge. In the same vein as, say, JPEG image compression, there exists a tradeoff between the amount of data used against the amount of information displayed.
+But just as there exist lossless compression formats for images, such as PNG compression, there also exists a lossless counterpart for edge bundling, known as \emph{confluent drawing}. An example of such a drawing can be seen on the right-hand side of Figure~\ref{fig:power_teaser}, where the bundles are interpreted as follows: every possible smooth path from one vertex to another indicates that they are connected by an edge in the original graph.
 
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{power/teaser.pdf}
-    \caption[A power-confluent drawing pipeline]{hi}
-\label{fig:power_teaser}
+    \caption[A power-confluent drawing pipeline]{A pipeline for producing power-confluent drawings. 
+    From left to right: a conventional node-link diagram with vertices arranged around a circle; its power graph decomposition, where edges are compressed by grouping similar nodes together; our novel equivalent routing graph, where the nested structure of groups is represented by a directed tree; the resulting confluent drawing, where original edges are threaded through the routing graph to form bundled junctions.}
+    \label{fig:power_teaser}
 \end{figure}
 
-2 parts: finding the power groups, then converting to a confluent drawing. The results here improve the speed and quality of the first part, and fix theoretical issues with the second.
+Confluent drawing has its roots in the more theoretical side of graph drawing, and was originally developed by Dickerson et al.\ \cite{Dickerson2005} as a novel method for drawing planar graphs. In Figure~\ref{fig:power_teaser} for example, the drawing of the original graph on the left contains many crossings and in fact can not be drawn in a planar way. Allowing edges to overlap, but requiring all smooth curves to denote an edge between endpoints, means that all connectivity is preserved, thus adhering to the analogy of lossless compression.
+The precise definition of what defines a confluent drawing will be studied later in Section~\ref{sec:confluent_definition}.
+
+The work in this chapter will study a subset of confluent drawing known as \emph{power-confluent} drawing.
+The process of producing a power-confluent drawing consists of three steps: finding the \emph{power graph decomposition}; converting this decomposition into an equivalent auxiliary routing graph (ARG), similarly to Section~\ref{sec:pruning}; and drawing curves back on top to render a confluent drawing. Each step is illustrated in Figure~\ref{fig:power_teaser}. This was an idea originally explored by Bach et al.\ \cite{Bach2017}, and the work presented here will aim to further develop and formalise the methods there.
+Specifically, the speed and quality of the first step will be improved, and some theoretical issues will be resolved for the second and third.
 
 \subsection{Power graph decomposition}
 \label{sec:power_graph}
-The first step is to produce a power graph
-The nested structure of power-groups is hierarchical, and so an agglomerative method is used.
-Small improvements on the previous method
+A power graph is an extension to the conventional node-link diagram, that allows vertices to be grouped together into \emph{power groups}, in order to merge edges that share endpoints into individual \emph{power edges} (see the leftmost two drawings in Fig.~\ref{fig:power_teaser}). Power groups may also be nested in a hierarchical structure, allowing power edges to cross group boundaries.
+
+This idea was originally developed for use in biological protein interaction network analysis by Royer et al.\ \cite{Royer2008}, who originally computed a decomposition by using heuristics based on the Jaccard index, defined here in Equation~\ref{eq:jaccard}. This was later improved by Dwyer et al.\ \cite{Dwyer2014} who presented multiple methods of finding both optimal and sub-optimal decompositions, while also proving that the problem in general is likely to be $\mathcal{NP}$-hard. The method they recommended for practical use is a greedy agglomeration technique not unlike the ones studied in Section~\ref{sec:dissimilarities}, except without the benefit of the Lance-Williams property shown in Equation~\eqref{eq:lancewilliams}. Its complexity is $\mathcal{O}(|V|^3|E|\log|E|)$, because it must search through $\mathcal{0}(|V|^2)$ merges $\mathcal{O}(|V|)$ times, and each merge takes $\mathcal{O}(|E|\log|E|)$ time to assess its quality. This will later be improved slightly to $\mathcal{O}(|E|)$, and in practice the number of edges to be considered diminishes quickly \cite{Dwyer2014}.
+
+This is also the method chosen by Bach et al.\ \cite{Bach2017}, to construct their initial power graphs, and is the one studied here. Note that the following description is specific to undirected graphs; the changes required for directed graphs are described in Section~\ref{sec:power_directed}.
+
+\subsubsection{Greedy agglomeration, again}
+The algorithm works taking advantage of the fact that the hierarchy of power groups can also be represented as a tree, with vertices as the leaves, similarly to the hierarchical clustering of Section~\ref{sec:dissimilarities}. It first initializes every vertex as the sole member of a trivial power group, henceforth referred to as a \emph{module}, and initializes a set of neighbours for each module based on the edges of the graph.
+It then greedily merges pairs of top-level modules at a time, picking the merge that eliminates the most edges at each step, until no more edges can be eliminated.
+The number of eliminated edges for any given merge is given by
+\begin{equation}
+    \kappa_{\cap}(m, n) = |N(m)\cap N(n)|
+    \label{eq:kappa_cap}
+\end{equation}
+where $m$ and $n$ are modules and $N$ are their neighbour sets.
+This is almost the same as $\mathrm{nedges}(m,n)$ in~\cite{Dwyer2014}, except as a positive score rather than a negative penalty.
+% See Dwyer et al.~\cite{Dwyer2014} for detailed background and definitions.
+
+This is the stage where the difference between this power decomposition and hierarchical clustering becomes clear: since power decomposition must preserve connectivity information, in line with the lossless compression analogy, care must be taken when performing the merging step in order to keep edges and power edges pointing at the correct endpoints. 
+The simplest case is when two modules $m$ and $n$ share the exact same neighbours, i.e.\ $N(m)=N(n)$. In this case one module can simply be `absorbed' into the other, such that every pair of edges is merged into one, and the number of modules decreases by one. 
+
+A trickier case is if only one of the modules contains edges that cannot be merged. For example, $m$ cannot fully absorb $n$ if $N(m)\supset N(n)$. Leaf modules of the hierarchical tree, i.e.\ individual vertices, also cannot be absorbed, and so the same situation occurs when $m$ is a leaf and $n$ is a module. In both cases $m$ adopts $n$, and $N(m)\cap N(n)$ is removed from $N(n)$.
+If both contain edges that cannot be absorbed, i.e.\ $N(m)\not\subset N(n)$ and $N(m)\not\supset N(n)$, then a new module is created that adopts $m$ and $n$ as children and steals $N(m)\cap N(n)$ as its neighbour set. This also happens if $m$ and $n$ are both leaf modules.
+Note that this is done equivalently in the original description by always generating a new parent module, and removing either child if their neighbour sets become empty \cite{Dwyer2014}.
+
+However, measuring the reduction in edges as in Equation~\eqref{eq:kappa_cap} is not the only metric that a greedy algorithm can use to judge the quality of any given merge.
+Only using one heuristic often results in many merges with the same score, and so the choice of merge may be arbitrarily chosen from many candidates, some of which may lead directly to local optima. In such situations it can be useful to include additional heuristics to further discriminate between choices.
+This is not explicitly mentioned in~\cite{Dwyer2014}, but is implemented in their provided source code, where they include two other metrics: minimising the total number of modules after the merge, and minimising the number of times power group boundaries are crossed by power edges.
+
+Here a new heuristic will be introduced that can roughly capture the effects of both, and is simpler to calculate: a penalty for the number of edges that could not be merged. This is defined by
+\begin{equation}
+    \kappa_{\Triangle}(m, n) = |N(m)\,\Triangle\,N(n)|
+    \label{eq:kappa_triangle}
+\end{equation}
+where $\Triangle$ denotes the symmetric difference, i.e.\ the number of unshared neighbours, between the two sets. This effectively measures the number of edges that cannot ever be eliminated in future steps, because only top level modules are considered for merging.
+Equation~\eqref{eq:kappa_triangle} captures the number of modules because a new parent module is only added if both children have unshared neighbours, and so the smaller Equation~\eqref{eq:kappa_triangle} is, the fewer modules there will likely be. It also captures the effect of edges crossing group boundaries, because any unshared edges must cross the boundary of its new parent module after the merge.
+Rewarding the first heuristic and punishing the second leaves a total score of
+\begin{equation}
+    \kappa(m,n) =
+    w_\cap \kappa_\cap(m,n) -
+    w_{\Triangle} \kappa_{\Triangle}(m,n)
+    \label{eq:kappa_full}
+\end{equation}
+where $w_\cap$ and $w_{\Triangle}$ determine the relative weight of either heuristic. For example, to construct a modular decomposition \cite{Habib2004}, $w_{\Triangle}$ may be set to infinity to forbid any module boundary crossings.
+Setting $w_\cap=10$ and $w_{\Triangle}=1$ works well in practice; these are the parameters used for the table of results in Table~\ref{tab:pgd_results}.
+The improvements are small, but are consistently better and with less variance.
+ 
 \begin{table}
     \centering
-    \caption[Experimental results on greedy power graph decomposition]{hi}
+    \caption[Experimental results on greedy power graph decomposition]{Experimental results for the improved greedy power graph decomposition described in Section~\ref{sec:power_graph}}
     % \caption{Some experimental results comparing the quality of resulting power graphs with and without our additional heuristic (Section~\ref{implementation}), taking the best and worst scores over 25 runs.
     % $|E|$ is the number of edges in the original graph, compressed into $|P|$ power edges and $|G|$ power groups; shaded boxes indicate the best score between the two methods.
     % Adding our new heuristic produces the best or joint best results in all graphs, and also improves the consistency of the output, with a better worst result in all cases.
@@ -390,56 +440,63 @@ Small improvements on the previous method
     \definecolor{grey}{RGB}{170,251,170} % mint :)
     
     \begin{tabular}{ |c|c|c|c|c| } 
-     \hline
-     \multirow{2}{*}{Name ($|E|$)} &
-     \multicolumn{2}{c|}{Best $|P|$ $(|M|)$} & \multicolumn{2}{c|}{Worst $|P|$ $(|M|)$} \\ 
-     \cline{2-5}
-     & only $\kappa_{\cap}$ & $\kappa_{\cap}$ and $\kappa_{\triangle}$ & only $\kappa_{\cap}$ & $\kappa_{\cap}$ and $\kappa_{\triangle}$ \\ 
-     \hline\hline
-     \texttt{florentine} (20)
-        % &\cellcolor{grey} 11 (4)
-        % &\cellcolor{grey} 11 (4)
-        & 11 (4)
-        & 11 (4)
-        & 11 (6)
-        &\cellcolor{grey} 11 (5) \\
-     \texttt{karate} (78)
-        % &\cellcolor{grey} 28 (13)\
-        % &\cellcolor{grey} 28 (13)
-        & 28 (13)\
-        & 28 (13)
-        & 30 (15)
-        &\cellcolor{grey} 29 (13)\\ 
-     \texttt{southern} (89)
-        & 30 (17)
-        &\cellcolor{grey} 27 (21)
-        & 37 (16)
-        &\cellcolor{grey} 30 (18)\\ 
-     \texttt{dolphins} (159)
-        & 82 (29)
-        &\cellcolor{grey} 81 (30)
-        & 87 (28)
-        &\cellcolor{grey} 83 (30)\\ 
-     \texttt{lesmis} (254)
-        & 74 (39)
-        &\cellcolor{grey} 72 (41)
-        & 79 (39)
-        &\cellcolor{grey} 72 (42)\\
-     \texttt{football} (613)
-        & 282 (83)
-        &\cellcolor{grey} 278 (84)
-        & 289 (83)
-        &\cellcolor{grey} 286 (84)\\
-     \texttt{netsci} (914)
-        & 355 (187)
-        &\cellcolor{grey} 338 (184)
-        & 371 (189)
-        &\cellcolor{grey} 341 (186)\\
-        
-     \hline
+        \hline
+        \multirow{2}{*}{Name ($|E|$)} &
+        \multicolumn{2}{c|}{Best $|P|$ $(|M|)$} & \multicolumn{2}{c|}{Worst $|P|$ $(|M|)$} \\ 
+        \cline{2-5}
+        & only $\kappa_\cap$ & $\kappa_\cap$ and $\kappa_{\Triangle}$ & only $\kappa_\cap$ & $\kappa_\cap$ and $\kappa_{\Triangle}$ \\ 
+        \hline\hline
+        \texttt{florentine} (20)
+           % &\cellcolor{grey} 11 (4)
+           % &\cellcolor{grey} 11 (4)
+           & 11 (4)
+           & 11 (4)
+           & 11 (6)
+           &\cellcolor{grey} 11 (5) \\
+        \texttt{karate} (78)
+           % &\cellcolor{grey} 28 (13)\
+           % &\cellcolor{grey} 28 (13)
+           & 28 (13)\
+           & 28 (13)
+           & 30 (15)
+           &\cellcolor{grey} 29 (13)\\ 
+        \texttt{southern} (89)
+           & 30 (17)
+           &\cellcolor{grey} 27 (21)
+           & 37 (16)
+           &\cellcolor{grey} 30 (18)\\ 
+        \texttt{dolphins} (159)
+           & 82 (29)
+           &\cellcolor{grey} 81 (30)
+           & 87 (28)
+           &\cellcolor{grey} 83 (30)\\ 
+        \texttt{lesmis} (254)
+           & 74 (39)
+           &\cellcolor{grey} 72 (41)
+           & 79 (39)
+           &\cellcolor{grey} 72 (42)\\
+        \texttt{football} (613)
+           & 282 (83)
+           &\cellcolor{grey} 278 (84)
+           & 289 (83)
+           &\cellcolor{grey} 286 (84)\\
+        \texttt{netsci} (914)
+           & 355 (187)
+           &\cellcolor{grey} 338 (184)
+           & 371 (189)
+           &\cellcolor{grey} 341 (186)\\
+           
+        \hline
     \end{tabular}
-    \label{pgd_results}
+    \label{tab:pgd_results}
 \end{table}
+
+It is important to note that this is still a simple greedy heuristic, which does not make any guarantees about the quality of the final result.
+The original method in~\cite{Dwyer2014} gives the option to somewhat alleviate this, by optionally maintaining a priority queue of the best configurations seen so far, along with some dynamic programming to prevent re-evaluating configurations already seen.
+A further exploration of this extended algorithm is out of scope for this paper, and Dwyer et al.~\cite{Dwyer2014} additionally note that the qualitative improvement that results from including this priority queue is minimal.
+
+Our final change involves bringing down the complexity of neighbour set intersection to $O(E)$ using hash sets, which reduces the complexity of the algorithm down slightly to $O(|V|^3|E|)$.
+Pseudocode for the above described algorithm can be seen in Fig.~\ref{fig:pseudocode_pgd}.
 
 \begin{figure}
     \removeAlgorithmFigureError
@@ -472,15 +529,22 @@ Small improvements on the previous method
     
     \caption[Pseudocode for improved power graph decomposition]{Pseudocode for the greedy heuristic power graph construction in Section~\ref{sec:power_graph}.
     Each module consists of a set of children $C$, and a set of neighbours $N$.
-    The score function $\kappa$ is from Equation~(\ref{eq:kappa}), and the merge operation on line~\ref{pseudo:merge} is described in Section~\ref{sec:power_graph}, where any new module is parented to its merged children by adding them to its set of children $C$.
+    The score function $\kappa$ is from Equation~\eqref{eq:kappa_full}, and the merge operation on line~\ref{pseudo:merge} is described in Section~\ref{sec:power_graph}, where any new module is parented to its merged children by adding them to its set of children $C$.
     In practice, we maintain a redundant super-module whose children are the top level modules $M_\mathrm{top}$ on line~\ref{pseudo:top}.}
     \label{fig:pseudocode_pgd}
 \end{figure} 
 
 \subsection{Confluent drawing conversion}
 \label{sec:confluent_definition}
-abstract and introduction of paper goes here
-definition of confluent
+
+\begin{mdframed}[backgroundcolor=WhiteSmoke]
+\begin{itemize}[leftmargin=*]
+    \item There is a one-to-one mapping between the vertices in $G$ and $A$, so that, for each vertex $v\in V(G)$, there is a corresponding vertex $v'\in A$, which has a unique point placement in the plane.
+    % \item There is an edge $(v_i,v_j)$ in $E(G)$ if and only if there is a locally-monotone curve $e'$ connecting $v_i'$ and $v_j'$ in A.
+    \item There is an edge $(v_i,v_j) \in E(G)$ iff there is a locally-monotone curve (defined as having no self intersections or sharp turns) $e'$, connecting $v_i'$ and $v_j'$ in $A$. 
+    \item $A$ is planar. That is, while locally-monotone curves in $A$ can share overlapping portions, no two can cross.
+\end{itemize}
+\end{mdframed}
 
 \subsubsection{Node split}
 \label{sec:node_split}
@@ -490,6 +554,8 @@ definition of confluent
 
 \subsection{Hierarchical Routing}
 \label{sec:hierarchical_routing}
+
+Pseudocode for the subsequent routing graph and B-spline generation process, described in Section~\ref{solution}, can be seen in Fig.~\ref{pcd_pseudo}.
 
 \begin{figure}
     \removeAlgorithmFigureError
@@ -566,6 +632,25 @@ holten qualitatively said some desirable properties of b-splines, but the real b
 The importance of this has been crucially missing in the literature
 examples of splines that are not convex hull is like the garland paper.
 
+\subsection{Directed graphs}
+\label{sec:power_directed}
+The definition for a directed confluent drawing is almost the same as the undirected case, except with the caveat that any given path can only `flow' in one direction. This is analogous to preventing trains on tracks from crashing into each other. 
+Formally, for a directed confluent drawing $B$, this is extra condition~\cite{Dickerson2005} is:
+\begin{itemize}
+    \item Locally monotone curves in B may share some overlapping portions, but the edges sharing the same portion of a track must all have the same direction along that portion.
+\end{itemize}
+This means that directed graphs lead to a slightly different power-to-routing graph conversion, where the description in~\cite{Bach2017} says \emph{``The only difference is that we create---as necessary---two junctions for each group, one for incoming and one for outgoing edges."}
+Here we will elaborate on this short description, as simply adding another routing node when its corresponding group has both incoming and outgoing edges is not enough to guarantee that all portions will only flow in one direction.
+This is because any power edges at a power group are propagated down the hierarchy, so that even if flows are correctly directed into separate junctions at one group, they may still clash further down the tree.
+Therefore, all descendants of any such group must also have two routing nodes: one for outgoing edges (flowing up the hierarchy) and one for incoming edges (flowing down the hierarchy).
+
+The description of the improved power graph construction algorithm from Section~\ref{sec:power_graph} is also easily applied to directed graphs, by splitting neighbour sets into incoming and outgoing edges. This is how the original algorithm is described by Dwyer et al.~\cite{Dwyer2014}.
+In other words, the formulations for the heuristics in Equation~\eqref{eq:kappa_full} instead become
+\begin{align}
+    &\kappa_\cap(m,n) = |N^+(m)\cap N^+(n)| + |N^-(m)\cap N^-(n)|,\\
+    &\kappa_{\Triangle}(m,n) = |N^+(m)\,\Triangle\,N^+(n)| + |N^-(m)\,\Triangle\,N^-(n)|
+\end{align}
+where $N^+$ is a set of outgoing edges, and $N^-$ a set of incoming edges.
 
 \subsection{Discussion}
 node splitting may not even be necessary if a different spline is chosen.

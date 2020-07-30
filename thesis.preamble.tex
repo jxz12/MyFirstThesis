@@ -139,7 +139,6 @@
 %%%%%%%%%%%%%%
 % Jonny stuff
 
-\setcounter{chapter}{-1}
 \usepackage{soul}
 
 \usepackage{unicode-math}
@@ -184,12 +183,11 @@
 
 % allow captions
 \usepackage{caption} 
-\captionsetup[table]{skip=7pt}
+\captionsetup[table]{skip=10pt}
 % \captionsetup[figure]{font={Fira Sans}}
 
 % allow multirow tables
 \usepackage{multirow}
-\newcommand{\Cpp}{C\raise .2ex \hbox{++}}
 
 % to make algorithm2e work in figure
 \usepackage[ruled,vlined,linesnumbered]{algorithm2e}
@@ -197,3 +195,20 @@
 \makeatletter
 \newcommand{\removeAlgorithmFigureError}{\let\@latex@error\@gobble}
 \makeatother
+
+% extra symbols
+\newcommand{\Cpp}{C\raise .2ex \hbox{++}}
+\newcommand{\Triangle}{\mathchoice
+  {\removeAlgorithmFigureError\raise .175ex\hbox{\larger[-2]$\triangle$}}
+  {\removeAlgorithmFigureError\raise .175ex\hbox{\larger[-2]$\triangle$}}
+  {\removeAlgorithmFigureError\raise .1ex\hbox{\larger[-4]$\triangle$}}
+  {\removeAlgorithmFigureError\raise .1ex\hbox{\larger[-6]$\triangle$}}
+}
+% prevents annoying warnings
+\renewcommand\RSsmallest{5pt}
+
+% number chapters from 0
+\renewcommand{\theequation}{\thechapter.\arabic{equation}}
+\renewcommand{\thefigure}{\thechapter.\arabic{figure}}
+\renewcommand{\thetable}{\thechapter.\arabic{table}}
+\setcounter{chapter}{-1}
