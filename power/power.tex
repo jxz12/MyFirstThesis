@@ -80,7 +80,7 @@ Unfortunately Jia et al.\ did not perform any quantitative analysis to evaluate 
 \begin{figure}
     \centering
     \includegraphics[width=\linewidth]{power/lesmis.pdf}
-    \caption[A hierarchical edge bundling pipeline]{An example of the hierarchical edge bundling pipeline presented here, on the graph \texttt{lesmis} which describes co. The top-left is a layout from stress optimisation; top-right is a dendrogram computed from agglomerative dissimilarity clustering (see Section~\ref{sec:dissimilarities}); bottom-left is the tidied up hierarchical tree after pruning (see Section~\ref{sec:pruning}; bottom-right is the final hierarchical edge bundling diagram when original edges are rendered using splines (see Section~\ref{sec:heb_background}).
+    \caption[A hierarchical edge bundling pipeline]{An example of the hierarchical edge bundling pipeline presented here, on the graph \texttt{lesmis} which describes co. The top-left is a layout from stress optimisation; top-right is a dendrogram computed from agglomerative dissimilarity clustering (see Section~\ref{sec:dissimilarities}); bottom-left is the tidied up hierarchical tree after pruning (see Section~\ref{sec:pruning}); bottom-right is the final hierarchical edge bundling diagram when original edges are rendered using splines (see Section~\ref{sec:heb_background}).
     TODO: write names on border}
     \label{fig:lesmis}
 \end{figure}
@@ -117,8 +117,7 @@ The most commonly used methods fall into three categories: using one member of a
 Choosing a single representative member is the most straightforward; when calculating the dissimilarity between two clusters, one can take the best-case scenario by choosing the closest pair of inter-cluster points, or the worst-case by choosing the farthest pair. These are known as single- and complete-linkage algorithms, respectively \cite{Sibson1973, Defays1977}.
 One can also choose to take an average over the members of both clusters. This can be done by taking the mean dissimilarity between all inter-cluster pairs, and and is known as UPGMA (Unweighted Pair Group Method with Arithmetic mean). Its `weighted' counterpart, known as WPGMA, is more efficient, as when a cluster is merged it `forgets' that it was made up of other elements and becomes treated as a single datapoint itself \cite{Sneath1973}. The reason it is called weighted is, perhaps confusingly, because the original datapoints `lose weight' by being merged into a cluster, whereas in the unweighted version each original datapoint still contributes the same amount to each merging decision.
 
-The third category is known as Ward's method \cite{WardJr1963}, and is based on minimising variance within clusters. The dissimilarity between clusters in this case is the increase in total within-cluster variance if they were to be merged. This is the same objective function that k-means clustering attempts to minimise \cite{Friedman2001a}.
-\footnote{The best description of these types is the shape of clusters. single linkage is an amoeba, complete is a hypersphere, upgma is, wpgma, ward is a 'type' see \url{https://stats.stackexchange.com/questions/195456/how-to-select-a-clustering-method-how-to-validate-a-cluster-solution-to-warran/195481\#195481}}
+The third category is known as Ward's method \cite{WardJr1963}, and is based on minimising variance within clusters. The dissimilarity between clusters in this case is the increase in total within-cluster variance if they were to be merged. This is the same objective function that k-means clustering attempts to minimise \cite{Friedman2001a}.\footnote{The best description of these types is the shape of clusters. single linkage is an amoeba, complete is a hypersphere, upgma is, wpgma, ward is a 'type' see \url{https://stats.stackexchange.com/questions/195456/how-to-select-a-clustering-method-how-to-validate-a-cluster-solution-to-warran/195481\#195481}}
 
 Note that since each merge is based on the dissimilarity between clusters, this extra information that can be stored in the resulting dendrogram as the height of the branch. This is a direct benefit of using dissimilarity clustering, and is usually used to decide where to cut the dendrogram if flat clusters are needed. It will be leveraged to simplify the resulting dendrogram in Section~\ref{sec:pruning}.
 However this is also a source of trouble for Ward's method specifically, because a monotonically increasing branch height is only guaranteed if the input is a \emph{distance}, and not just a \emph{dissimilarity}.
@@ -214,16 +213,16 @@ The distances derived from Equations~\eqref{eq:jaccard}--\eqref{eq:commute} will
 
 \subsection{Experimental study}
 \label{sec:clustering_experiment}
-Since clustering is an undefined problem, the quality of a clustering algorithm is also undefined. I will therefore measure the quality of clusters by using a benchmark set of graphs where a ground truth clustering configuration is known. 
+Since clustering is an undefined problem, I will measure the quality of clusters by using a benchmark set of graphs where a ground truth clustering configuration is known.
 
 \begin{table}
     \centering
-    \caption{Benchmark graphs used for the experiment in Section~\ref{sec:clustering_experiment}}
+    \caption[Benchmark graphs used for the experiment in Section~\ref{sec:clustering_experiment}]{Benchmark graphs used for the experiment in Section~\ref{sec:clustering_experiment}. $|V|$ denotes the number of vertices, $|E|$ the number of edges, and $|M|$ the number of ground truth clusters.}
     \setlength{\tabcolsep}{1em} % for the horizontal padding
-    {\renewcommand{\arraystretch}{1.2}% for the vertical padding
+    {\renewcommand{\arraystretch}{1.25}% for the vertical padding
     \begin{tabular}{|c|c|c|c|}
         \hline
-        Name & $|V|$ & $|E|$ & $|C|$
+        Name & $|V|$ & $|E|$ & $|M|$
         \\\hline\hline
         \texttt{karate} & 34 & 78 & 2
         \\\hline
@@ -259,7 +258,7 @@ Results are presented in Figures~\ref{fig:ARI1} and~\ref{fig:ARI2}, where all di
     \includegraphics[height=.95\textheight]{power/ARI1.pdf}
     \caption[Experimental clustering results for \texttt{karate} and \texttt{footballTSE}]{Results for \texttt{karate} and \texttt{footballTSE}. Each linkage method is denoted by a different color and symbol.
     ARI is on y-axis, all clusterings on x-axis.
-    Girvan-Newman is GN. Average and best ARI for all runs is in bottom right. Missing values for KL are due to probabilities of 0.}
+    Girvan-Newman is GN. Average and best ARI for all runs is in bottom right. Missing values for KL are due to probabilities of 0. Weighted KL done for 100 iterations}
     \label{fig:ARI1}
 \end{figure}
 \begin{figure}
@@ -309,7 +308,7 @@ The angle of a parent is set to the mean of the angles of its children, and its 
 
 The final step is to render the bundles itself. With the tree layout determined, this step is exactly the same as that of Holten \cite{Holten2006}. Important subtleties include relaxing bundles to prevent splines from overlapping too much, and skipping the lowest common ancestor as a control point in order to reduce clutter around common parent nodes.
 The resulting visualisations for the four benchmark graphs in Table~\ref{tab:bundle_graphs} can be seen in Figure~\ref{fig:untangled_hairballs}.
-Code used to generate all figures can be found at \url{github.com/jxz12/MyFirstThesis}.
+Code used to generate all figures can be found at \url{github.com/jxz12/HierarchicalEdgeBundles}.
 
 \begin{figure}
     \centering
@@ -326,7 +325,7 @@ Code used to generate all figures can be found at \url{github.com/jxz12/MyFirstT
 The results presented here largely agree with the design choices made by Pons and Latapy \cite{Pons2006} for the use of agglomerative dissimilarity clustering on graphs. That is except for leaving out the extra $\mathbf{D}_{kk}^{\text{--}\sfrac{1}{2}}$ weighting in Equation~\ref{eq:walktrap} as it did not improve performance at all in the benchmark explored here.
 
 The use of dissimilarity measures based on random walks outperforms those derived from other features such as shortest paths, as well as the Girvan-Newman algorithm used by Jia et al.\ \cite{Jia2011}, which also has a higher runtime complexity.
-Calculating betweenness-centrality for each edge is $\mathcal{O}(|V||E|)$ \cite{Brandes2001a} and since this must be recalculated $|E|$ times, the overall complexity of the algorithm is $\mathcal{O}(|V||E|^2)$ compared to $\mathcal{O}(|V|^2\log|V|)$ for the agglomerative methods explored here.
+This is because calculating betweenness-centrality for each edge is $\mathcal{O}(|V||E|)$ \cite{Brandes2001a} and since this must be recalculated $|E|$ times, the overall complexity of the algorithm is $\mathcal{O}(|V||E|^2)$ compared to $\mathcal{O}(|V|^2\log|V|)$ for the agglomerative methods explored here.
 Ward's method also consistently outperforms other linkage methods, and a qualitative observation of note is that it also tends to give dendrograms that lend themselves more to the pruning process in Section~\ref{sec:pruning}. Branches in the dendrogram more clearly delineate separately groups of clusters, leading to easier simplification into a streamlined hierarchy for bundling.
 % more systematic study into different methods for pruning 
 When the opposite situation occurs, i.e.\ if differences in branch height are homogenous, the pruning process may merges every single branch into one, since child branches are recursively merged into their parents. However this also usually corresponds to a poor quality clustering in general, because it means that the algorithm could not find large groups of datapoints that were all close to each other.
@@ -344,16 +343,16 @@ A possible study to quantify the effectiveness of bundles could be to ask partic
 
 % Applying hierarchical edge bundles to the test set leads to smaller edges being within clusters and larger ones being across the 
 Future work could also include testing on a larger benchmark, especially with graphs with more biclique than clique structure.
-The current benchmark also measures the quality of clustering, but not bundling directly. If a dissimilarity measure or loss function could be formulated that that directly relates to bundling quality, it could be directly optimised to produce mathematically high-quality bundles.
+The current benchmark also measures the quality of clustering, but not bundling directly. If a dissimilarity measure or loss function could be formulated that that directly relates to bundling quality, it could be directly optimised to produce high-quality bundles.
 
 % Another benefit to agglomerative methods is that it is easy to interpret and understand what the algorithm is doing, even if the answer is suboptimal. I would always pick an algorithm that I fully understand for a visualisation over a black-box algorithm that produces slightly better results. But this is just opinion.
 
 \section{Power-confluent drawing}
-Edge bundling can be likened to data compression on the graph, as the goal is to describe a given network with less information. For example than, say, viewing the source and target of every individual edge. Such compression would be impossible in a random network, but because real-world data does have structure, underlying patterns can be leveraged to group together similar components within the data.
+Edge bundling can be likened to data compression on the graph, as the goal is to describe a given network without having to know the source and target for every individual edge. Such compression would be impossible in a random network, but because real-world data does have structure, underlying patterns can be leveraged to group together similar components within the data.
 % However, even knowing that this is the goal does not make the problem easier, because these underlying patterns are not known to us. The real world is complex, and so any data collected from it is not likely to be straightforward to understand. Much of the data collected may not even contain any order in the first place.
 % In fact, if you will allow me to go meta for a moment, the very act of collecting data itself into the form of a network is already technically a form of compression, as 
 
-The hierarchical edge bundling of the previous section can be interpreted as \emph{lossy} compression, because the bundling of edges can obscure the exact direction of each drawing
+The hierarchical edge bundling of the previous section can be interpreted as \emph{lossy} compression, because the bundling of edges can obscure the exact endpoints of each edge. This is another reason why 
 confluent drawing is lossless.
 in confluent drawings the trade-off of less clutter vs information loss is actually attempted to be avoided
 it is likened to lossless compression.
@@ -372,6 +371,75 @@ it is likened to lossless compression.
 The first step is to produce a power graph
 The nested structure of power-groups is hierarchical, and so an agglomerative method is used.
 Small improvements on the previous method
+\begin{table}
+    \centering
+    \caption[Experimental results on greedy power graph decomposition]{hi}
+    % \caption{Some experimental results comparing the quality of resulting power graphs with and without our additional heuristic (Section~\ref{implementation}), taking the best and worst scores over 25 runs.
+    % $|E|$ is the number of edges in the original graph, compressed into $|P|$ power edges and $|G|$ power groups; shaded boxes indicate the best score between the two methods.
+    % Adding our new heuristic produces the best or joint best results in all graphs, and also improves the consistency of the output, with a better worst result in all cases.
+    % Note that the variation between runs in our implementation is due to a pseudorandom order of iteration through
+    % candidate merges (Fig.~\ref{pgd_pseudo}, line~\ref{pseudo:top}).
+    % % \texttt{std::unordered\_set} in \Cpp, which may vary between implementations of the standard library.
+    % The networks are, from top to bottom, Italian families linked by marriage~\cite{florentine}, members of a karate club~\cite{karate}, women meeting at social events~\cite{southernwomen}, interactions between bottlenose dolphins~\cite{dolphins}, co-occurrence of characters in the musical Les Mis\'erables~\cite{lesmis}, American football games between US colleges~\cite{football}, and coauthorships of scientists working on network theory~\cite{netscience}.
+    % }
+    
+    \setlength{\tabcolsep}{1em}
+    \renewcommand{\arraystretch}{1.25}
+    % \definecolor{grey}{RGB}{222,222,222}
+    % \definecolor{grey}{RGB}{152,251,152} % mint :)
+    \definecolor{grey}{RGB}{170,251,170} % mint :)
+    
+    \begin{tabular}{ |c|c|c|c|c| } 
+     \hline
+     \multirow{2}{*}{Name ($|E|$)} &
+     \multicolumn{2}{c|}{Best $|P|$ $(|M|)$} & \multicolumn{2}{c|}{Worst $|P|$ $(|M|)$} \\ 
+     \cline{2-5}
+     & only $\kappa_{\cap}$ & $\kappa_{\cap}$ and $\kappa_{\triangle}$ & only $\kappa_{\cap}$ & $\kappa_{\cap}$ and $\kappa_{\triangle}$ \\ 
+     \hline\hline
+     \texttt{florentine} (20)
+        % &\cellcolor{grey} 11 (4)
+        % &\cellcolor{grey} 11 (4)
+        & 11 (4)
+        & 11 (4)
+        & 11 (6)
+        &\cellcolor{grey} 11 (5) \\
+     \texttt{karate} (78)
+        % &\cellcolor{grey} 28 (13)\
+        % &\cellcolor{grey} 28 (13)
+        & 28 (13)\
+        & 28 (13)
+        & 30 (15)
+        &\cellcolor{grey} 29 (13)\\ 
+     \texttt{southern} (89)
+        & 30 (17)
+        &\cellcolor{grey} 27 (21)
+        & 37 (16)
+        &\cellcolor{grey} 30 (18)\\ 
+     \texttt{dolphins} (159)
+        & 82 (29)
+        &\cellcolor{grey} 81 (30)
+        & 87 (28)
+        &\cellcolor{grey} 83 (30)\\ 
+     \texttt{lesmis} (254)
+        & 74 (39)
+        &\cellcolor{grey} 72 (41)
+        & 79 (39)
+        &\cellcolor{grey} 72 (42)\\
+     \texttt{football} (613)
+        & 282 (83)
+        &\cellcolor{grey} 278 (84)
+        & 289 (83)
+        &\cellcolor{grey} 286 (84)\\
+     \texttt{netsci} (914)
+        & 355 (187)
+        &\cellcolor{grey} 338 (184)
+        & 371 (189)
+        &\cellcolor{grey} 341 (186)\\
+        
+     \hline
+    \end{tabular}
+    \label{pgd_results}
+\end{table}
 
 \begin{figure}
     \removeAlgorithmFigureError
@@ -480,12 +548,14 @@ definition of confluent
         \label{alg:pcd}
     \end{algorithm}
     
-    \caption[Pseudocode for power-confluent drawing]{Pseudocode for our conversion from a set of power graph modules to a rendered drawing, described in Section~\ref{sec:hierarchical_routing}. 
-    $C$ is children.
-    Note that the edges on line~\ref{pseudo:directed} are ordered pairs, while those on line~\ref{pseudo:undirected} are unordered. This allows, on line~\ref{pseudo:inout}, for $N^+$ to indicate a set of outgoing neighbours, and $N^{-*}$ a set of incoming neighbours plus any connected by power edges in $P$.
-    The split operation on line~\ref{pseudo:split} then moves $N^+$ and $N^{-*}$ to separate routing nodes, as in Figure~\ref{TODO}.
-    In practice a shorter edge length is placed between split routing nodes, and so for line~\ref{pseudo:sgd} use a 
-    The specifics of the spline function on line~\ref{pseudo:spline} are outlined in Section~\ref{sec:bspline_details}}
+    \caption[Pseudocode for power-confluent drawing]{hi} 
+    % \caption[Pseudocode for power-confluent drawing]{Pseudocode for our conversion from a set of power graph modules to a rendered drawing, described in Section~\ref{sec:hierarchical_routing}. 
+    % \caption[Pseudocode for power-confluent drawing]{Pseudocode for our conversion from a set of power graph modules to a rendered drawing, described in Section~\ref{sec:hierarchical_routing}. 
+    % $C$ is children.
+    % Note that the edges on line~\ref{pseudo:directed} are ordered pairs, while those on line~\ref{pseudo:undirected} are unordered. This allows, on line~\ref{pseudo:inout}, for $N^+$ to indicate a set of outgoing neighbours, and $N^{-*}$ a set of incoming neighbours plus any connected by power edges in $P$.
+    % The split operation on line~\ref{pseudo:split} then moves $N^+$ and $N^{-*}$ to separate routing nodes, as in Figure~\ref{TODO}.
+    % In practice a shorter edge length is placed between split routing nodes, and so for line~\ref{pseudo:sgd} use a 
+    % The specifics of the spline function on line~\ref{pseudo:spline} are outlined in Section~\ref{sec:bspline_details}}
     \label{fig:pseudocode_pcd}
 \end{figure}
 

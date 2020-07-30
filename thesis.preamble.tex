@@ -166,7 +166,7 @@
 \usepackage{xfrac}
 
 % for getting a coloured text box
-\usepackage[svgnames]{xcolor}
+\usepackage[svgnames, table]{xcolor}
 \usepackage{enumitem}
 \usepackage{mdframed}
 
@@ -185,6 +185,11 @@
 % allow captions
 \usepackage{caption} 
 \captionsetup[table]{skip=7pt}
+% \captionsetup[figure]{font={Fira Sans}}
+
+% allow multirow tables
+\usepackage{multirow}
+\newcommand{\Cpp}{C\raise .2ex \hbox{++}}
 
 % to make algorithm2e work in figure
 \usepackage[ruled,vlined,linesnumbered]{algorithm2e}
