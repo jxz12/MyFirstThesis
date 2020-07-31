@@ -3,7 +3,7 @@
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{power/metaunityplaceholder.png}
-    \caption[The Unity game engine, visualised using the Unity game engine]{A visualisation of the Unity game engine, produced using the Unity game engine. TODO: explanation of hierarchy and labels around perimeter. Also move this to the start of the chapter}
+    \caption[The Unity game engine, visualised using the Unity game engine]{A visualisation of the Unity game engine, produced using the Unity game engine. TODO: explanation of hierarchy and labels around perimeter. Also note how many nodes and edges}
     \label{fig:metaunity}
 \end{figure}
 The previous chapter of was an exploration of how to position the vertices of a graph, and the natural question to then ask is how to deal with the only remaining component: the edges. However this question is seemingly redundant at first, as the obvious answer is to simply draw straight lines between adjacent nodes. While this by no means a poor choice, and is exactly how all node-link diagrams have been drawn thus far, this chapter will explore the possibility of drawing links using curves instead.
@@ -83,7 +83,7 @@ Unfortunately Jia et al.\ did not perform any quantitative analysis to evaluate 
     \centering
     \includegraphics[width=\textwidth]{power/lesmis.pdf}
     \caption[A hierarchical edge bundling pipeline]{An example of the hierarchical edge bundling pipeline presented here, on the graph \texttt{lesmis} which describes co-appearances of characters in the musical les Mis\'erables \cite{Knuth1993}. The top-left is a layout from stress optimisation; top-right is a dendrogram computed from agglomerative dissimilarity clustering (see Section~\ref{sec:dissimilarities}); bottom-left is the tidied up hierarchical tree after pruning (see Section~\ref{sec:pruning}); bottom-right is the final hierarchical edge bundling diagram when original edges are rendered using splines (see Section~\ref{sec:heb_background}).
-    TODO: write names on border}
+    TODO: write names on border and tidy up hierarchies}
     \label{fig:lesmis}
 \end{figure}
 To assess the quality of the divisive Girvan-Newman algorithm used by Jia et al.\ \cite{Jia2011}, it will be compared with \emph{agglomerative dissimilarity clustering}.
@@ -119,7 +119,8 @@ The most commonly used methods fall into three categories: using one member of a
 Choosing a single representative member is the most straightforward; when calculating the dissimilarity between two clusters, one can take the best-case scenario by choosing the closest pair of inter-cluster points, or the worst-case by choosing the farthest pair. These are known as single- and complete-linkage algorithms, respectively \cite{Sibson1973, Defays1977}.
 One can also choose to take an average over the members of both clusters. This can be done by taking the mean dissimilarity between all inter-cluster pairs, and and is known as UPGMA (Unweighted Pair Group Method with Arithmetic mean). Its `weighted' counterpart, known as WPGMA, is more efficient, as when a cluster is merged it `forgets' that it was made up of other elements and becomes treated as a single datapoint itself \cite{Sneath1973}. The reason it is called weighted is, perhaps confusingly, because the original datapoints `lose weight' by being merged into a cluster, whereas in the unweighted version each original datapoint still contributes the same amount to each merging decision.
 
-The third category is known as Ward's method \cite{WardJr1963}, and is based on minimising variance within clusters. The dissimilarity between clusters in this case is the increase in total within-cluster variance if they were to be merged. This is the same objective function that k-means clustering attempts to minimise \cite{Friedman2001a}.\footnote{The best description of these types is the shape of clusters. single linkage is an amoeba, complete is a hypersphere, upgma is, wpgma, ward is a 'type' see \url{https://stats.stackexchange.com/questions/195456/how-to-select-a-clustering-method-how-to-validate-a-cluster-solution-to-warran/195481\#195481}}
+The third category is known as Ward's method \cite{WardJr1963}, and is based on minimising variance within clusters. The dissimilarity between clusters in this case is the increase in total within-cluster variance if they were to be merged. This is the same objective function that k-means clustering attempts to minimise \cite{Friedman2001a}.
+% \footnote{A good interpretation for the behaviour of different linkage methods is to imagine their shape. Single linkage is an amoeba absorbing the closest point around it, complete is a hypersphere expanding as little as possible, upgma b, wpgma, ward is a 'type' see \url{https://stats.stackexchange.com/questions/195456/how-to-select-a-clustering-method-how-to-validate-a-cluster-solution-to-warran/195481\#195481}}
 
 Note that since each merge is based on the dissimilarity between clusters, this extra information that can be stored in the resulting dendrogram as the height of the branch. This is a direct benefit of using dissimilarity clustering, and is usually used to decide where to cut the dendrogram if flat clusters are needed. It will be leveraged to simplify the resulting dendrogram in Section~\ref{sec:pruning}.
 However this is also a source of trouble for Ward's method specifically, because a monotonically increasing branch height is only guaranteed if the input is a \emph{distance}, and not just a \emph{dissimilarity}.
@@ -253,7 +254,7 @@ To assess the quality of the results, the adjusted random index (ARI) was used t
 ARI is bounded between --$1$ and $1$, where a value of $1$ denotes perfect clustering, $0$ denotes a randomly shuffled clustering, and --$1$ denotes an even worse match than the expected result of a shuffle.
 A problem with hierarchical clustering is that, to extract flat clusters to match the ground truth, the resulting dendrogram must be cut. The results here give the benefit of the doubt by measuring ARI at all cutting points and taking the maximum ARI of all cuts, to essentially assume that the algorithm always chooses its cut perfectly.
 
-The package \texttt{scipy.cluster.hierarchy} \cite{Virtanen2020} was used to perform all dissimilarity-based clustering.
+The package \texttt{scipy.cluster.hierarchy} \cite{Virtanen2020} was used to perform all hierarchical dissimilarity-based clustering.
 Results are presented in Figures~\ref{fig:ARI1} and~\ref{fig:ARI2}, where all dissimilarity measures are clustered with each of the five linkage methods presented in Section~\ref{sec:dissimilarities}.
 
 \begin{figure}
@@ -311,7 +312,7 @@ The angle of a parent is set to the mean of the angles of its children, and its 
 
 The final step is to render the bundles itself. With the tree layout determined, this step is exactly the same as that of Holten \cite{Holten2006}. Important subtleties include relaxing bundles to prevent splines from overlapping too much, and skipping the lowest common ancestor as a control point in order to reduce clutter around common parent nodes.
 The resulting visualisations for the four benchmark graphs in Table~\ref{tab:bundle_graphs} can be seen in Figure~\ref{fig:untangled_hairballs}.
-Code used to generate all figures can be found at \url{github.com/jxz12/HierarchicalEdgeBundles}.
+Code used to generate all figures can be found at \url{www.github.com/jxz12/HierarchicalEdgeBundles}.
 
 \begin{figure}
     \centering
@@ -493,7 +494,7 @@ Adding our new heuristic produces the best or joint best results in all graphs, 
 Note that the variation between runs in our implementation is due to a pseudorandom order of iteration through
 candidate merges (Figure.~\ref{fig:pseudocode_pgd}, line~\ref{pseudo:pgd:top}).
 % \texttt{std::unordered\_set} in \Cpp, which may vary between implementations of the standard library.
-The networks are, from top to bottom, Italian families linked by marriage \cite{Breiger1986}, members of a karate club \cite{Zachary1977}, women meeting at social events \cite{Davis2009}, interactions between bottlenose dolphins \cite{Lusseau2003}, co-occurrence of characters in the musical Les Mis\'erables \cite{Knuth1993}, American football games between US colleges \cite{Newman2004}, and coauthorships of scientists working on network theory \cite{Newman2006a}.
+The networks are, from top to bottom, Italian families linked by marriage \cite{Breiger1986}, members of a karate club \cite{Zachary1977}, women meeting at social events \cite{Davis2009}, interactions between bottlenose dolphins \cite{Lusseau2003}, co-occurrence of characters in the musical Les Mis\'erables \cite{Knuth1993}, American football games between US colleges \cite{Girvan2002}, and coauthorships of scientists working on network theory \cite{Newman2006a}.
  
 \begin{figure}
     \removeAlgorithmFigureError
@@ -556,7 +557,7 @@ This process is illustrated in Fig.~\ref{fig:power_teaser}, and the ARG used is 
 The only differences are the removal of the root of the tree, and the addition of extra edges between tree vertices to represent power edges, as shown in Figure~\ref{fig:power_teaser}, second from right. Note that the in the original algorithm \cite{Bach2017} edges in the ARG are undirected, unlike those shown in Figure~\ref{fig:power_teaser}.
 The addition of directed edges to the ARG will be used to solve the theoretical issues outlined below, in Section~\ref{sec:hierarchical_routing}.
 
-It will be shown here that the original combination of B-splines and shortest paths introduces problems not fully explored by the original authors, causing the resulting drawings to violate the second and third conditions in the above definition. These problems will be solved, and the subclass of confluent drawings the algorithm can produce will be identified as a new classification known as \emph{power-confluent}. The fixed solution guarantees that the second condition is always satisfied, but still cannot guarantee the third, as discussed in Section~\ref{sec:power_discussion}.
+It will be shown here that the original combination of B-splines and shortest paths introduces problems not fully explored by the original authors, causing the resulting drawings to violate the second and third conditions in the above definition. These problems will be solved, and the subclass of confluent drawings the algorithm can produce will be identified as a new classification known as \emph{power-confluent}. The fixed solution guarantees that the second condition is always satisfied, but still cannot guarantee the third, as discussed in Section~\ref{sec:power_planarity}.
 % Source and pseudocode for our implementation is provided in Section~\ref{implementation}.
 
 \subsubsection{Problem 1: Node splitting}
@@ -598,9 +599,8 @@ Note that every power group in this example is intentionally redundant for clari
     \includegraphics[width=.8\linewidth]{power/shortcircuit.pdf}
     \caption[Examples of the short-circuit problem]{Examples of how absent edges can appear to exist due to the short-circuit problem.
     Top: a toy example of a hypothetical routing graph that causes edges $\{a,d\}$ and $\{c,b\}$ to both erroneously appear to exist.
-    Bottom: an example of a power graph that causes a similar ambiguity, where $c$ appears connected to $b$ because the edge $\{b,d\}$ short-circuits the nested structure of power groups (represented by blue boxes), causing $\{a,b\}$ to be routed incorrectly downwards, instead of as shown by the dashed line.
-    % The correct direction that would not cause an issue is shown as a dashed line along the top.
-    % Routing edges resulting from inclusion within a power group are in blue, and from connection to a power edge in orange.
+    Bottom: an example of a power graph that causes a similar ambiguity, where $c$ appears connected to $b$ because the edge $\{b,d\}$ short-circuits the nested structure of power groups (represented by blue boxes), causing $\{a,b\}$ to be routed incorrectly downwards.
+    The correct direction that would not cause an issue is shown as a dashed line along the top.
     }
     \label{fig:overlap}
 \end{figure}
@@ -608,7 +608,7 @@ Note that every power group in this example is intentionally redundant for clari
 \begin{figure}
     \centering
     \includegraphics[width=.8\linewidth]{power/shortcircuit_big.pdf}
-    \caption[A full example of Figure~\ref{fig:overlap}]{A full example of Figure~\ref{fig:overlap}, bottom, without any redundant power groups.
+    \caption[A full version of Figure~\ref{fig:overlap}]{A fleshed-out version of Figure~\ref{fig:overlap}, bottom, without any redundant power groups.
     (i): an example of the power graph in the same layout as Figure~\ref{fig:overlap}, where the nested structure of groups comes from a clique structure.
     (ii) top: a conventional node-link layout of the graph, bottom: the same power graph as in (i). 
     (iii) left: the resulting routing graph from the method of Bach et al.\ \cite{Bach2017}, right: the resulting drawing when splines take their shortest paths through this routing graph. The edge $\{a,b\}$ is routed downwards in the wrong direction, causing the edge $\{c,b\}$ to falsely appear to exist.
@@ -628,11 +628,9 @@ The key detail here is that only one power edge should ever be traversed for any
 
 \subsection{Hierarchical Routing}
 \label{sec:hierarchical_routing}
+
 The solution to these problems is to retain the hierarchical structure of power groups as a directed tree, with all routing edges directed towards the leaves. Power edges are then added back, except as a special type of edge that is incoming at both ends (the purpose of which will soon be made clear). If the root of the tree is then discarded, we are left with the exact same ARG as before, except now with all routing edges explicitly directed (see Figure~\ref{fig:radial}, middle column).
 Note that this also means all adjacency information is now preserved in the ARG, such that the original graph can be recovered.
-
-To draw the adjacency edges back on top, any shortest path calculations can now be forgoed. Instead, for each power edge, a depth-first search is performed for all child leaf nodes starting from both ends of the power edge. Each path to each leaf from one end is then concatenated to the reversed path to each leaf from the other end, and every concatenated path is used as the sequence of control points for a spline.
-These paths are now guaranteed to be unique because the ARG is now effectively a tree, due to power edges being incoming at both ends to prevent their traversal. Since only the one correct power edge is traversed for each spline, the short-circuit problem described in Section~\ref{sec:confluent_definition} is alleviated.
 
 \begin{figure}
     \centering
@@ -646,11 +644,6 @@ These paths are now guaranteed to be unique because the ARG is now effectively a
     }
     \label{fig:radial}
 \end{figure}
-
-Imposing this directionality on the routing graph also fixes the node splitting ambiguity in Section~\ref{sec:confluent_definition}, guaranteeing that the split occurs in the correct direction, according to the rule of separating incoming and outgoing edges to different nodes.
-This works because every routing node is the boundary between two sides of a biclique, equivalent to a single bundled junction; the explicit direction of routing edges now encodes the orientation of the bundle itself.
-This entire process is illustrated in Figure~\ref{fig:radial}, and pseudocode for the resulting algorithm can be seen in Figure~\ref{fig:pseudocode_pcd}, Algorithm~\ref{alg:pcd}.
-
 
 \begin{figure}
     \removeAlgorithmFigureError
@@ -717,27 +710,34 @@ This entire process is illustrated in Figure~\ref{fig:radial}, and pseudocode fo
     \label{fig:pseudocode_pcd}
 \end{figure}
 
+To draw the adjacency edges back on top, any shortest path calculations can now be forgoed. Instead, for each power edge, a depth-first search is performed for all child leaf nodes starting from both ends of the power edge. Each path to each leaf from one end is then concatenated to the reversed path to each leaf from the other end, and every concatenated path is used as the sequence of control points for a spline.
+These paths are now guaranteed to be unique because the ARG is now effectively a tree, due to power edges being incoming at both ends to prevent their traversal. Since only the one correct power edge is traversed for each spline, the short-circuit problem described in Section~\ref{sec:confluent_definition} is alleviated.
+
+Imposing this directionality on the routing graph also fixes the node splitting ambiguity in Section~\ref{sec:confluent_definition}, guaranteeing that the split occurs in the correct direction, according to the rule of separating incoming and outgoing edges to different nodes.
+This works because every routing node is the boundary between two sides of a biclique, equivalent to a single bundled junction; the explicit direction of routing edges now encodes the orientation of the bundle itself.
+This entire process is illustrated in Figure~\ref{fig:radial}, and pseudocode for the resulting algorithm can be seen in Figure~\ref{fig:pseudocode_pcd}, Algorithm~\ref{alg:pcd}.
+
 \subsection{B-splines}
 \label{sec:bspline_details}
-The choice of spline has not yet been discussed, for either the hierarchical bundling of Section~\ref{sec:hierarchical_clustering} or here for confluent drawings. 
-The choice of spline for both in the literature is the \emph{B-spline}, which is a generalisation of B\'ezier curves that offers the two nice properties of convex hull and local control, previously mentioned in Section~\ref{sec:node_split}.
-A more thorough explanation into why these properties are beneficial to bundling is however something generally missing from the literature, and so this section will attempt to elucidate some theory behind why they are commonly used for bundling purposes.
+The choice of spline has not yet been discussed, for either confluent drawing or the hierarchical bundling of Section~\ref{sec:hierarchical_clustering}. 
+The usually chosen spline in the literature is the \emph{B-spline}, which is a generalisation of B\'ezier curves that offers the two nice properties of convex hull and local control, previously mentioned in Section~\ref{sec:node_split}.
+A more thorough explanation into why these properties are beneficial to bundling is, however, something generally missing from the literature, and so this section will attempt to elucidate some theory behind why they are commonly used for bundling purposes.
 The importance of choosing the correct spline is illustrated in Jia et al.\ \cite{Jia2011}, in which the diagrams contain poorly implemented B-splines that do not satisfy these two properties.
 % This section explains the construction of B-splines in more detail.
 % , and may be skipped if the reader is not interested in the more technical details.
 A good introduction to B-splines and their decomposition into segments can be found by Sederberg \cite{Sederberg2005}.
 
-We first prove that splines of degree $p$ must share at least $p$ control points to overlap. A B-spline is a parametric curve that interpolates a number of control points by summing up contributions from a basis function for each (Figure~\ref{fig:basis}). As a consequence, the spline is constructed as a series of polynomial
+It will first be proven that splines of degree $p$ must share at least $p$ control points to overlap. A B-spline is a parametric curve that interpolates a number of control points by summing up contributions from a basis function for each (Figure~\ref{fig:basis}). As a consequence, the spline is constructed as a series of polynomial
 % curves (specifically, B\'ezier curves derived using the B\"ohm algorithm~\cite{sederberg}), known as segments. Each segment satisfies t
-curves, known as segments, which each satisfy
-the local control property, meaning that each segment is affected by the basis functions of only the surrounding $p+1$ control points. These basis functions are continuous, so at the exact point at which two segments join (known as a knot) the curve cannot simultaneously be affected by the two furthest control points affecting the segments on either side. The remaining control points at the knot are therefore the last $p$ control points of the left segment, which overlap with the first $p$ control points of the right segment.
-This proof is illustrated in Figure~\ref{fig:basis}. As a result, splines used must be quadratic ($p=2$) for node splitting (Figure~\ref{fig:nodesplit}) to work as intended.
+curves, known as \emph{segments}, which each satisfy
+the \emph{local control} property, meaning that each segment is affected by the basis functions of only the surrounding $p+1$ control points. These basis functions are continuous, so at the exact point at which two segments join (known as a knot) the curve cannot simultaneously be affected by the two furthest control points affecting the segments on either side. The remaining control points at the knot are therefore the last $p$ control points of the left segment, which overlap with the first $p$ control points of the right segment.
+This proof is illustrated in Figure~\ref{fig:basis}. As a result, splines used must be quadratic, i.e.\ $p=2$, for node splitting (Figure~\ref{fig:nodesplit}) to work as intended.
 % Both tangents at this point are also guaranteed to be equal, through the same argument.
 
 The values of knots determine the parametric intervals over which the segments span, and the above proof assumes a `uniform' knot vector, where uniform is defined as having knots spaced along even parametric intervals. This ensures that splines with overlapping control points also have overlapping knots.
 To additionally ensure that splines are connected to the first and last control point, the knot vector must also be `open', i.e.\ it contains $p$ repeated knots at each end.
 However, there are two ways of doing this: the first retains the same total number of knots, for example a quadratic spline ($p=2$) with 4 control points and the standard knot vector $\langle0,1,2,3,4\rangle$ becomes $\langle0,0,1,2,2\rangle$, which eventually reduces to a B\'ezier curve \cite{Sederberg2005}. The second appends $p-1$ knots at either end, where $\langle0,1,2,3,4\rangle$ becomes $\langle0,0,1,2,3,4,4\rangle$, effectively duplicating the first and last control points.
-This second method is illustrated in Figure~\ref{fig:basis}.
+This second method is illustrated by the translucent curves to represent repeated knots in Figure~\ref{fig:basis}.
 
 \begin{figure}
     \centering
@@ -748,14 +748,14 @@ This second method is illustrated in Figure~\ref{fig:basis}.
 
 In practice this second method makes the rendered curve hug its path through the routing graph closer than the first. In the case of cubic splines ($p=3$), this means that edges come sufficiently close to look bundled, even though the above proof demonstrates that the degree must be $p=2$ for curves to fully overlap (unless routing nodes are split twice to guarantee three shared control points).
 This appears to be the choice of the original authors \cite{Bach2017} in their provided source code.
-The benefit of cubic splines is that they are $C^2$ continuous, i.e.\  have no sudden jumps in curvature, and having this extra smoothness is more aesthetically pleasing. Regardless, for all figures here except for Figure~\ref{fig:basis} we use quadratic splines, and with the first method of joining to end points.
+The benefit of cubic splines is that they are $C^2$ continuous, i.e.\  have no sudden jumps in curvature, and having this extra smoothness is more aesthetically pleasing. Regardless, for all figures here except for the bottom of Figure~\ref{fig:basis} we use quadratic splines, along with the first method of joining to end points.
 
-Note that drawing a spline for every edge is not the only way to render the graph, and also introduces a great deal of redundancy due to the large amount of overlap between edges. If a purely confluent drawing is desired, then it is not necessary to redraw overlapping segments.
-Allowing bundles to be relaxed \cite[Fig.~18]{Bach2017} is, however, a useful option that rendering each edge does provide.
+Note that drawing a spline for every edge is not the only way to render the graph, and also introduces a great deal of redundancy due to the large amount of overlapping portions. If a purely confluent drawing is desired, then it is not necessary to redraw overlapping segments.
+Allowing bundles to be relaxed \cite[Fig.~18]{Bach2017} is, however, a useful option that rendering each link does provide.
 
 \subsection{Directed graphs}
 \label{sec:power_directed}
-The definition for a directed confluent drawing is almost the same as the undirected case, except with the caveat that any given path can only `flow' in one direction. This is analogous to preventing trains on tracks from crashing into each other. 
+The definition for a directed confluent drawing is almost the same as the undirected case, except with the caveat that any path can only `flow' in one direction. This is analogous to preventing trains on tracks from crashing into each other. 
 Formally, for a directed confluent drawing $B$, this is extra condition \cite{Dickerson2005} is:
 \begin{mdframed}[backgroundcolor=WhiteSmoke]
 \begin{itemize}[leftmargin=*]
@@ -775,6 +775,54 @@ In other words, the formulations for the heuristics in Equation~\eqref{eq:kappa_
 \end{align}
 where $N^+$ is a set of outgoing edges, and $N^-$ a set of incoming edges.
 
+\subsection{Planarity}
+\label{sec:power_planarity}
+Here the third condition in the confluent definition (Section~\ref{sec:confluent_definition}) will be discussed, which requires planarity. Unfortunately, the method of Bach et al.\ \cite{Bach2017} does not offer any guarantee of planarity due to the use of a force-directed method to lay out the graph.
+While the authors do recognize this, and make the distinction that their drawings are `non-planar confluent', the loss of this condition means that almost any drawing, with or without curved edges, satisfies a now-trivial definition.
+There also exist graphs that have been proven to not admit any confluent drawing \cite{Dickerson2005}, and so it is impossible for any algorithm to produce confluent drawings for general graphs.
+However, the planarity condition can be relaxed in the context of finding a drawing that reduces the number of crossings, for example in layered confluent drawings \cite{Eppstein2007}. Bach et al.\ \cite{Bach2017} do not explicitly address this question, but in practice the approach can greatly reduce the number of crossings, making it a practical method to enhance readability.
+
+Furthermore, it is easy to see that a planar ARG can always lead to a planar drawing, as long as we are careful to avoid crossings at routing nodes (which is always possible because every routing node is simply a single junction). If we assume that there are no redundant routing edges without adjacencies routed through them, this means that the complete confluent definition can be satisfied if and only if the ARG is also planar.
+This naturally implies a new subset of confluent drawings, much like the $\Delta$-confluent \cite{Eppstein2005} or strict confluent \cite{Eppstein2013} subclasses, which can be found only through a planar power-to-routing graph conversion. We suggest naming such drawings as \emph{power-confluent}.
+This new classification will now be proven to be a subclass of strict confluent drawing. 
+
+\subsubsection{Stricter than strict}
+The definition of strict confluent drawing has only the additional restriction that there can be at most one smooth path between vertices, and there cannot be any paths from a vertex to itself \cite{Eppstein2013}. 
+% For the power-confluent case, because each routing node can only have one parent, and each path must go up the tree through this parent, there can only ever be one path that can be taken between two vertices. Every power-confluent drawing is therefore also strict confluent.
+For the power-confluent case, because the mapping of edges to power edges is surjective \cite{Royer2008}, each edge can only correspond to a single path through the power graph hierarchy, and therefore also through the routing graph behind the confluent drawing. Every power-confluent drawing without self-loops is therefore also strict confluent.
+
+The reverse is not true, because another condition of power graphs is that groups must be disjoint \cite{Royer2008}, i.e.\ their boundaries may not overlap.
+There exist confluent drawings that cannot result from power graphs unless this condition is broken, for example the tetrahedron-like structure in Figure~\ref{fig:strict}.
+In this structure there are six junctions, and so at least six power groups are required in the corresponding power graph; however, there is a maximum of four that will not overlap, as there can only be one for each `corner' of the `tetrahedron'. This is due to the middle vertex of each `corner' sharing junctions with all three surrounding it, which means that grouping any of the three valid pairings will block out the other two.
+Note that the graph itself is not necessarily impossible to draw in a power-confluent manner, but that this particular drawing could never result from the algorithm presented in this paper.
+Power-confluent is therefore a strictly stronger condition than strict confluent.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{power/stricter.pdf}
+    \caption[A strict confluent drawing that is not power-confluent]{An example of a strict confluent drawing that cannot be reverse-engineered into a valid power graph, unless power group boundaries are allowed to overlap. On the left is the confluent drawing (with junctions marked by transparent blue circles), and on the right is a power graph that shows all possible groupings to match these junctions.}
+    \label{fig:strict}
+\end{figure}
+
 \subsection{Discussion}
 \label{sec:power_discussion}
-node splitting may not even be necessary if a different spline is chosen.
+The work presented here has developed the ideas presented by Bach et al.\ \cite{Bach2017} by both improving the power graph decomposition step (Section~\ref{sec:power_graph}) and fixing some practical issues with the conversion to a confluent drawing (Section~\ref{sec:confluent_definition}. Source code for all the algorithms discussed here can be found at \url{www.github.com/jxz12/pconfluent}.
+
+Further directions could involve developing methods to find power-confluent drawings, by guiding the search algorithm towards solutions that produce planar routing graphs.
+Methods such as Monte Carlo or A* search may prove useful for either finding such drawings, or just improving the greedy search presented here.
+% A different optimization heuristic may also lead to less cluttered drawings, as a well compressed power graph may not lead to a good confluent drawing. Perhaps measure the number of junctions in the resulting graph or something
+% As mentioned above, proving or disproving an equivalence to strict confluent drawing is also left open. If power-confluent is a stronger condition than strict confluent, then
+
+On the theoretical side, it may be the case that relaxing the non-overlapping group boundary condition, as explored by Ahnert \cite{Ahnert2014}, could result in an equivalent classification to strict confluent drawing.
+% We have also not addressed the question of whether the class of power-confluent drawable graphs is also smaller than that of strict confluent, rather than the resulting drawings.
+The potential proof or refutation of this equivalence is left as an open question, along with determining the exact relationship between power decomposition and confluent drawing in general.
+
+To finish on a practical note, a more tailored layout algorithm than standard force-directed methods will be necessary for the algorithm to become a truly practical tool, as layouts can often become tangled and unreadable. See Figure~\ref{fig:power_karate_lesmis} for two examples of this on graphs previously studied in this chapter.
+The layout function (Figure~\ref{fig:pseudocode_pcd}, line~\ref{pseudo:sgd}) is currently only given the routing graph as input, but may benefit from extra information, such as which edges are power edges and which are hierarchical. An effective radial layout that can avoid crossings, like the one shown in Figure~\ref{fig:radial} but automatic, may also offer a superior solution.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{power/power_karate_lesmis.pdf}
+    \caption[Examples of networks drawn with the power-confluent algorithm]{Two examples of graphs drawn with the Algorithms~\ref{alg:pgd} then~\ref{alg:pcd}, in Figures~\ref{fig:pseudocode_pgd} and~\ref{fig:pseudocode_pcd} respectively. On the left is \texttt{karate}, previously shown in Figure~\ref{fig:untangled_hairballs}, top. On the right is \texttt{lesmis}, previously shown in Figure~\ref{fig:lesmis}.}
+    \label{fig:power_karate_lesmis}
+\end{figure}

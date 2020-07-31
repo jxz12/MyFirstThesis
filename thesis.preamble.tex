@@ -144,11 +144,23 @@
 \usepackage{unicode-math}
 \usepackage{fontspec}
 \setmainfont[Path = fonts/,
-    UprightFont = *-Regular,
-    ItalicFont = *-Italic,
-    BoldFont = *-Bold
+    UprightFont = *-regular,
+    ItalicFont = *-italic,
+    BoldFont = *-bold
 ]{softing}
+
 \setmathfont{STIX Two Math}
+\setmathrm{STIX Two Text}
+\DeclareMathSizes{12}{13}{9}{8}
+
+% for monospace font
+\setmonofont{Inconsolata}
+\usepackage{anyfontsize}
+\makeatletter
+\DeclareRobustCommand\ttfamily
+    {\not@math@alphabet\ttfamily\mathtt
+     \fontfamily\ttdefault\fontsize{12.5}{10}\selectfont}
+\makeatother
 
 % for making lines fit
 \emergencystretch=.5em
@@ -179,7 +191,7 @@
 }
 
 % fix margins
-\usepackage[inner=1.1in, outer=1.1in, vmargin=1.75in]{geometry}
+\usepackage[inner=1.1in, outer=1.1in, vmargin=1.2in]{geometry}
 
 % allow captions
 \usepackage{caption} 
