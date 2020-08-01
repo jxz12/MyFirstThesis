@@ -1,12 +1,12 @@
 \chapter{Edges}
 \label{sec:edges_background}
 \begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{power/metaunityplaceholder.png}
-    \caption[The Unity game engine, visualised using the Unity game engine]{A visualisation of the Unity game engine, produced using the Unity game engine. TODO: explanation of hierarchy and labels around perimeter. Also note how many nodes and edges}
-    \label{fig:metaunity}
+  \centering
+  \includegraphics[width=\textwidth]{power/metaunityplaceholder.png}
+  \caption[The Unity game engine, visualised using the Unity game engine]{A visualisation of the Unity game engine, produced using the Unity game engine. TODO: explanation of hierarchy and labels around perimeter. Also note how many nodes and edges}
+  \label{fig:metaunity}
 \end{figure}
-The previous chapter of was an exploration of how to position the vertices of a graph, and the natural question to then ask is how to deal with the only remaining component: the edges. However this question is seemingly redundant at first, as the obvious answer is to simply draw straight lines between adjacent nodes. While this by no means a poor choice, and is exactly how all node-link diagrams have been drawn thus far, this chapter will explore the possibility of drawing links using curves instead.
+The previous chapter was an exploration of how to position the vertices of a graph, and the natural question to then ask is how to deal with the only remaining component: the edges. However this question is seemingly redundant at first, as the obvious answer is to simply draw straight lines between adjacent nodes. While this by no means a poor choice, and is exactly how all node-link diagrams have been drawn thus far, this chapter will explore the possibility of drawing links using curves instead.
 
 \section{Background}
 The curving of links in the context of a node-link diagram is known as \textit{edge bundling}. It is a technique that has been developed because many networks, when processed through a standard force-directed layout, result in a seemingly random layout with no discernable structure. See Figure~\ref{fig:untangled_hairballs} for examples of this. The similarity of such layouts to tangled collections of hair has led to them being colloquially termed \textit{hairballs}.
@@ -43,8 +43,8 @@ What is needed is a way of grouping similar datapoints together. This is known a
 There exist a wide variety of powerful and creative methods that have been developed to perform clustering on networks. A widely used method is to define an equation that can be used to numerically measure the quality of a given clustering, and to attempt to maximise this quality. This is reminiscent of the optimisation-based methods described in Section~\ref{sec:force_background}.
 A popular version of this is known as \emph{modularity}, defined as
 \begin{equation}
-    Q = \frac{1}{|E|}\sum_{i,j}\left(\mathbf{A}_{ij} - \frac{|N(i)||N(j)|}{|E|}\right)\mathbf{C}_{ij}
-    \label{eq:modularity}
+  Q = \frac{1}{|E|}\sum_{i,j}\left(\mathbf{A}_{ij} - \frac{|N(i)||N(j)|}{|E|}\right)\mathbf{C}_{ij}
+  \label{eq:modularity}
 \end{equation}
 where $\mathbf{A}$ is the adjacency matrix where $\mathbf{A}_{ij}$ equals 1 if vertices $i$ and $j$ are connected by an edge, and $\mathbf{C}_{ij}$ equals 1 if vertices $i$ and $j$ are in the same cluster and 0 otherwise.
 The value of $Q$ lies between $\text{--}\sfrac{1}{2}$ and 1 \cite{Brandes2007a}, and it can be intuitively understood as the fraction of the edges that fall within the given clusters minus the expected fraction if edges were distributed at random.
@@ -62,10 +62,10 @@ The growing number of graph-shaped datasets being used in machine learning has a
 One reason why there is such a variety of clustering algorithms is due in part to it being an undefined problem. A simple example of two equally valid but opposing definitions for a cluster would be to compare a clique vs.\ a biclique. A definition that attempts to keep edges within clusters, such as Equation~\ref{eq:modularity}, perfectly captures cliques, but fails for bicliques, as none of the edges are within the clusters, instead all falling between them.
 % There are also
 \begin{figure}
-    \centering
-    \includegraphics[width=.8\textwidth]{power/clique_vs_biclique.pdf}
-    \caption[Two examples for why clustering is difficult to define]{An example of different types of clusters. On the left is a situation with edges within clusters, and on the right with edges between clusters.}
-    \label{fig:clique_vs_biclique}
+  \centering
+  \includegraphics[width=.8\textwidth]{power/clique_vs_biclique.pdf}
+  \caption[Two examples for why clustering is difficult to define]{An example of different types of clusters. On the left is a situation with edges within clusters, and on the right with edges between clusters.}
+  \label{fig:clique_vs_biclique}
 \end{figure}
 It is therefore important to keep in mind that clustering algorithms are attempts to quantify common characteristics of real-world data, and there is generally no `right answer' to the question of which one should be chosen; It depends on both the specific objective and dataset being examined. 
 Nevertheless, they have been used to great effect in many applications \cite{Fortunato2016}, and so confidence can be placed in their utility as a tool to help understand patterns in data.
@@ -80,11 +80,11 @@ Unfortunately Jia et al.\ did not perform any quantitative analysis to evaluate 
 \section{Hierarchical clustering}
 \label{sec:hierarchical_clustering}
 \begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{power/lesmis.pdf}
-    \caption[A hierarchical edge bundling pipeline]{An example of the hierarchical edge bundling pipeline presented here, on the graph \texttt{lesmis} which describes co-appearances of characters in the musical les Mis\'erables \cite{Knuth1993}. The top-left is a layout from stress optimisation; top-right is a dendrogram computed from agglomerative dissimilarity clustering (see Section~\ref{sec:dissimilarities}); bottom-left is the tidied up hierarchical tree after pruning (see Section~\ref{sec:pruning}); bottom-right is the final hierarchical edge bundling diagram when original edges are rendered using splines (see Section~\ref{sec:heb_background}).
-    TODO: write names on border and tidy up hierarchies}
-    \label{fig:lesmis}
+  \centering
+  \includegraphics[width=\textwidth]{power/lesmis.pdf}
+  \caption[A hierarchical edge bundling pipeline]{An example of the hierarchical edge bundling pipeline presented here, on the graph \texttt{lesmis} which describes co-appearances of characters in the musical les Mis\'erables \cite{Knuth1993}. The top-left is a layout from stress optimisation; top-right is a dendrogram computed from agglomerative dissimilarity clustering (see Section~\ref{sec:dissimilarities}); bottom-left is the tidied up hierarchical tree after pruning (see Section~\ref{sec:pruning}); bottom-right is the final hierarchical edge bundling diagram when original edges are rendered using splines (see Section~\ref{sec:heb_background}).
+  TODO: write names on border and tidy up hierarchies}
+  \label{fig:lesmis}
 \end{figure}
 To assess the quality of the divisive Girvan-Newman algorithm used by Jia et al.\ \cite{Jia2011}, it will be compared with \emph{agglomerative dissimilarity clustering}.
 This is a family of algorithms where the input is a matrix of \emph{dissimilarities} between individual datapoints, in this case the vertices of a graph, and the output is a dendrogram as required. Similarly to the stress-based layout explored in the previous chapter, it is a more general algorithm that can be applied to any numerical datasets and not just graphs, unlike the methods previously outlined in Section~\ref{sec:clustering_background}. It is also closely related to the class of multidimensional scaling methods that stress minimisation belongs to, as both procedures take a matrix of dissimilarities as input.
@@ -104,11 +104,11 @@ However, since we already have a graph-specific divisive method in the Girvan-Ne
 The agglomerative process is as follows:
 \begin{mdframed}[backgroundcolor=WhiteSmoke]
 \begin{enumerate}[leftmargin=*]
-    \item Calculate the dissimilarities between all pairs of datapoints. \label{item:agglomerate_calculate}
-    \item Place each datapoint into its own singleton cluster.
-    \item Iterate over each pair of clusters, and merge the closest pair into a single cluster. \label{item:agglomerate_pairs}
-    \item Recalculate the dissimilarities between the newly merged cluster and the remaining unmerged clusters. \label{item:agglomerate_recalculate}
-    \item Repeat steps \ref{item:agglomerate_pairs} and \ref{item:agglomerate_recalculate} until only one supercluster remains.
+  \item Calculate the dissimilarities between all pairs of datapoints. \label{item:agglomerate_calculate}
+  \item Place each datapoint into its own singleton cluster.
+  \item Iterate over each pair of clusters, and merge the closest pair into a single cluster. \label{item:agglomerate_pairs}
+  \item Recalculate the dissimilarities between the newly merged cluster and the remaining unmerged clusters. \label{item:agglomerate_recalculate}
+  \item Repeat steps \ref{item:agglomerate_pairs} and \ref{item:agglomerate_recalculate} until only one supercluster remains.
 \end{enumerate}
 \end{mdframed}
 On the surface this is a simple procedure, but it is not immediately clear how to calculate dissimilarities between datapoints or between clusters in steps \ref{item:agglomerate_calculate} or \ref{item:agglomerate_recalculate}.
@@ -127,9 +127,9 @@ However this is also a source of trouble for Ward's method specifically, because
 A distance must strictly satisfy the conditions
 \begin{equation}
 \begin{aligned}
-    d_{ij} & \geq 0 \quad\text{and}\quad d_{ij}=0 \Leftrightarrow i=j \\
-    d_{ij} & = d_{ji} \\
-    d_{ij} & \leq d_{ik} + d_{ky}
+  d_{ij} & \geq 0 \quad\text{and}\quad d_{ij}=0 \Leftrightarrow i=j \\
+  d_{ij} & = d_{ji} \\
+  d_{ij} & \leq d_{ik} + d_{ky}
 \end{aligned}
 \end{equation}
 where the third condition is known as the triangle inequality, and is a requirement for the points to have a corresponding embedding in a metric space, such as Euclidean.
@@ -141,8 +141,8 @@ In practice, any reasonable dissimilarity does not often result in negative bran
 
 The final thing to discuss before moving onto how to choose a dissimilarity is the computational complexity on recalculating dissimilarities between clusters when they are merged. Remarkably, all of the above methods can be recalculated based on the Lance-Williams equation
 \begin{equation}
-    \;d_{\{i\cup j\}k} = \alpha_i d_{ik} + \alpha_j d_{jk} + \beta d_{ij} + \gamma|d_{ik}-d_{jk}|
-    \label{eq:lancewilliams}
+  \;d_{\{i\cup j\}k} = \alpha_i d_{ik} + \alpha_j d_{jk} + \beta d_{ij} + \gamma|d_{ik}-d_{jk}|
+  \label{eq:lancewilliams}
 \end{equation}
 where $d_{\{i\cup j\}k}$ is the new distance between $k$ and a newly merged cluster containing $i$ and $j$, and the values of $\alpha$, $\beta$, and $\gamma$ can all be calculated in constant time.
 Recalculating the dissimilarity matrix after a merge therefore takes $\mathcal{O}(|V|)$ time. Searching through this matrix to find the best merge takes $\mathcal{O}(|V|^2)$ time, but this can be reduced to $\mathcal{O}(|V|\log(|V|)$ with a priority queue. Since forming a complete dendrogram requires $\mathcal{O}(|V|)$ merges, the overall complexity of greedy agglomerative clustering is $\mathcal{O}(|V|^2\log(|V|)$ .
@@ -150,14 +150,14 @@ Recalculating the dissimilarity matrix after a merge therefore takes $\mathcal{O
 
 \subsubsection{Random walks as dissimilarities}
 The first step before performing the agglomeration is to calculate the pairwise dissimilarities between individual datapoints. As previously noted, the shortest path distance was used in the context of optimising stress, but it be shown here that this is far from optimal in a clustering context.
-The reason for this that there is not enough \emph{local} information to differentiate vertices successfully.    
+The reason for this that there is not enough \emph{local} information to differentiate vertices successfully.
 For example, imagine a graph with two fully connected cliques, but with one edge connecting a single inter-cluster pair (one edge connecting the two clusters to the left of Figure~\ref{fig:clique_vs_biclique}). Since the shortest path between the pair is one hop, it means that the pair is considered just as similar to each other as to the other vertices in their respective cliques.
 Similarly, vertices in the same group within a biclique are not connected at all (right side of Figure~\ref{fig:clique_vs_biclique}) and so within-cluster pairs would be considered even less similar than inter-cluster pairs.
 
 A commonly used distance to capture local detail is the Jaccard index
 \begin{equation}
-    d_{ij} = 1 - \frac{|N(i) \cap N(j)|}{|N(i) \cup N(j)|}
-    \label{eq:jaccard}
+  d_{ij} = 1 - \frac{|N(i) \cap N(j)|}{|N(i) \cup N(j)|}
+  \label{eq:jaccard}
 \end{equation}
 which can be interpreted as the proportion of neighbours shared between vertices $i$ and $j$. However, this has the exact opposite problem to using shortest paths, as it fails to capture any \emph{global} detail, because any pair of vertices more than two hops away can never share any neighbours, and so will always have a maximum dissimilarity of one.
 An ad hoc solution to this problem is to combine the two measures by simply multiplying them together, following Zheng et al.\ \cite{Zheng2018}. Note that despite shortest paths and Jaccard index both being distance metrics \cite{Clarkson2006}, it is not guaranteed the product of dissimilarities will also be.
@@ -165,15 +165,15 @@ An ad hoc solution to this problem is to combine the two measures by simply mult
 A popular method of graph clustering that uses dissimilarities as input is the \emph{cluster walktrap} method of Pons and Latapy \cite{Pons2006}. They use \emph{random walks} to first construct a high-dimensional embedding of each vertex.
 To construct the high-dimensional embedding, the \emph{Markov chain} transition matrix of the graph is calculated, defined as
 \begin{equation}
-    \mathbf{P} = \mathbf{D}^{-1} \mathbf{A}
+  \mathbf{P} = \mathbf{D}^{-1} \mathbf{A}
 \end{equation}
 where $\mathbf{D}$ is a diagonal matrix of degrees, where the entries are the sum of the corresponding row in $\mathbf{A}$, which is the adjacency matrix of the graph that is not necessarily binary if edges have weights. $\mathbf{P}$ is essentially a normalised $\mathbf{A}$ where rows sum up to one.
 
 However, this is not directly used as the high-dimensional embedding because of the same problem as the Jaccard coefficient in Equation~\eqref{eq:jaccard}, that is it only captures local detail. This matrix is therefore multiplied by itself a number of times in order to simulate a longer random walk. However, multiplying too many times results in a matrix converging to a state only dependent on the in-degree of each vertex \cite{Pons2006}, and so the length of the walk is left as an input parameter that should be set to an intermediate value.
 The distance is defined as
 \begin{equation}
-    d_{ij} = \sqrt{\sum_{k}\frac{(\mathbf{P}_{ik}^t - \mathbf{P}_{jk}^t)^2}{\mathbf{D}_{kk}}}
-    \label{eq:walktrap}
+  d_{ij} = \sqrt{\sum_{k}\frac{(\mathbf{P}_{ik}^t - \mathbf{P}_{jk}^t)^2}{\mathbf{D}_{kk}}}
+  \label{eq:walktrap}
 \end{equation}
 where $t>0$ is an input parameter that determines how many times $\mathbf{P}$ should be multiplied by itself.
 Notice that this is very close to being simply the Euclidean distance between columns in $\mathbf{P}$, except with a factor consisting of $\mathbf{D}_{kk}^{\text{--}\sfrac{1}{2}}$. This was done presumably in order to undercompensate for high-degree vertices, although they state that their distance ``can also be seen as the $L^2$ distance between the two probability distributions'' \cite{Pons2006} without mentioning this factor. However a look into their provided source code confirms the use of the factor.
@@ -184,8 +184,8 @@ The algorithm then proceeds by applying agglomerative clustering using the Ward 
 
 It is also not necessary to be restricted to having the embedding capture the random walker at a single walk length. Another type of embedding I will look at is the weighted average over all walk lengths. However this would also converge to the same matrix as an infinite length walk, by virtue of the Markov matrix converging to only depend on in-degrees as previously mentioned. In this case we include a \emph{damping factor}, similar to the one used in PageRank \cite{Page1999} and infomap clustering \cite{Rosvall2008} to simulate a random walker losing a proportion of its energy on each step and eventually coming to a stop. This is defined as
 \begin{equation}
-    \mathbf{P}' = \sum_{k=0}^\infty t^k\mathbf{P}^{k}
-    \label{eq:damped}
+  \mathbf{P}' = \sum_{k=0}^\infty t^k\mathbf{P}^{k}
+  \label{eq:damped}
 \end{equation}
 where $0<t\leq 1$ is an input parameter to represent the proportion of walkers that move on to take another step. This will be referred to as the \emph{damped} embedding, as it captures the random walker state damped over a range of step lengths. A range of values for $t$ from Equation~\eqref{eq:walktrap} will be systematically tested in the Section~\ref{sec:clustering_experiment}.
 
@@ -194,13 +194,13 @@ an extra benefit of interpreting heavier edge weights as bringing vertices close
 The weights on the graph in Figure~\ref{fig:lesmis} describe how many times characters appeared in the same scene together, and this extra information was used in the clustering process.
 The fact that the Markov chain matrix is a probability distribution also allows it to naturally be applied to measures such as the Kullback-Leibler (KL) divergence 
 \begin{equation}
-    d_{ij} = \sum_k \mathbf{P}_{ik}\log\left(\frac{\mathbf{P}_{ik}}{\mathbf{P}_{jk}}\right)
-    \label{eq:kullbackleibler}
+  d_{ij} = \sum_k \mathbf{P}_{ik}\log\left(\frac{\mathbf{P}_{ik}}{\mathbf{P}_{jk}}\right)
+  \label{eq:kullbackleibler}
 \end{equation}
 which can be interpreted as the relative entropy of $i$ relative to $j$.
 Another popular measure is the Wasserstein distance
 \begin{equation}
-    d_{ij} = \int_{-\infty}^{\infty}|\mathbf{F}(i) - \mathbf{F}(j)|
+  d_{ij} = \int_{-\infty}^{\infty}|\mathbf{F}(i) - \mathbf{F}(j)|
 \end{equation}
 where $\mathbf{F}_i$ denotes the cumulative probability distributions of $i$ and $j$ \cite{Ramdas2017}. This can be interpreted by imagining the area under the curve of one distribution as mass to be moved, and measuring the amount of work needed to transform that mass into the second distribution.
 Both are natural and popular dissimilarities in the context of probability that are commonly used in the field of machine learning \cite{Goodfellow2014, Arjovsky2017}. The Wasserstein distance is already a distance metric \cite{Villani2003} and so can safely be used as an input. KL is not even a dissimilarity in Equation~\ref{eq:kullbackleibler} as it is not symmetric, and so it is commonly symmetrised by adding the two directions together as $d'_{ij} = d_{ij} + d_{ji}$ \cite{Kullback1951}.
@@ -220,24 +220,24 @@ The distances derived from Equations~\eqref{eq:jaccard}--\eqref{eq:commute} will
 Since clustering is an undefined problem, I will measure the quality of clusters by using a benchmark set of graphs where a ground truth clustering configuration is known.
 
 \begin{table}
-    \centering
-    \caption[Benchmark graphs used for the experiment in Section~\ref{sec:clustering_experiment}]{Benchmark graphs used for the experiment in Section~\ref{sec:clustering_experiment}. $|V|$ denotes the number of vertices, $|E|$ the number of edges, and $|M|$ the number of ground truth clusters.}
-    \setlength{\tabcolsep}{1em} % for the horizontal padding
-    {\renewcommand{\arraystretch}{1.25}% for the vertical padding
-    \begin{tabular}{|c|c|c|c|}
-        \hline
-        Name & $|V|$ & $|E|$ & $|M|$
-        \\\hline\hline
-        \texttt{karate} & 34 & 78 & 2
-        \\\hline
-        \texttt{footballTSE} & 115 & 613 & 19
-        \\\hline
-        \texttt{caltech} & 762 & 16651 & 9
-        \\\hline
-        \texttt{lfr} & 250 & 472 & 10
-        \\\hline
-    \end{tabular}}
-    \label{tab:bundle_graphs}
+  \centering
+  \caption[Benchmark graphs used for the experiment in Section~\ref{sec:clustering_experiment}]{Benchmark graphs used for the experiment in Section~\ref{sec:clustering_experiment}. $|V|$ denotes the number of vertices, $|E|$ the number of edges, and $|M|$ the number of ground truth clusters.}
+  \setlength{\tabcolsep}{1em} % for the horizontal padding
+  {\renewcommand{\arraystretch}{1.25}% for the vertical padding
+  \begin{tabular}{|c|c|c|c|}
+    \hline
+    Name & $|V|$ & $|E|$ & $|M|$
+    \\\hline\hline
+    \texttt{karate} & 34 & 78 & 2
+    \\\hline
+    \texttt{footballTSE} & 115 & 613 & 19
+    \\\hline
+    \texttt{caltech} & 762 & 16651 & 9
+    \\\hline
+    \texttt{lfr} & 250 & 472 & 10
+    \\\hline
+  \end{tabular}}
+  \label{tab:bundle_graphs}
 \end{table}
 
 Table~\ref{tab:bundle_graphs} contains the four graphs used in this study.
@@ -258,18 +258,18 @@ The package \texttt{scipy.cluster.hierarchy} \cite{Virtanen2020} was used to per
 Results are presented in Figures~\ref{fig:ARI1} and~\ref{fig:ARI2}, where all dissimilarity measures are clustered with each of the five linkage methods presented in Section~\ref{sec:dissimilarities}.
 
 \begin{figure}
-    \centering
-    \includegraphics[height=.95\textheight]{power/ARI1.pdf}
-    \caption[Experimental clustering results for \texttt{karate} and \texttt{footballTSE}]{Results for \texttt{karate} and \texttt{footballTSE}. Each linkage method is denoted by a different color and symbol.
-    ARI is on y-axis, all clusterings on x-axis.
-    Girvan-Newman is GN. Average and best ARI for all runs is in bottom right. Missing values for KL are due to probabilities of 0. Weighted KL done for 100 iterations}
-    \label{fig:ARI1}
+  \centering
+  \includegraphics[height=.95\textheight]{power/ARI1.pdf}
+  \caption[Experimental clustering results for \texttt{karate} and \texttt{footballTSE}]{Results for \texttt{karate} and \texttt{footballTSE}. Each linkage method is denoted by a different color and symbol.
+  ARI is on y-axis, all clusterings on x-axis.
+  Girvan-Newman is GN. Average and best ARI for all runs is in bottom right. Missing values for KL are due to probabilities of 0. Weighted KL done for 100 iterations}
+  \label{fig:ARI1}
 \end{figure}
 \begin{figure}
-    \centering
-    \includegraphics[height=.95\textheight]{power/ARI2.pdf}
-    \caption[Experimental clustering results for \texttt{caltech} and \texttt{lfr}]{Results for \texttt{caltech} and \texttt{lfr}.}
-    \label{fig:ARI2}
+  \centering
+  \includegraphics[height=.95\textheight]{power/ARI2.pdf}
+  \caption[Experimental clustering results for \texttt{caltech} and \texttt{lfr}]{Results for \texttt{caltech} and \texttt{lfr}.}
+  \label{fig:ARI2}
 \end{figure}
 
 \subsubsection{Results}
@@ -292,10 +292,10 @@ However a problem with using a dendrogram is that, as a binary tree, it contains
 The process of tidying up this tree such that it is suitable for use in hierarchical bundling will be referred to as \emph{pruning}. 
 
 \begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{power/pruning.pdf}
-    \caption[Hierarchical edge bundles without pruning]{An example of the resulting hierarchical edge bundles when pruning is not applied to the hierarchy. On the left is the full hierarchical dendrogram without pruning, and on the right is the resulting bundled diagram, which is clearly worse than the one in Figure~\ref{fig:lesmis}.}
-    \label{fig:pruning}   
+  \centering
+  \includegraphics[width=\textwidth]{power/pruning.pdf}
+  \caption[Hierarchical edge bundles without pruning]{An example of the resulting hierarchical edge bundles when pruning is not applied to the hierarchy. On the left is the full hierarchical dendrogram without pruning, and on the right is the resulting bundled diagram, which is clearly worse than the one in Figure~\ref{fig:lesmis}.}
+  \label{fig:pruning}   
 \end{figure}
 
 Jia et al.\ \cite{Jia2011} also encountered the same problem when producing their hierarchical bundles using the resulting dendrogram from the Girvan-Newman algorithm. They alleviate this issue by applying a branch-merging procedure that leverages the fact that each branch corresponds to a disconnected subgraph, due to the progressive removal of edges at each step in the algorithm.
@@ -315,14 +315,14 @@ The resulting visualisations for the four benchmark graphs in Table~\ref{tab:bun
 Code used to generate all figures can be found at \url{www.github.com/jxz12/HierarchicalEdgeBundles}.
 
 \begin{figure}
-    \centering
-    \includegraphics[height=.9\textheight]{power/bundled.pdf}
-    \caption[Final hierarchical edge bundled diagrams]{Drawings of the graphs in Table~\ref{tab:bundle_graphs} using both a stress layout (left) and with hierarchical edge bundling (right). Colours of nodes correspond to the ground truth clusters included in the data.
-    For \texttt{football}, 8 of its teams are singleton clusters in independent divisions, and for \texttt{caltech} ??? are unassigned to dorms.
-    branch merge distance = 0.1 of total height
-    branch distance from center = number of leaves cubed.
-    TODO: have karate, football, lfr on top 2 rows, bigger caltech on third}
-    \label{fig:untangled_hairballs}
+  \centering
+  \includegraphics[height=.9\textheight]{power/bundled.pdf}
+  \caption[Final hierarchical edge bundled diagrams]{Drawings of the graphs in Table~\ref{tab:bundle_graphs} using both a stress layout (left) and with hierarchical edge bundling (right). Colours of nodes correspond to the ground truth clusters included in the data.
+  For \texttt{football}, 8 of its teams are singleton clusters in independent divisions, and for \texttt{caltech} ??? are unassigned to dorms.
+  branch merge distance = 0.1 of total height
+  branch distance from center = number of leaves cubed.
+  TODO: have karate, football, lfr on top 2 rows, bigger caltech on third}
+  \label{fig:untangled_hairballs}
 \end{figure}
 
 \subsection{Discussion}
@@ -364,11 +364,11 @@ But just as there exist lossless compression formats for images, such as PNG com
 This eliminates crossings by allowing edges to overlap, and is analogous to junctions on a train track that allow carriages to switch directions without stopping.
 
 \begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{power/teaser.pdf}
-    \caption[A power-confluent drawing pipeline]{A pipeline for producing power-confluent drawings. 
-    From left to right: a conventional node-link diagram with vertices arranged around a circle; its power graph decomposition, where edges are compressed by grouping similar verticess together; our novel equivalent routing graph, where the nested structure of groups is represented by a directed tree; the resulting confluent drawing, where original edges are threaded through the routing graph to form bundled junctions.}
-    \label{fig:power_teaser}
+  \centering
+  \includegraphics[width=\textwidth]{power/teaser.pdf}
+  \caption[A power-confluent drawing pipeline]{A pipeline for producing power-confluent drawings. 
+  From left to right: a conventional node-link diagram with vertices arranged around a circle; its power graph decomposition, where edges are compressed by grouping similar verticess together; our novel equivalent routing graph, where the nested structure of groups is represented by a directed tree; the resulting confluent drawing, where original edges are threaded through the routing graph to form bundled junctions.}
+  \label{fig:power_teaser}
 \end{figure}
 
 Confluent drawing has its roots in the more theoretical side of graph drawing, and was originally developed by Dickerson et al.\ \cite{Dickerson2005} as a novel method for drawing planar graphs. In Figure~\ref{fig:power_teaser} for example, the drawing of the original graph on the left contains many crossings and in fact can not be drawn in a planar way. Allowing edges to overlap, but requiring all smooth curves to denote an edge between endpoints, means that all connectivity is preserved, thus adhering to the analogy of lossless compression.
@@ -391,8 +391,8 @@ The algorithm works taking advantage of the fact that the hierarchy of power gro
 It then greedily merges pairs of top-level modules at a time, picking the merge that eliminates the most edges at each step, until no more edges can be eliminated.
 The number of eliminated edges for any given merge is given by
 \begin{equation}
-    \kappa_{\cap}(m, n) = |N(m)\cap N(n)|
-    \label{eq:kappa_cap}
+  \kappa_{\cap}(m, n) = |N(m)\cap N(n)|
+  \label{eq:kappa_cap}
 \end{equation}
 where $m$ and $n$ are modules and $N$ are their neighbour sets.
 This is almost the same as $\mathrm{nedges}(m,n)$ in \cite{Dwyer2014}, except as a positive score rather than a negative penalty.
@@ -411,82 +411,80 @@ This is not explicitly mentioned in \cite{Dwyer2014}, but is implemented in thei
 
 Here a new heuristic will be introduced that can roughly capture the effects of both, and is simpler to calculate: a penalty for the number of edges that could not be merged. This is defined by
 \begin{equation}
-    \kappa_{\Triangle}(m, n) = |N(m)\,\Triangle\,N(n)|
-    \label{eq:kappa_triangle}
+  \kappa_{\Triangle}(m, n) = |N(m)\,\Triangle\,N(n)|
+  \label{eq:kappa_triangle}
 \end{equation}
 where $\Triangle$ denotes the symmetric difference, i.e.\ the number of unshared neighbours, between the two sets. This effectively measures the number of edges that cannot ever be eliminated in future steps, because only top level modules are considered for merging.
 Equation~\eqref{eq:kappa_triangle} captures the number of modules because a new parent module is only added if both children have unshared neighbours, and so the smaller Equation~\eqref{eq:kappa_triangle} is, the fewer modules there will likely be. It also captures the effect of edges crossing group boundaries, because any unshared edges must cross the boundary of its new parent module after the merge.
 Rewarding the first heuristic and punishing the second leaves a total score of
 \begin{equation}
-    \kappa(m,n) =
-    w_\cap \kappa_\cap(m,n) -
-    w_{\Triangle} \kappa_{\Triangle}(m,n)
-    \label{eq:kappa_full}
+  \kappa(m,n) =
+  w_\cap \kappa_\cap(m,n) -
+  w_{\Triangle} \kappa_{\Triangle}(m,n)
+  \label{eq:kappa_full}
 \end{equation}
 where $w_\cap$ and $w_{\Triangle}$ determine the relative weight of either heuristic. For example, to construct a modular decomposition \cite{Habib2004}, $w_{\Triangle}$ may be set to infinity to forbid any module boundary crossings.
 Setting $w_\cap=10$ and $w_{\Triangle}=1$ works well in practice; these are the parameters used for the results in Table~\ref{tab:pgd_results}.
 
 \begin{table}
-    \centering
-    \caption[Experimental results on greedy power graph decomposition]{Experimental results for the improved greedy power graph decomposition described in Section~\ref{sec:power_graph}
-    $|E|$ is the number of edges in the original graph, compressed into $|P|$ power edges and $|M|$ power groups; shaded cells indicate the better score between the two methods.}
-    
-    \setlength{\tabcolsep}{1em}
-    \renewcommand{\arraystretch}{1.25}
-    % \definecolor{grey}{RGB}{222,222,222}
-    % \definecolor{grey}{RGB}{152,251,152} % mint :)
-    \definecolor{grey}{RGB}{170,251,170} % mint :)
-    
-    \begin{tabular}{ |c|c|c|c|c| } 
-        \hline
-        \multirow{2}{*}{Name ($|E|$)} &
-        \multicolumn{2}{c|}{Best $|P|$ $(|M|)$} & \multicolumn{2}{c|}{Worst $|P|$ $(|M|)$} \\ 
-        \cline{2-5}
-        & only $\kappa_\cap$ & $\kappa_\cap$ and $\kappa_{\Triangle}$ & only $\kappa_\cap$ & $\kappa_\cap$ and $\kappa_{\Triangle}$ \\ 
-        \hline\hline
-        \texttt{florentine} (20)
-           % &\cellcolor{grey} 11 (4)
-           % &\cellcolor{grey} 11 (4)
-           & 11 (4)
-           & 11 (4)
-           & 11 (6)
-           &\cellcolor{grey} 11 (5) \\
-        \texttt{karate} (78)
-           % &\cellcolor{grey} 28 (13)\
-           % &\cellcolor{grey} 28 (13)
-           & 28 (13)\
-           & 28 (13)
-           & 30 (15)
-           &\cellcolor{grey} 29 (13)\\ 
-        \texttt{southern} (89)
-           & 30 (17)
-           &\cellcolor{grey} 27 (21)
-           & 37 (16)
-           &\cellcolor{grey} 30 (18)\\ 
-        \texttt{dolphins} (159)
-           & 82 (29)
-           &\cellcolor{grey} 81 (30)
-           & 87 (28)
-           &\cellcolor{grey} 83 (30)\\ 
-        \texttt{lesmis} (254)
-           & 74 (39)
-           &\cellcolor{grey} 72 (41)
-           & 79 (39)
-           &\cellcolor{grey} 72 (42)\\
-        \texttt{football} (613)
-           & 282 (83)
-           &\cellcolor{grey} 278 (84)
-           & 289 (83)
-           &\cellcolor{grey} 286 (84)\\
-        \texttt{netsci} (914)
-           & 355 (187)
-           &\cellcolor{grey} 338 (184)
-           & 371 (189)
-           &\cellcolor{grey} 341 (186)\\
-           
-        \hline
-    \end{tabular}
-    \label{tab:pgd_results}
+  \centering
+  \caption[Experimental results on greedy power graph decomposition]{Experimental results for the improved greedy power graph decomposition described in Section~\ref{sec:power_graph}
+  $|E|$ is the number of edges in the original graph, compressed into $|P|$ power edges and $|M|$ power groups; shaded cells indicate the better score between the two methods.}
+  
+  \setlength{\tabcolsep}{1em}
+  \renewcommand{\arraystretch}{1.25}
+  \definecolor{grey}{RGB}{170,251,170} % mint :)
+
+  \begin{tabular}{ |c|c|c|c|c| } 
+    \hline
+    \multirow{2}{*}{Name ($|E|$)} &
+    \multicolumn{2}{c|}{Best $|P|$ $(|M|)$} & \multicolumn{2}{c|}{Worst $|P|$ $(|M|)$} \\ 
+    \cline{2-5}
+    & only $\kappa_\cap$ & $\kappa_\cap$ and $\kappa_{\Triangle}$ & only $\kappa_\cap$ & $\kappa_\cap$ and $\kappa_{\Triangle}$ \\ 
+    \hline\hline
+    \texttt{florentine} (20)
+       % &\cellcolor{grey} 11 (4)
+       % &\cellcolor{grey} 11 (4)
+       & 11 (4)
+       & 11 (4)
+       & 11 (6)
+       &\cellcolor{grey} 11 (5) \\
+    \texttt{karate} (78)
+       % &\cellcolor{grey} 28 (13)\
+       % &\cellcolor{grey} 28 (13)
+       & 28 (13)\
+       & 28 (13)
+       & 30 (15)
+       &\cellcolor{grey} 29 (13)\\ 
+    \texttt{southern} (89)
+       & 30 (17)
+       &\cellcolor{grey} 27 (21)
+       & 37 (16)
+       &\cellcolor{grey} 30 (18)\\ 
+    \texttt{dolphins} (159)
+       & 82 (29)
+       &\cellcolor{grey} 81 (30)
+       & 87 (28)
+       &\cellcolor{grey} 83 (30)\\ 
+    \texttt{lesmis} (254)
+       & 74 (39)
+       &\cellcolor{grey} 72 (41)
+       & 79 (39)
+       &\cellcolor{grey} 72 (42)\\
+    \texttt{football} (613)
+       & 282 (83)
+       &\cellcolor{grey} 278 (84)
+       & 289 (83)
+       &\cellcolor{grey} 286 (84)\\
+    \texttt{netsci} (914)
+       & 355 (187)
+       &\cellcolor{grey} 338 (184)
+       & 371 (189)
+       &\cellcolor{grey} 341 (186)\\
+       
+    \hline
+  \end{tabular}
+  \label{tab:pgd_results}
 \end{table}
 
 Adding our new heuristic produces the best or joint best results in all graphs, and also improves the consistency of the output, with a better worst result in all cases.
@@ -497,39 +495,40 @@ candidate merges (Figure.~\ref{fig:pseudocode_pgd}, line~\ref{pseudo:pgd:top}).
 The networks are, from top to bottom, Italian families linked by marriage \cite{Breiger1986}, members of a karate club \cite{Zachary1977}, women meeting at social events \cite{Davis2009}, interactions between bottlenose dolphins \cite{Lusseau2003}, co-occurrence of characters in the musical Les Mis\'erables \cite{Knuth1993}, American football games between US colleges \cite{Girvan2002}, and coauthorships of scientists working on network theory \cite{Newman2006a}.
  
 \begin{figure}
-    \removeAlgorithmFigureError
-    \DontPrintSemicolon
-    \begin{algorithm}[H]
-        \SetKwInOut{Input}{inputs}
-        \SetKwInOut{Output}{output}
-        \SetKwFor{ForEach}{foreach}{}{}
-        \SetKwRepeat{Do}{do}{while}
-        \SetKwIF{If}{ElseIf}{Else}{if}{}{else if}{else}{}
-        \Input{graph $G=(V,E)$}
-        \Output{modules $M=\text{set of pairs }(C,N)$}
-        
-        $M \leftarrow \{(\emptyset,\,N(v))\ |\ v\in V\}$
-        
-        \Do{$\kappa_\mathrm{best}>0$}{
-            $\kappa_\mathrm{best}\leftarrow0$
-            
-            \ForEach{\emph{pair of modules} $\{m,n\}\in M_\mathrm{top}\times M_\mathrm{top}$}{
-            \label{pseudo:pgd:top}
-                $\kappa_\mathrm{best} \leftarrow \max(\kappa(m,n),\,\kappa_\mathrm{best})$
-                \label{pseudo:pgd:kappa}
-            }
-            $\textsc{merge}(\{m,n\}_\mathrm{best})$
-            \label{pseudo:pgd:merge}
-        }
-        \caption{\textsc{Greedy power graph decomposition}}
-        \label{alg:pgd}
-    \end{algorithm}
+  \removeAlgorithmFigureError
+  \DontPrintSemicolon
+  \begin{algorithm}[H]
+    \SetKwInOut{Input}{inputs}
+    \SetKwInOut{Output}{output}
+    \SetKwFor{ForEach}{foreach}{}{}
+    \SetKwRepeat{Do}{do}{while}
+    \SetKwIF{If}{ElseIf}{Else}{if}{}{else if}{else}{}
+    \Input{graph $G=(V,E)$}
+    \Output{modules $M=\text{set of pairs }(C,N)$}
     
-    \caption[Pseudocode for improved power graph decomposition]{Pseudocode for the greedy heuristic power graph construction in Section~\ref{sec:power_graph}.
-    Each module consists of a set of children $C$, and a set of neighbours $N$.
-    The score function $\kappa$ is from Equation~\eqref{eq:kappa_full}, and the merge operation on line~\ref{pseudo:pgd:merge} is described in Section~\ref{sec:power_graph}, where any new module is parented to its merged children by adding them to its set of children $C$.
-    In practice a redundant super-module is maintained, whose children are the top level modules $M_\mathrm{top}$ on line~\ref{pseudo:pgd:top}.}
-    \label{fig:pseudocode_pgd}
+    $M \leftarrow \{(\emptyset,\,N(v))\ |\ v\in V\}$
+    
+    \Do{$\kappa_\mathrm{best}>0$}{
+      $\kappa_\mathrm{best}\leftarrow0$
+      
+      \ForEach{\emph{pair of modules} $\{m,n\}\in M_\mathrm{top}\times M_\mathrm{top}$}
+      {
+        \label{pseudo:pgd:top}
+        $\kappa_\mathrm{best} \leftarrow \max(\kappa(m,n),\,\kappa_\mathrm{best})$
+        \label{pseudo:pgd:kappa}
+      }
+      $\textsc{merge}(\{m,n\}_\mathrm{best})$
+      \label{pseudo:pgd:merge}
+    }
+    \caption{\textsc{Greedy power graph decomposition}}
+    \label{alg:pgd}
+  \end{algorithm}
+  
+  \caption[Pseudocode for improved power graph decomposition]{Pseudocode for the greedy heuristic power graph construction in Section~\ref{sec:power_graph}.
+  Each module consists of a set of children $C$, and a set of neighbours $N$.
+  The score function $\kappa$ is from Equation~\eqref{eq:kappa_full}, and the merge operation on line~\ref{pseudo:pgd:merge} is described in Section~\ref{sec:power_graph}, where any new module is parented to its merged children by adding them to its set of children $C$.
+  In practice a redundant super-module is maintained, whose children are the top level modules $M_\mathrm{top}$ on line~\ref{pseudo:pgd:top}.}
+  \label{fig:pseudocode_pgd}
 \end{figure} 
 
 It is important to note that this is still a simple greedy heuristic, which does not make any guarantees about the quality of the final result.
@@ -544,10 +543,10 @@ Pseudocode for the above described algorithm can be seen in Fig.~\ref{fig:pseudo
 The original definition of a confluent drawing~$A$ for a graph~$G$ is:
 \begin{mdframed}[backgroundcolor=WhiteSmoke]
 \begin{itemize}[leftmargin=*]
-    \item There is a one-to-one mapping between the vertices in $G$ and $A$, so that, for each vertex $v\in V(G)$, there is a corresponding vertex $v'\in A$, which has a unique point placement in the plane.
-    % \item There is an edge $(v_i,v_j)$ in $E(G)$ if and only if there is a locally-monotone curve $e'$ connecting $v_i'$ and $v_j'$ in A.
-    \item There is an edge $(v_i,v_j) \in E(G)$ iff there is a locally-monotone curve (defined as having no self intersections or sharp turns) $e'$, connecting $v_i'$ and $v_j'$ in $A$. 
-    \item $A$ is planar. That is, while locally-monotone curves in $A$ can share overlapping portions, no two can cross.
+  \item There is a one-to-one mapping between the vertices in $G$ and $A$, so that, for each vertex $v\in V(G)$, there is a corresponding vertex $v'\in A$, which has a unique point placement in the plane.
+  % \item There is an edge $(v_i,v_j)$ in $E(G)$ if and only if there is a locally-monotone curve $e'$ connecting $v_i'$ and $v_j'$ in A.
+  \item There is an edge $(v_i,v_j) \in E(G)$ iff there is a locally-monotone curve (defined as having no self intersections or sharp turns) $e'$, connecting $v_i'$ and $v_j'$ in $A$. 
+  \item $A$ is planar. That is, while locally-monotone curves in $A$ can share overlapping portions, no two can cross.
 \end{itemize}
 \end{mdframed}
 This was proposed by Dickerson et al.\ \cite{Dickerson2005}, where the second condition is the key part of the definition that lets links overlap in the final drawing.
@@ -567,11 +566,11 @@ These were likely chosen because they satisfy the convex hull property, which pr
 Local control is what makes it possible for drawings to be confluent; with the right routing graph, it is possible for edges to share enough control points to produce the overlapping portions that are required for a confluent drawing. Specifically, for two curves to be guaranteed to overlap they must share $p$ or more control points (see Section~\ref{sec:bspline_details} for a proof and a more detailed explanation).
 
 \begin{figure}
-    \centering
-    \includegraphics[width=.8\textwidth]{power/nodesplit.pdf}
-    \caption[Examples of the node split problem]{Examples to show how the direction of node splitting can affect the graph $K_{2,2}$. The first column shows a standard situation where a split is required to make edges overlap, the second shows the correct split, and the third shows that if the node is split the other way, then the edges $\{a,c\}$ and $\{b,d\}$ are falsely introduced.
-    }
-    \label{fig:nodesplit}
+  \centering
+  \includegraphics[width=.8\textwidth]{power/nodesplit.pdf}
+  \caption[Examples of the node split problem]{Examples to show how the direction of node splitting can affect the graph $K_{2,2}$. The first column shows a standard situation where a split is required to make edges overlap, the second shows the correct split, and the third shows that if the node is split the other way, then the edges $\{a,c\}$ and $\{b,d\}$ are falsely introduced.
+  }
+  \label{fig:nodesplit}
 \end{figure}
 
 There are two problems with using B-splines in this context. The first is that splines that share fewer than $p$ control points will \emph{not} overlap, but sharing even a single routing node should indicate a bundled junction.
@@ -595,28 +594,28 @@ This is shown in Figure~\ref{fig:overlap}, where two intermediate routing nodes 
 Note that every power group in this example is intentionally redundant for clarity; a full version of this example can be seen in Figure~\ref{fig:overlap_sm}.
 
 \begin{figure}
-    \centering
-    \includegraphics[width=.8\linewidth]{power/shortcircuit.pdf}
-    \caption[Examples of the short-circuit problem]{Examples of how absent edges can appear to exist due to the short-circuit problem.
-    Top: a toy example of a hypothetical routing graph that causes edges $\{a,d\}$ and $\{c,b\}$ to both erroneously appear to exist.
-    Bottom: an example of a power graph that causes a similar ambiguity, where $c$ appears connected to $b$ because the edge $\{b,d\}$ short-circuits the nested structure of power groups (represented by blue boxes), causing $\{a,b\}$ to be routed incorrectly downwards.
-    The correct direction that would not cause an issue is shown as a dashed line along the top.
-    }
-    \label{fig:overlap}
+  \centering
+  \includegraphics[width=.8\linewidth]{power/shortcircuit.pdf}
+  \caption[Examples of the short-circuit problem]{Examples of how absent edges can appear to exist due to the short-circuit problem.
+  Top: a toy example of a hypothetical routing graph that causes edges $\{a,d\}$ and $\{c,b\}$ to both erroneously appear to exist.
+  Bottom: an example of a power graph that causes a similar ambiguity, where $c$ appears connected to $b$ because the edge $\{b,d\}$ short-circuits the nested structure of power groups (represented by blue boxes), causing $\{a,b\}$ to be routed incorrectly downwards.
+  The correct direction that would not cause an issue is shown as a dashed line along the top.
+  }
+  \label{fig:overlap}
 \end{figure}
 
 \begin{figure}
-    \centering
-    \includegraphics[width=.8\linewidth]{power/shortcircuit_big.pdf}
-    \caption[A full version of Figure~\ref{fig:overlap}]{A fleshed-out version of Figure~\ref{fig:overlap}, bottom, without any redundant power groups.
-    (i): an example of the power graph in the same layout as Figure~\ref{fig:overlap}, where the nested structure of groups comes from a clique structure.
-    (ii) top: a conventional node-link layout of the graph, bottom: the same power graph as in (i). 
-    (iii) left: the resulting routing graph from the method of Bach et al.\ \cite{Bach2017}, right: the resulting drawing when splines take their shortest paths through this routing graph. The edge $\{a,b\}$ is routed downwards in the wrong direction, causing the edge $\{c,b\}$ to falsely appear to exist.
-    The edge $\{a,e\}$ also has two equal-length shortest paths, either through the line shown or downwards through $b$.
-    % , albeit this specific case can easily be prevented by only preventing original nodes from being used as intermediate control points, as the original authors appear to have done in \cite[Fig.~2(c)]{Bach2017} for the edge $\{u,w\}$.
-    (iv) left: the result of using the new method (Section~\ref{sec:hierarchical_routing}) of retaining the hierarchical structure of power groups through directed edges, right: the resulting drawing where $\{a,b\}$ is routed through the three correct upward routing nodes. The previously incorrect routing is marked by a dashed line.
-    }
-    \label{fig:overlap_sm}
+  \centering
+  \includegraphics[width=.8\linewidth]{power/shortcircuit_big.pdf}
+  \caption[A full version of Figure~\ref{fig:overlap}]{A fleshed-out version of Figure~\ref{fig:overlap}, bottom, without any redundant power groups.
+  (i): an example of the power graph in the same layout as Figure~\ref{fig:overlap}, where the nested structure of groups comes from a clique structure.
+  (ii) top: a conventional node-link layout of the graph, bottom: the same power graph as in (i). 
+  (iii) left: the resulting routing graph from the method of Bach et al.\ \cite{Bach2017}, right: the resulting drawing when splines take their shortest paths through this routing graph. The edge $\{a,b\}$ is routed downwards in the wrong direction, causing the edge $\{c,b\}$ to falsely appear to exist.
+  The edge $\{a,e\}$ also has two equal-length shortest paths, either through the line shown or downwards through $b$.
+  % , albeit this specific case can easily be prevented by only preventing original nodes from being used as intermediate control points, as the original authors appear to have done in \cite[Fig.~2(c)]{Bach2017} for the edge $\{u,w\}$.
+  (iv) left: the result of using the new method (Section~\ref{sec:hierarchical_routing}) of retaining the hierarchical structure of power groups through directed edges, right: the resulting drawing where $\{a,b\}$ is routed through the three correct upward routing nodes. The previously incorrect routing is marked by a dashed line.
+  }
+  \label{fig:overlap_sm}
 \end{figure}
 
 This effect can be explained as follows. The structure of groups within a power graph can be represented as a tree, where groups are represented by branches and vertices by leaves.
@@ -633,81 +632,81 @@ The solution to these problems is to retain the hierarchical structure of power 
 Note that this also means all adjacency information is now preserved in the ARG, such that the original graph can be recovered.
 
 \begin{figure}
-    \centering
-    \includegraphics[width=.8\linewidth]{power/solution.pdf}
-    \caption[A fixed method for confluent drawing]{The solution to both ambiguities described in Section~\ref{sec:hierarchical_routing}.
-    % The same example graph as in \cite[Fig.~2]{Bach2017} and here Figure~\ref{fig:power_teaser} is used, shown in a radial layout to emphasize the tree structure of power groups.
-    The leftmost graphs are a power graph (top), and a tree that represents the hierarchy of power groups (bottom), but without power edges.
-    The middle column contains the resulting routing graphs without node splitting (top) and with (bottom, split indicated in red).
-    % Note that these do not include or require the root of the tree.
-    The final column displays the resulting bundled layouts.
-    }
-    \label{fig:radial}
+  \centering
+  \includegraphics[width=.8\linewidth]{power/solution.pdf}
+  \caption[A fixed method for confluent drawing]{The solution to both ambiguities described in Section~\ref{sec:hierarchical_routing}.
+  % The same example graph as in \cite[Fig.~2]{Bach2017} and here Figure~\ref{fig:power_teaser} is used, shown in a radial layout to emphasize the tree structure of power groups.
+  The leftmost graphs are a power graph (top), and a tree that represents the hierarchy of power groups (bottom), but without power edges.
+  The middle column contains the resulting routing graphs without node splitting (top) and with (bottom, split indicated in red).
+  % Note that these do not include or require the root of the tree.
+  The final column displays the resulting bundled layouts.
+  }
+  \label{fig:radial}
 \end{figure}
 
 \begin{figure}
-    \removeAlgorithmFigureError
-    \DontPrintSemicolon
-    \begin{algorithm}[H]
-        \SetKwInOut{Input}{inputs}
-        \SetKwInOut{Output}{output}
-        \SetKwFor{ForEach}{foreach}{}{}
-        \SetKwRepeat{Do}{do}{while}
-        \SetKwIF{If}{ElseIf}{Else}{if}{}{else if}{else}{}
-        \Input{modules $M=\text{set of pairs }(C,N)$}
-        \Output{drawing $A$}
-            
-        $V\leftarrow\emptyset,\,E\leftarrow\emptyset,\,P\leftarrow\emptyset$
-        
-        \ForEach{\emph{module} $m=(C_m,N_m)\in M$}{
-            $V\leftarrow V\cup m$
-            
-            % $E\leftarrow E\cup(m,c) \;\forall c\in C_m$
-            % $E\leftarrow E\cup\bigcup_{c\in C_m}(m,c)$
-            $E\leftarrow E\cup\{(m,c)\ |\ c\in C_m\}$
-            \label{pseudo:directed}
-            
-            % $P\leftarrow P\cup\{m,n\} \;\forall n\in N_m$
-            % $P\leftarrow P\cup\bigcup_{n\in N_m}\{m,n\}$
-            $P\leftarrow P\cup\{(m,n)\ |\ n\in N_m\}$
-            \label{pseudo:undirected}
-        }
-        \ForEach{\emph{vertex} $v\in V$}{
-            \If{$|N^+(v)|\geq 2$ \emph{and} $|N^{-*}(v)|\geq 2$}{
-            \label{pseudo:inout}
-                \textsc{split}($v$)
-                \label{pseudo:split}
-            }
-        }
-        
-        $A \leftarrow \emptyset$
-        
-        $\mathbf{X} \leftarrow \textsc{layout}((V,\,E\cup P))$
-        \label{pseudo:sgd}
-        
-        \ForEach{\emph{power edge} $p=\{i,j\}\in P$}{
-            % $Q_i\leftarrow \textsc{pathstoleaves}(i, \{V,E\})$
-            
-            % $Q_j\leftarrow \textsc{pathsfromleaves}(j, \{V,E\})$
-            
-            $Q_i\:\leftarrow$ paths $\in (V,E)$ from leaves to $i$
-            
-            $Q_j\leftarrow$ paths  $\in (V,E)$ from $j$ to leaves
-            
-            % $A\leftarrow A\cup\bigcup_{q\in Q_i\times Q_j} \textsc{spline}(\mathbf{X}_q)$
-            $A\leftarrow A\cup\{\,\textsc{spline}(\mathbf{X}_q)\ |\ q\in Q_i\times Q_j\}$
-            \label{pseudo:spline}
-        }
-        \caption{\textsc{Power-confluent drawing}}
-        \label{alg:pcd}
-    \end{algorithm}
+  \removeAlgorithmFigureError
+  \DontPrintSemicolon
+  \begin{algorithm}[H]
+    \SetKwInOut{Input}{inputs}
+    \SetKwInOut{Output}{output}
+    \SetKwFor{ForEach}{foreach}{}{}
+    \SetKwRepeat{Do}{do}{while}
+    \SetKwIF{If}{ElseIf}{Else}{if}{}{else if}{else}{}
+    \Input{modules $M=\text{set of pairs }(C,N)$}
+    \Output{drawing $A$}
     
-    \caption[Pseudocode for power-confluent drawing]{Pseudocode for our conversion from a set of power graph modules (see the output of Algorithm~\ref{alg:pgd} in Figure~\ref{fig:pseudocode_pgd}) to a rendered drawing, described in Section~\ref{sec:hierarchical_routing}. 
-    Note that the edges on line~\ref{pseudo:directed} are ordered pairs, while those on line~\ref{pseudo:undirected} are unordered. This allows, on line~\ref{pseudo:inout}, for $N^+$ to indicate a set of outgoing neighbours, and $N^{-*}$ a set of incoming neighbours plus any connected by power edges in $P$.
-    The split operation on line~\ref{pseudo:split} then moves $N^+$ and $N^{-*}$ to separate routing nodes, as in Figure~\ref{fig:radial}.
-    In practice a shorter edge length is placed between split routing nodes, and so for line~\ref{pseudo:sgd} require a layout method that can embed edge lengths, such as the stress layout in Section~\ref{sec:stress_background}.
-    The specifics of the spline function on line~\ref{pseudo:spline} are outlined in Section~\ref{sec:bspline_details}}
-    \label{fig:pseudocode_pcd}
+    $V\leftarrow\emptyset,\,E\leftarrow\emptyset,\,P\leftarrow\emptyset$
+    
+    \ForEach{\emph{module} $m=(C_m,N_m)\in M$}{
+      $V\leftarrow V\cup m$
+      
+      % $E\leftarrow E\cup(m,c) \;\forall c\in C_m$
+      % $E\leftarrow E\cup\bigcup_{c\in C_m}(m,c)$
+      $E\leftarrow E\cup\{(m,c)\ |\ c\in C_m\}$
+      \label{pseudo:directed}
+      
+      % $P\leftarrow P\cup\{m,n\} \;\forall n\in N_m$
+      % $P\leftarrow P\cup\bigcup_{n\in N_m}\{m,n\}$
+      $P\leftarrow P\cup\{(m,n)\ |\ n\in N_m\}$
+      \label{pseudo:undirected}
+    }
+    \ForEach{\emph{vertex} $v\in V$}{
+      \If{$|N^+(v)|\geq 2$ \emph{and} $|N^{-*}(v)|\geq 2$}{
+      \label{pseudo:inout}
+        \textsc{split}($v$)
+        \label{pseudo:split}
+      }
+    }
+    
+    $A \leftarrow \emptyset$
+    
+    $\mathbf{X} \leftarrow \textsc{layout}((V,\,E\cup P))$
+    \label{pseudo:sgd}
+    
+    \ForEach{\emph{power edge} $p=\{i,j\}\in P$}{
+      % $Q_i\leftarrow \textsc{pathstoleaves}(i, \{V,E\})$
+      
+      % $Q_j\leftarrow \textsc{pathsfromleaves}(j, \{V,E\})$
+      
+      $Q_i\:\leftarrow$ paths $\in (V,E)$ from leaves to $i$
+      
+      $Q_j\leftarrow$ paths  $\in (V,E)$ from $j$ to leaves
+      
+      % $A\leftarrow A\cup\bigcup_{q\in Q_i\times Q_j} \textsc{spline}(\mathbf{X}_q)$
+      $A\leftarrow A\cup\{\,\textsc{spline}(\mathbf{X}_q)\ |\ q\in Q_i\times Q_j\}$
+      \label{pseudo:spline}
+    }
+    \caption{\textsc{Power-confluent drawing}}
+    \label{alg:pcd}
+  \end{algorithm}
+  
+  \caption[Pseudocode for power-confluent drawing]{Pseudocode for our conversion from a set of power graph modules (see the output of Algorithm~\ref{alg:pgd} in Figure~\ref{fig:pseudocode_pgd}) to a rendered drawing, described in Section~\ref{sec:hierarchical_routing}. 
+  Note that the edges on line~\ref{pseudo:directed} are ordered pairs, while those on line~\ref{pseudo:undirected} are unordered. This allows, on line~\ref{pseudo:inout}, for $N^+$ to indicate a set of outgoing neighbours, and $N^{-*}$ a set of incoming neighbours plus any connected by power edges in $P$.
+  The split operation on line~\ref{pseudo:split} then moves $N^+$ and $N^{-*}$ to separate routing nodes, as in Figure~\ref{fig:radial}.
+  In practice a shorter edge length is placed between split routing nodes, and so for line~\ref{pseudo:sgd} require a layout method that can embed edge lengths, such as the stress layout in Section~\ref{sec:stress_background}.
+  The specifics of the spline function on line~\ref{pseudo:spline} are outlined in Section~\ref{sec:bspline_details}}
+  \label{fig:pseudocode_pcd}
 \end{figure}
 
 To draw the adjacency edges back on top, any shortest path calculations can now be forgoed. Instead, for each power edge, a depth-first search is performed for all child leaf nodes starting from both ends of the power edge. Each path to each leaf from one end is then concatenated to the reversed path to each leaf from the other end, and every concatenated path is used as the sequence of control points for a spline.
@@ -740,10 +739,10 @@ However, there are two ways of doing this: the first retains the same total numb
 This second method is illustrated by the translucent curves to represent repeated knots in Figure~\ref{fig:basis}.
 
 \begin{figure}
-    \centering
-    \includegraphics[width=.9\linewidth]{power/basis.pdf}
-    \caption[B-spline basis functions]{Examples of two open uniform B-splines and their basis functions below. Control points are spaced evenly along the x-axis such that knots (vertical lines) align with their associated segments. The top spline is quadratic (degree $p=2$), while the bottom is cubic ($p=3$). In both, the left- and rightmost basis functions go to zero at the middle knot, and so another curve that shares the middle $p$ control points is guaranteed to overlap exactly at that knot. Note that the sum of basis functions must always add up to one, so to attach a curve to its endpoints, the final control point is repeated $p$ times. The curves there are also slightly transparent, to match the corresponding repeated basis functions.}
-    \label{fig:basis}
+  \centering
+  \includegraphics[width=.9\linewidth]{power/basis.pdf}
+  \caption[B-spline basis functions]{Examples of two open uniform B-splines and their basis functions below. Control points are spaced evenly along the x-axis such that knots (vertical lines) align with their associated segments. The top spline is quadratic (degree $p=2$), while the bottom is cubic ($p=3$). In both, the left- and rightmost basis functions go to zero at the middle knot, and so another curve that shares the middle $p$ control points is guaranteed to overlap exactly at that knot. Note that the sum of basis functions must always add up to one, so to attach a curve to its endpoints, the final control point is repeated $p$ times. The curves there are also slightly transparent, to match the corresponding repeated basis functions.}
+  \label{fig:basis}
 \end{figure}
 
 In practice this second method makes the rendered curve hug its path through the routing graph closer than the first. In the case of cubic splines ($p=3$), this means that edges come sufficiently close to look bundled, even though the above proof demonstrates that the degree must be $p=2$ for curves to fully overlap (unless routing nodes are split twice to guarantee three shared control points).
@@ -759,7 +758,7 @@ The definition for a directed confluent drawing is almost the same as the undire
 Formally, for a directed confluent drawing $B$, this is extra condition \cite{Dickerson2005} is:
 \begin{mdframed}[backgroundcolor=WhiteSmoke]
 \begin{itemize}[leftmargin=*]
-    \item Locally monotone curves in B may share some overlapping portions, but the edges sharing the same portion of a track must all have the same direction along that portion.
+  \item Locally monotone curves in B may share some overlapping portions, but the edges sharing the same portion of a track must all have the same direction along that portion.
 \end{itemize}
 \end{mdframed}
 This means that directed graphs lead to a slightly different power-to-routing graph conversion, where the description in \cite{Bach2017} says \emph{``The only difference is that we create---as necessary---two junctions for each group, one for incoming and one for outgoing edges."}
@@ -770,8 +769,8 @@ Therefore, all descendants of any such group must also have two routing nodes: o
 The description of the improved power graph construction algorithm from Section~\ref{sec:power_graph} is also easily applied to directed graphs, by splitting neighbour sets into incoming and outgoing edges. This is how the original algorithm is described by Dwyer et al. \cite{Dwyer2014}.
 In other words, the formulations for the heuristics in Equation~\eqref{eq:kappa_full} instead become
 \begin{align}
-    &\kappa_\cap(m,n) = |N^+(m)\cap N^+(n)| + |N^-(m)\cap N^-(n)|,\\
-    &\kappa_{\Triangle}(m,n) = |N^+(m)\,\Triangle\,N^+(n)| + |N^-(m)\,\Triangle\,N^-(n)|
+  &\kappa_\cap(m,n) = |N^+(m)\cap N^+(n)| + |N^-(m)\cap N^-(n)|,\\
+  &\kappa_{\Triangle}(m,n) = |N^+(m)\,\Triangle\,N^+(n)| + |N^-(m)\,\Triangle\,N^-(n)|
 \end{align}
 where $N^+$ is a set of outgoing edges, and $N^-$ a set of incoming edges.
 
@@ -798,10 +797,10 @@ Note that the graph itself is not necessarily impossible to draw in a power-conf
 Power-confluent is therefore a strictly stronger condition than strict confluent.
 
 \begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{power/stricter.pdf}
-    \caption[A strict confluent drawing that is not power-confluent]{An example of a strict confluent drawing that cannot be reverse-engineered into a valid power graph, unless power group boundaries are allowed to overlap. On the left is the confluent drawing (with junctions marked by transparent blue circles), and on the right is a power graph that shows all possible groupings to match these junctions.}
-    \label{fig:strict}
+  \centering
+  \includegraphics[width=\linewidth]{power/stricter.pdf}
+  \caption[A strict confluent drawing that is not power-confluent]{An example of a strict confluent drawing that cannot be reverse-engineered into a valid power graph, unless power group boundaries are allowed to overlap. On the left is the confluent drawing (with junctions marked by transparent blue circles), and on the right is a power graph that shows all possible groupings to match these junctions.}
+  \label{fig:strict}
 \end{figure}
 
 \subsection{Discussion}
@@ -821,8 +820,8 @@ To finish on a practical note, a more tailored layout algorithm than standard fo
 The layout function (Figure~\ref{fig:pseudocode_pcd}, line~\ref{pseudo:sgd}) is currently only given the routing graph as input, but may benefit from extra information, such as which edges are power edges and which are hierarchical. An effective radial layout that can avoid crossings, like the one shown in Figure~\ref{fig:radial} but automatic, may also offer a superior solution.
 
 \begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{power/power_karate_lesmis.pdf}
-    \caption[Examples of networks drawn with the power-confluent algorithm]{Two examples of graphs drawn with the Algorithms~\ref{alg:pgd} then~\ref{alg:pcd}, in Figures~\ref{fig:pseudocode_pgd} and~\ref{fig:pseudocode_pcd} respectively. On the left is \texttt{karate}, previously shown in Figure~\ref{fig:untangled_hairballs}, top. On the right is \texttt{lesmis}, previously shown in Figure~\ref{fig:lesmis}.}
-    \label{fig:power_karate_lesmis}
+  \centering
+  \includegraphics[width=\linewidth]{power/power_karate_lesmis.pdf}
+  \caption[Examples of networks drawn with the power-confluent algorithm]{Two examples of graphs drawn with the Algorithms~\ref{alg:pgd} then~\ref{alg:pcd}, in Figures~\ref{fig:pseudocode_pgd} and~\ref{fig:pseudocode_pcd} respectively. On the left is \texttt{karate}, previously shown in Figure~\ref{fig:untangled_hairballs}, top. On the right is \texttt{lesmis}, previously shown in Figure~\ref{fig:lesmis}.}
+  \label{fig:power_karate_lesmis}
 \end{figure}
