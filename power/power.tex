@@ -11,7 +11,7 @@ The previous chapter was an exploration of how to position the vertices of a gra
 \section{Background}
 The curving of links in the context of a node-link diagram is known as \textit{edge bundling}. It is a technique that has been developed because many networks, when processed through a standard force-directed layout, result in a seemingly random layout with no discernable structure. See Figure~\ref{fig:untangled_hairballs} for examples of this. The similarity of such layouts to tangled collections of hair has led to them being colloquially termed \textit{hairballs}.
 
-Unfortunately this is not an easily solved problem, because the \textit{curse of dimensionality} \cite{Friedman2001} means that most of these networks simply cannot be accurately represented in two dimensions, and the likelihood of this problem only rises as the size of any network increases. This can happen even if there exists a clear underlying structure to these networks, lying beyond the reach of the standard layout algorithm.
+Unfortunately this is not an easily solved problem, because the \textit{curse of dimensionality} \cite{Friedman2001Local} means that most of these networks simply cannot be accurately represented in two dimensions, and the likelihood of this problem only rises as the size of any network increases. This can happen even if there exists a clear underlying structure to these networks, lying beyond the reach of the standard layout algorithm.
 Edge bundling attempts to alleviate this issue by introducing a trade-off---the ability to follow individual links is sacrificed for better representation of global structure, by allowing links to overlap.
 This is analogous to organising the wires in a computer system by tying groups of wires together that share similar endpoints.
 
@@ -30,7 +30,7 @@ An example of this in action can be seen in Figure \ref{fig:metaunity}, which il
 The trick to the bundling comes from the fact that we have extra metadata available: the hierarchy of folders and source files that hold the code.
 This hierarchy, not the call graph itself, is first layed out as a tree. Then, since this tree includes extra nodes to represent the folders and source files, these extra nodes are erased from the final visualisation. However their coordinates are instead used as an auxiliary routing graph (ARG) to route the original edges through.
 More precisely, this process of routing involves taking every edge in the original call graph (the vertices of which map to leaves of the hierarchical tree) and rendering each one using a spline curve, whose control points consist of the path from leaf to leaf through the ARG. There is only one such path through the ARG because it is a tree, although this may not necessarily the case; this possibility of a non-tree-shaped ARG will be studied Section~\ref{sec:short_circuits}. The precise definition of the spline curve is also important, and will be further elaborated upon in Section~\ref{sec:bspline_details}, but for now the important thing to note is that this produces bundling behaviour because vertices close to each other in the hierarchy will share control points for their splines, thus curving their rendered links towards each other.
-The hierarchical tree extracted from the Unity game engine can be seen on the TODO hand side, to illustrate its influence on the final visualisation.
+% The hierarchical tree extracted from the Unity game engine can be seen on the TODO hand side, to illustrate its influence on the final visualisation.
 
 This technique is so effective because the structure of the bundles is informed by human judgement. To continue within the call graph example, the hierarchy of folders and source files is literally designed by the programmers for organisational purposes, and so it is very likely to admit some utility for also organising, say, a visualisation.
 Additionally, not only is the curvature links influenced by the ARG, but so is the position of the nodes. Since each node is a leaf in the tree-shaped ARG, their positions around the circle are also influenced by the topology of the tree.
@@ -47,10 +47,10 @@ A popular version of this is known as \emph{modularity}, defined as
   \label{eq:modularity}
 \end{equation}
 where $\mathbf{A}$ is the adjacency matrix where $\mathbf{A}_{ij}$ equals 1 if vertices $i$ and $j$ are connected by an edge, and $\mathbf{C}_{ij}$ equals 1 if vertices $i$ and $j$ are in the same cluster and 0 otherwise.
-The value of $Q$ lies between $\text{--}\sfrac{1}{2}$ and 1 \cite{Brandes2007a}, and it can be intuitively understood as the fraction of the edges that fall within the given clusters minus the expected fraction if edges were distributed at random.
+The value of $Q$ lies between $\text{--}\sfrac{1}{2}$ and 1 \cite{Brandes2007Modularity}, and it can be intuitively understood as the fraction of the edges that fall within the given clusters minus the expected fraction if edges were distributed at random.
 
-This was introduced by Newman and Girvan \cite{Newman2004} to evaluate a separate clustering algorithm, and later directly optimised by Newman \cite{Newman2006} with two methods that both initialise the network as one big cluster that is recursively split into half until no further gain in modularity is possible. The first finds the split by calculating eigenvectors of the \emph{modularity matrix}, and another that finds the split by repeatedly moving vertices between the two sides of the split until modularity is maximised, akin to a hill-climbing method.
-Optimising modularity in general is $\mathcal{NP}$-complete \cite{Brandes2007a}, but its intuitive interpretation has led to various other authors to develop methods to optimise it. The Louvain algorithm (given its name from the authors coming from the University of Louvain, Belgium) \cite{Blondel2008} and its recent improvement to the Leiden algorithm (from Leiden University, Netherlands) \cite{Traag2019} both start by placing every vertex in a singleton cluster, followed by successively merging clusters whilst also moving vertices between clusters, also until modularity cannot be improved further.
+This was introduced by Newman and Girvan \cite{Newman2004} to evaluate a separate clustering algorithm, and later directly optimised by Newman \cite{Newman2006Modularity} with two methods that both initialise the network as one big cluster that is recursively split into half until no further gain in modularity is possible. The first finds the split by calculating eigenvectors of the \emph{modularity matrix}, and another that finds the split by repeatedly moving vertices between the two sides of the split until modularity is maximised, akin to a hill-climbing method.
+Optimising modularity in general is $\mathcal{NP}$-complete \cite{Brandes2007Modularity}, but its intuitive interpretation has led to various other authors to develop methods to optimise it. The Louvain algorithm (given its name from the authors coming from the University of Louvain, Belgium) \cite{Blondel2008} and its recent improvement to the Leiden algorithm (from Leiden University, Netherlands) \cite{Traag2019} both start by placing every vertex in a singleton cluster, followed by successively merging clusters whilst also moving vertices between clusters, also until modularity cannot be improved further.
 
 The behaviour of random walks along the graph has also been used to great effect for clustering. For example, the \emph{markov cluster} algorithm of Enright et al.\ \cite{Enright2002} simulates a random walk process through a series of matrix multiplications on the markov chain of the graph.
 The \emph{infomap} algorithm of Rosvall and Bergstrom \cite{Rosvall2008} optimises a cost function known as the map equation, which applies information-theoretic concepts such as entropy to the behaviour of random walkers. It is optimised through a combination of greedy search and simulated annealing.
@@ -119,7 +119,7 @@ The most commonly used methods fall into three categories: using one member of a
 Choosing a single representative member is the most straightforward; when calculating the dissimilarity between two clusters, one can take the best-case scenario by choosing the closest pair of inter-cluster points, or the worst-case by choosing the farthest pair. These are known as single- and complete-linkage algorithms, respectively \cite{Sibson1973, Defays1977}.
 One can also choose to take an average over the members of both clusters. This can be done by taking the mean dissimilarity between all inter-cluster pairs, and and is known as UPGMA (Unweighted Pair Group Method with Arithmetic mean). Its `weighted' counterpart, known as WPGMA, is more efficient, as when a cluster is merged it `forgets' that it was made up of other elements and becomes treated as a single datapoint itself \cite{Sneath1973}. The reason it is called weighted is, perhaps confusingly, because the original datapoints `lose weight' by being merged into a cluster, whereas in the unweighted version each original datapoint still contributes the same amount to each merging decision.
 
-The third category is known as Ward's method \cite{WardJr1963}, and is based on minimising variance within clusters. The dissimilarity between clusters in this case is the increase in total within-cluster variance if they were to be merged. This is the same objective function that k-means clustering attempts to minimise \cite{Friedman2001a}.
+The third category is known as Ward's method \cite{WardJr1963}, and is based on minimising variance within clusters. The dissimilarity between clusters in this case is the increase in total within-cluster variance if they were to be merged. This is the same objective function that k-means clustering attempts to minimise \cite{Friedman2001Nearest}.
 % \footnote{A good interpretation for the behaviour of different linkage methods is to imagine their shape. Single linkage is an amoeba absorbing the closest point around it, complete is a hypersphere expanding as little as possible, upgma b, wpgma, ward is a 'type' see \url{https://stats.stackexchange.com/questions/195456/how-to-select-a-clustering-method-how-to-validate-a-cluster-solution-to-warran/195481\#195481}}
 
 Note that since each merge is based on the dissimilarity between clusters, this extra information that can be stored in the resulting dendrogram as the height of the branch. This is a direct benefit of using dissimilarity clustering, and is usually used to decide where to cut the dendrogram if flat clusters are needed. It will be leveraged to simplify the resulting dendrogram in Section~\ref{sec:pruning}.
@@ -330,7 +330,7 @@ Code used to generate all figures can be found at \url{www.github.com/jxz12/Hier
 The results presented here largely agree with the design choices made by Pons and Latapy \cite{Pons2006} for the use of agglomerative dissimilarity clustering on graphs. That is except for leaving out the extra $\mathbf{D}_{kk}^{\text{--}\sfrac{1}{2}}$ weighting in Equation~\ref{eq:walktrap} as it did not improve performance at all in the benchmark explored here.
 
 The use of dissimilarity measures based on random walks outperforms those derived from other features such as shortest paths, as well as the Girvan-Newman algorithm used by Jia et al.\ \cite{Jia2011}, which also has a higher runtime complexity.
-This is because calculating betweenness-centrality for each edge is $\mathcal{O}(|V||E|)$ \cite{Brandes2001a} and since this must be recalculated $|E|$ times, the overall complexity of the algorithm is $\mathcal{O}(|V||E|^2)$ compared to $\mathcal{O}(|V|^2\log|V|)$ for the agglomerative methods explored here.
+Calculating betweenness-centrality for each edge is $\mathcal{O}(|V||E|)$ \cite{Brandes2001Centrality} and since this must be recalculated $|E|$ times, the overall complexity of Girvan-Newman is $\mathcal{O}(|V||E|^2)$, compared to $\mathcal{O}(|V|^2\log|V|)$ for the agglomerative methods explored here.
 Ward's method also consistently outperforms other linkage methods, and a qualitative observation of note is that it also tends to give dendrograms that lend themselves more to the pruning process in Section~\ref{sec:pruning}. Branches in the dendrogram more clearly delineate separately groups of clusters, leading to easier simplification into a streamlined hierarchy for bundling.
 % more systematic study into different methods for pruning 
 When the opposite situation occurs, i.e.\ if differences in branch height are homogenous, the pruning process may merges every single branch into one, since child branches are recursively merged into their parents. However this also usually corresponds to a poor quality clustering in general, because it means that the algorithm could not find large groups of datapoints that were all close to each other.
@@ -490,9 +490,9 @@ Setting $w_\cap=10$ and $w_{\Triangle}=1$ works well in practice; these are the 
 Adding our new heuristic produces the best or joint best results in all graphs, and also improves the consistency of the output, with a better worst result in all cases.
 % The improvements are small, but are consistently better and with less variance.
 Note that the variation between runs in our implementation is due to a pseudorandom order of iteration through
-candidate merges (Figure.~\ref{fig:pseudocode_pgd}, line~\ref{pseudo:pgd:top}).
+candidate merges (Figure.~\ref{fig:pseudo_pgd}, line~\ref{code:pgd:top}).
 % \texttt{std::unordered\_set} in \Cpp, which may vary between implementations of the standard library.
-The networks are, from top to bottom, Italian families linked by marriage \cite{Breiger1986}, members of a karate club \cite{Zachary1977}, women meeting at social events \cite{Davis2009}, interactions between bottlenose dolphins \cite{Lusseau2003}, co-occurrence of characters in the musical Les Mis\'erables \cite{Knuth1993}, American football games between US colleges \cite{Girvan2002}, and coauthorships of scientists working on network theory \cite{Newman2006a}.
+The networks are, from top to bottom, Italian families linked by marriage \cite{Breiger1986}, members of a karate club \cite{Zachary1977}, women meeting at social events \cite{Davis2009}, interactions between bottlenose dolphins \cite{Lusseau2003}, co-occurrence of characters in the musical Les Mis\'erables \cite{Knuth1993}, American football games between US colleges \cite{Girvan2002}, and coauthorships of scientists working on network theory \cite{Newman2006Eigenvectors}.
  
 \begin{figure}
   \removeAlgorithmFigureError
@@ -513,12 +513,12 @@ The networks are, from top to bottom, Italian families linked by marriage \cite{
       
       \ForEach{\emph{pair of modules} $\{m,n\}\in M_\mathrm{top}\times M_\mathrm{top}$}
       {
-        \label{pseudo:pgd:top}
+        \label{code:pgd:top}
         $\kappa_\mathrm{best} \leftarrow \max(\kappa(m,n),\,\kappa_\mathrm{best})$
-        \label{pseudo:pgd:kappa}
+        \label{code:pgd:kappa}
       }
       $\textsc{merge}(\{m,n\}_\mathrm{best})$
-      \label{pseudo:pgd:merge}
+      \label{code:pgd:merge}
     }
     \caption{\textsc{Greedy power graph decomposition}}
     \label{alg:pgd}
@@ -526,9 +526,9 @@ The networks are, from top to bottom, Italian families linked by marriage \cite{
   
   \caption[Pseudocode for improved power graph decomposition]{Pseudocode for the greedy heuristic power graph construction in Section~\ref{sec:power_graph}.
   Each module consists of a set of children $C$, and a set of neighbours $N$.
-  The score function $\kappa$ is from Equation~\eqref{eq:kappa_full}, and the merge operation on line~\ref{pseudo:pgd:merge} is described in Section~\ref{sec:power_graph}, where any new module is parented to its merged children by adding them to its set of children $C$.
-  In practice a redundant super-module is maintained, whose children are the top level modules $M_\mathrm{top}$ on line~\ref{pseudo:pgd:top}.}
-  \label{fig:pseudocode_pgd}
+  The score function $\kappa$ is from Equation~\eqref{eq:kappa_full}, and the merge operation on line~\ref{code:pgd:merge} is described in Section~\ref{sec:power_graph}, where any new module is parented to its merged children by adding them to its set of children $C$.
+  In practice a redundant super-module is maintained, whose children are the top level modules $M_\mathrm{top}$ on line~\ref{code:pgd:top}.}
+  \label{fig:pseudo_pgd}
 \end{figure} 
 
 It is important to note that this is still a simple greedy heuristic, which does not make any guarantees about the quality of the final result.
@@ -536,9 +536,9 @@ The original method in \cite{Dwyer2014} gives the option to somewhat alleviate t
 A further exploration of this extended algorithm is out of scope for this paper, and Dwyer et al. \cite{Dwyer2014} additionally note that the qualitative improvement that results from including this priority queue is minimal.
 
 Our final change involves bringing down the complexity of neighbour set intersection to $O(E)$ using hash sets, which reduces the complexity of the algorithm down slightly to $O(|V|^3|E|)$.
-Pseudocode for the above described algorithm can be seen in Fig.~\ref{fig:pseudocode_pgd}.
+Pseudocode for the above described algorithm can be seen in Fig.~\ref{fig:pseudo_pgd}.
 
-\subsection{Confluent drawing conversion}
+\subsection{Confluent drawing}
 \label{sec:confluent_definition}
 The original definition of a confluent drawing~$A$ for a graph~$G$ is:
 \begin{mdframed}[backgroundcolor=WhiteSmoke]
@@ -625,7 +625,7 @@ Trees are geodetic (i.e.\ there exists a unique shortest path between any pair o
 The bottom row in Figure~\ref{fig:overlap} shows a simple example of how this can happen. While it may seem as if this counter-example is contrived and should not ever appear due to the redundant nested structure of power groups, a similar pattern arises from the optimal decomposition of a clique, shown in Figure~\ref{fig:overlap_sm}.
 The key detail here is that only one power edge should ever be traversed for any given adjacency, which is guaranteed by the solution described in the following Section~\ref{sec:hierarchical_routing}.
 
-\subsection{Hierarchical Routing}
+\subsection{Hierarchical routing}
 \label{sec:hierarchical_routing}
 
 The solution to these problems is to retain the hierarchical structure of power groups as a directed tree, with all routing edges directed towards the leaves. Power edges are then added back, except as a special type of edge that is incoming at both ends (the purpose of which will soon be made clear). If the root of the tree is then discarded, we are left with the exact same ARG as before, except now with all routing edges explicitly directed (see Figure~\ref{fig:radial}, middle column).
@@ -664,25 +664,25 @@ Note that this also means all adjacency information is now preserved in the ARG,
       % $E\leftarrow E\cup(m,c) \;\forall c\in C_m$
       % $E\leftarrow E\cup\bigcup_{c\in C_m}(m,c)$
       $E\leftarrow E\cup\{(m,c)\ |\ c\in C_m\}$
-      \label{pseudo:directed}
+      \label{code:pcd:directed}
       
       % $P\leftarrow P\cup\{m,n\} \;\forall n\in N_m$
       % $P\leftarrow P\cup\bigcup_{n\in N_m}\{m,n\}$
       $P\leftarrow P\cup\{(m,n)\ |\ n\in N_m\}$
-      \label{pseudo:undirected}
+      \label{code:pcd:undirected}
     }
     \ForEach{\emph{vertex} $v\in V$}{
       \If{$|N^+(v)|\geq 2$ \emph{and} $|N^{-*}(v)|\geq 2$}{
-      \label{pseudo:inout}
+      \label{code:pcd:inout}
         \textsc{split}($v$)
-        \label{pseudo:split}
+        \label{code:pcd:split}
       }
     }
     
     $A \leftarrow \emptyset$
     
     $\mathbf{X} \leftarrow \textsc{layout}((V,\,E\cup P))$
-    \label{pseudo:sgd}
+    \label{code:pcd:sgd}
     
     \ForEach{\emph{power edge} $p=\{i,j\}\in P$}{
       % $Q_i\leftarrow \textsc{pathstoleaves}(i, \{V,E\})$
@@ -695,18 +695,18 @@ Note that this also means all adjacency information is now preserved in the ARG,
       
       % $A\leftarrow A\cup\bigcup_{q\in Q_i\times Q_j} \textsc{spline}(\mathbf{X}_q)$
       $A\leftarrow A\cup\{\,\textsc{spline}(\mathbf{X}_q)\ |\ q\in Q_i\times Q_j\}$
-      \label{pseudo:spline}
+      \label{code:pcd:spline}
     }
     \caption{\textsc{Power-confluent drawing}}
     \label{alg:pcd}
   \end{algorithm}
   
-  \caption[Pseudocode for power-confluent drawing]{Pseudocode for our conversion from a set of power graph modules (see the output of Algorithm~\ref{alg:pgd} in Figure~\ref{fig:pseudocode_pgd}) to a rendered drawing, described in Section~\ref{sec:hierarchical_routing}. 
-  Note that the edges on line~\ref{pseudo:directed} are ordered pairs, while those on line~\ref{pseudo:undirected} are unordered. This allows, on line~\ref{pseudo:inout}, for $N^+$ to indicate a set of outgoing neighbours, and $N^{-*}$ a set of incoming neighbours plus any connected by power edges in $P$.
-  The split operation on line~\ref{pseudo:split} then moves $N^+$ and $N^{-*}$ to separate routing nodes, as in Figure~\ref{fig:radial}.
-  In practice a shorter edge length is placed between split routing nodes, and so for line~\ref{pseudo:sgd} require a layout method that can embed edge lengths, such as the stress layout in Section~\ref{sec:stress_background}.
-  The specifics of the spline function on line~\ref{pseudo:spline} are outlined in Section~\ref{sec:bspline_details}}
-  \label{fig:pseudocode_pcd}
+  \caption[Pseudocode for power-confluent drawing]{Pseudocode for our conversion from a set of power graph modules (see the output of Algorithm~\ref{alg:pgd} in Figure~\ref{fig:pseudo_pgd}) to a rendered drawing, described in Section~\ref{sec:hierarchical_routing}. 
+  Note that the edges on line~\ref{code:pcd:directed} are ordered pairs, while those on line~\ref{code:pcd:undirected} are unordered. This allows, on line~\ref{code:pcd:inout}, for $N^+$ to indicate a set of outgoing neighbours, and $N^{-*}$ a set of incoming neighbours plus any connected by power edges in $P$.
+  The split operation on line~\ref{code:pcd:split} then moves $N^+$ and $N^{-*}$ to separate routing nodes, as in Figure~\ref{fig:radial}.
+  In practice a shorter edge length is placed between split routing nodes, and so for line~\ref{code:pcd:sgd} require a layout method that can embed edge lengths, such as the stress layout in Section~\ref{sec:stress_background}.
+  The specifics of the spline function on line~\ref{code:pcd:spline} are outlined in Section~\ref{sec:bspline_details}}
+  \label{fig:pseudo_pcd}
 \end{figure}
 
 To draw the adjacency edges back on top, any shortest path calculations can now be forgoed. Instead, for each power edge, a depth-first search is performed for all child leaf nodes starting from both ends of the power edge. Each path to each leaf from one end is then concatenated to the reversed path to each leaf from the other end, and every concatenated path is used as the sequence of control points for a spline.
@@ -714,7 +714,7 @@ These paths are now guaranteed to be unique because the ARG is now effectively a
 
 Imposing this directionality on the routing graph also fixes the node splitting ambiguity in Section~\ref{sec:confluent_definition}, guaranteeing that the split occurs in the correct direction, according to the rule of separating incoming and outgoing edges to different nodes.
 This works because every routing node is the boundary between two sides of a biclique, equivalent to a single bundled junction; the explicit direction of routing edges now encodes the orientation of the bundle itself.
-This entire process is illustrated in Figure~\ref{fig:radial}, and pseudocode for the resulting algorithm can be seen in Figure~\ref{fig:pseudocode_pcd}, Algorithm~\ref{alg:pcd}.
+This entire process is illustrated in Figure~\ref{fig:radial}, and pseudocode for the resulting algorithm can be seen in Figure~\ref{fig:pseudo_pcd}, Algorithm~\ref{alg:pcd}.
 
 \subsection{B-splines}
 \label{sec:bspline_details}
@@ -817,11 +817,11 @@ On the theoretical side, it may be the case that relaxing the non-overlapping gr
 The potential proof or refutation of this equivalence is left as an open question, along with determining the exact relationship between power decomposition and confluent drawing in general.
 
 To finish on a practical note, a more tailored layout algorithm than standard force-directed methods will be necessary for the algorithm to become a truly practical tool, as layouts can often become tangled and unreadable. See Figure~\ref{fig:power_karate_lesmis} for two examples of this on graphs previously studied in this chapter.
-The layout function (Figure~\ref{fig:pseudocode_pcd}, line~\ref{pseudo:sgd}) is currently only given the routing graph as input, but may benefit from extra information, such as which edges are power edges and which are hierarchical. An effective radial layout that can avoid crossings, like the one shown in Figure~\ref{fig:radial} but automatic, may also offer a superior solution.
+The layout function (Figure~\ref{fig:pseudo_pcd}, line~\ref{code:pcd:sgd}) is currently only given the routing graph as input, but may benefit from extra information, such as which edges are power edges and which are hierarchical. An effective radial layout that can avoid crossings, like the one shown in Figure~\ref{fig:radial} but automatic, may also offer a superior solution.
 
 \begin{figure}
   \centering
   \includegraphics[width=\linewidth]{power/power_karate_lesmis.pdf}
-  \caption[Examples of networks drawn with the power-confluent algorithm]{Two examples of graphs drawn with the Algorithms~\ref{alg:pgd} then~\ref{alg:pcd}, in Figures~\ref{fig:pseudocode_pgd} and~\ref{fig:pseudocode_pcd} respectively. On the left is \texttt{karate}, previously shown in Figure~\ref{fig:untangled_hairballs}, top. On the right is \texttt{lesmis}, previously shown in Figure~\ref{fig:lesmis}.}
+  \caption[Examples of networks drawn with the power-confluent algorithm]{Two examples of graphs drawn with the Algorithms~\ref{alg:pgd} then~\ref{alg:pcd}, in Figures~\ref{fig:pseudo_pgd} and~\ref{fig:pseudo_pcd} respectively. On the left is \texttt{karate}, previously shown in Figure~\ref{fig:untangled_hairballs}, top. On the right is \texttt{lesmis}, previously shown in Figure~\ref{fig:lesmis}.}
   \label{fig:power_karate_lesmis}
 \end{figure}
