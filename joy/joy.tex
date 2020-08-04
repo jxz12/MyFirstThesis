@@ -11,7 +11,7 @@ We concluded that dense networks such as foodwebs require some use of metadata t
 The technique that we decided worked best was to still use a force-directed method, but to additionally constrain the y-axis positions to something meaningful. In the case of food webs, we choose the
 \emph{prey-averaged trophic level}~\cite{trophic}, defined as
 \begin{equation}
-    t_j = 1 + \sum_i^n p_{ij}t_i
+  t_j = 1 + \sum_i^n p_{ij}t_i
 \end{equation}
 where $p_{ij}$ is the proportion of the diet of $j$ that $i$ contributes to. This essentially means that the trophic level of a species is equal to the average trophic level of its prey plus one.
 Note that for double subscripts we always denote the resource first and then the consumer, so in the above example $j$ is the consumer and $i$ is the resource.
@@ -59,11 +59,11 @@ Adding a dimension allows for more possible configurations in the space, and so 
 See Figure~\ref{niche} for a simple example.
 
 \begin{figure}
-    \centering
-    \includegraphics[width=.8\linewidth]{niche.pdf}
-    \caption{Example of a 1D niche structure (top) and 2D (bottom), with a consumer and its feeding range in red, and resources in green.
-    In one dimension it is not possible to eat only the left and right species, but given another dimension it is possible for the middle species to `escape'.}
-    \label{niche}
+  \centering
+  \includegraphics[width=.8\linewidth]{niche.pdf}
+  \caption{Example of a 1D niche structure (top) and 2D (bottom), with a consumer and its feeding range in red, and resources in green.
+  In one dimension it is not possible to eat only the left and right species, but given another dimension it is possible for the middle species to `escape'.}
+  \label{niche}
 \end{figure}
 
 What Eklof et al.~\cite{eklof} did was to find the minimum number of dimensions necessary to describe their empirical data. Note that their methods are not exact because there exists no polynomial algorithm to find the dimensionality, related to \emph{boxicity} in graph theory terminology, of a network. They used an algorithm that searches the space by swapping certain species one by one, and estimated the `best' dimension using the Akaike information criterion~\cite{eklof}.
@@ -84,8 +84,8 @@ As we shall see, this also solves our issue of having to choose a suitable extin
 Let us first recall the form of our equations. Our Lotka-Volterra style model\footnote{These such equations have been criticised in the past for being too simplistic, but after much thought we decided to stick with this simpler set of differential equations, in lieu of more complex models such as Type II/III functional responses~\cite{holling}, which introduce even more parameterisation problems. Our model in particular will be parameterised using allometry i.e. scaled according to the species body mass. See Pawar~\cite{pawar} for further details.}
 describes the rate of change in population of a single species $x_i$ as
 \begin{equation}
-    \frac{dx_i}{dt} = x_i(r_i + \sum_j^na_{ij}x_j)
-    \label{lv}
+  \frac{dx_i}{dt} = x_i(r_i + \sum_j^na_{ij}x_j)
+  \label{lv}
 \end{equation}
 where $b_i$ is the growth (or death if it is negative) rate, and $a_{ij}$ is the strength of the interaction between two species (which is negative if $i$ is a resource of $j$). 
 This can be written in vector format to include all species simultaneously as
@@ -98,8 +98,8 @@ We then set the left hand side to zero in order to find an equilibrium point i.e
 The solution to this equilibrium has many trivial solutions with any species $x=0$, which corresponds to the natural case of an extinct species staying extinct.
 However we are interested in finding if there are any non-zero solutions, and so cancel the $\mathbf{x}$ outside to bracket to reach the solution
 \begin{equation}
-    \mathbf{x^*} = -\mathbf{A}^{-1}\mathbf{b}.
-    \label{equilibrium}
+  \mathbf{x^*} = -\mathbf{A}^{-1}\mathbf{b}.
+  \label{equilibrium}
 \end{equation}
 where $\mathbf{x}^*$ is the strictly non-zero populations of every species at equilibrium.
 This is equivalent to a linear system of equations and so can be solved exactly by numerical methods.
@@ -108,17 +108,17 @@ If the solution $\mathbf{x^*}$ contains any negative numbers then we simply tell
 
 If the system is however feasible, the second benefit of this technique is that we can continue and derive the \emph{local asymptotic stability} of this fixed point, which has been widely used in the literature as a mathematically elegant and computationally tractable measure of food web stability~\cite{may, emmerson}, although not without criticism~\cite{reactivity, axelrossberg}. To do this we first find the Jacobian matrix
 \begin{equation}
-    \mathbb{J} = \begin{bmatrix}
-    \frac{\partial f_1}{\partial x_1} & 
-    \cdots &
-    \frac{\partial f_1}{\partial x_n} \\
-    \vdots &
-    \ddots &
-    \vdots \\
-    \frac{\partial f_n}{\partial x_1} & 
-    \cdots &
-    \frac{\partial f_n}{\partial x_n}
-    \end{bmatrix}
+  \mathbb{J} = \begin{bmatrix}
+  \frac{\partial f_1}{\partial x_1} & 
+  \cdots &
+  \frac{\partial f_1}{\partial x_n} \\
+  \vdots &
+  \ddots &
+  \vdots \\
+  \frac{\partial f_n}{\partial x_1} & 
+  \cdots &
+  \frac{\partial f_n}{\partial x_n}
+  \end{bmatrix}
 \end{equation}
 using (\ref{lv}) = $f_i$.
 This is the matrix of all partial derivatives of a vector-valued function. We then evaluate the Jacobian at our feasible equilibrium point $\mathbf{x}^*$, giving us the \emph{community matrix}
@@ -157,33 +157,33 @@ Cite games like fold.it, eyewire, eteRNA, borderlands minigame etc.
 \section{Design and Hypotheses}
 \subsection{Visualisation}
 \begin{itemize}
-    \item TROPHIC LEVELS:
-    \begin{itemize}
-        \item gauss-seidel iteration because positive definite, optimised to only take O(m) per iteration and O(n) extra space (because we only care about the sum of the rows and not where the rows are placed. In general we find the number of iterations required is <100 (test this) but requires for loops~\cite{oliviasimpsonpaper}
-        \item whether this laplacian has a solution can also be found using a breadth first search from sources (which is also used for chain)
-        \item note that this is the same set of equations as in \eqref{eq:tutte}
-    \end{itemize}
-    \item LAYOUT:
-    \begin{itemize}
-        \item SGD is so fast that we use it on every topological change
-        \item 3D vs 2D: originally used 3D, but we found that players could not quickly pick up the rotational interface. Nodes would also often become obscured in the center of the layout, so we switched to 2D instead. 
-        \item however this also made trophic level constraints more difficult to satisfy because there is one fewer dimension to move around in (previously all that was needed was to always keep the y-position. The best solution was to add 5 iterations of $\mu=1$ at the beginning, as an initialization step. TODO graph on this
-        \item localised majorization is used every frame for one node in order to fine-tune layout
-        \item we compare constrained to non-constrained to see who performs better. They both use the same initial layout (SGD constrained to trophic levels) but with either constrained or non-constrained majorization when fine tuning.
-        \item TODO: procrustes then performed on each connected component
-    \end{itemize}
-    
-    \item superfocus
-    \item johnson's algorithm for loops
-    \item mention old idea for chess-board and why it didn't work
+  \item TROPHIC LEVELS:
+  \begin{itemize}
+    \item gauss-seidel iteration because positive definite, optimised to only take O(m) per iteration and O(n) extra space (because we only care about the sum of the rows and not where the rows are placed. In general we find the number of iterations required is <100 (test this) but requires for loops~\cite{oliviasimpsonpaper}
+    \item whether this laplacian has a solution can also be found using a breadth first search from sources (which is also used for chain)
+    \item note that this is the same set of equations as in \eqref{eq:tutte}
+  \end{itemize}
+  \item LAYOUT:
+  \begin{itemize}
+    \item SGD is so fast that we use it on every topological change
+    \item 3D vs 2D: originally used 3D, but we found that players could not quickly pick up the rotational interface. Nodes would also often become obscured in the center of the layout, so we switched to 2D instead. 
+    \item however this also made trophic level constraints more difficult to satisfy because there is one fewer dimension to move around in (previously all that was needed was to always keep the y-position. The best solution was to add 5 iterations of $\mu=1$ at the beginning, as an initialization step. TODO graph on this
+    \item localised majorization is used every frame for one node in order to fine-tune layout
+    \item we compare constrained to non-constrained to see who performs better. They both use the same initial layout (SGD constrained to trophic levels) but with either constrained or non-constrained majorization when fine tuning.
+    \item TODO equations: procrustes then performed on each connected component
+  \end{itemize}
+  
+  \item superfocus
+  \item johnson's algorithm for loops
+  \item mention old idea for chess-board and why it didn't work
 \end{itemize}
 UI:
 \begin{itemize}
-    \item database in sql
-    \item indexed using...
-    \item battery icon for health
-    \item stars and leaderboards
-    \item species mesh and colour dependent on traits
+  \item database in sql
+  \item indexed using...
+  \item battery icon for health
+  \item stars and leaderboards
+  \item species mesh and colour dependent on traits
 \end{itemize}
 
 What is the outcome? Test both visualisations and see which group gets higher scores and/or finishes quicker and/or gives up earlier!
@@ -191,10 +191,10 @@ What is the outcome? Test both visualisations and see which group gets higher sc
 \subsection{Simulation}
 model:
 \begin{itemize}
-    \item USED to be real time ODE solver, but changed into analytic equilibrium point finder. Makes it a PUZZLE game.
-    \item scoring metric used in the end is 
-    \item diagonals of interaction matrix (reference hsi-cheng's work)
-    \item math.net library
+  \item USED to be real time ODE solver, but changed into analytic equilibrium point finder. Makes it a PUZZLE game.
+  \item scoring metric used in the end is 
+  \item diagonals of interaction matrix (reference hsi-cheng's work)
+  \item math.net library
 \end{itemize}
 
 what is the outcome? analyse the most successful strategies for structural (average chain length/trophic level, number of edges, all the niche model stuff) and dynamical features (average body size/interferences, paradox of enrichment, flux/abundance)
