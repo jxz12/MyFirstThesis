@@ -19,7 +19,7 @@ A more obscure example is \emph{string graphs}, where each vertex is represented
 A gallery of such examples can be seen in Figure~\ref{fig:graph_representations}.
 Each of these each of these representations has its unique benefits and downsides: matrix plots can show a very dense amount of data in a small space, but are very dependent on the ordering of rows and columns \cite{Liiv2010}, as it can be seen in Figure~\ref{fig:graph_representations} that shuffling the order of rows and column can completely hide the underlying structure.
 The intersection-style graphs are intuitive and do not require edges to be explicitly drawn, thus saving on visual clutter. However they cannot be drawn for all graphs for either the circle \cite{McDiarmid2014} or string \cite{Schaefer2003} representations.
-Treemaps effectively convey the idea of a hierarchy, where the root node completely envelops each of its children in a recursive manner. On their own they can clearly only visualise trees, but have been effectively used in conjuction with clustering algorithms applied to a graph, for methods such as \emph{graph thumbnails} \cite{Yoghourdjian2018}, or the \emph{power graphs decomposition} \cite{Dwyer2014} that will be studied later in Chapter~2, Section~\ref{sec:power_graph}.
+Treemaps effectively convey the idea of a hierarchy, where the root node completely envelops each of its children in a recursive manner. On their own they can only visualise trees, but have been effectively used in conjuction with clustering algorithms to apply them to general graphs; examples of this include \emph{graph thumbnails} \cite{Yoghourdjian2018}, or \emph{power graphs decomposition} \cite{Dwyer2014} that will be studied later in Chapter~\ref{chap:edges}, Section~\ref{sec:power_graph}.
   
 % Because of the difference between the abstract mathematical structure of a network and its representation within a visualisation, the abstract structure itself will henceforth be referred to a graph comprised of vertices and edges, and its representation a a network comprised of nodes and links.\footnote{This is in line with the terminology chosen by the \emph{International Symposium on Graph Drawing and Network Visualisation} to separate its theoretical and applied submission tracks, and so I will attempt to adopt it here. However the distinction between the two can sometimes become blurred depending on the context.}
 
@@ -27,7 +27,7 @@ Even within the subfield of node-link diagrams, there is a wide variety of optio
 Examples include \emph{arc} or \emph{chord diagrams}, where nodes are placed on a line or around a circle, respectively. Links are then added by drawing the eponymous arcs or chords between nodes.
 A method that has recently gained popularity is the \emph{hive plot}, a simple but effective variant of parallel coordinate plots \cite{Krzywinski2012}, which places nodes on radial lines to draw curves between them, in a similar fashion to radar charts \cite{Porter2018}. An important subtlety is that each node may or may not be placed on more than one line, and the order in which the nodes are spread across the line is also a conscious choice. This customisability is where the power of such a method lies.
 
-Hopefully the above examples give a taste of how varied the representation of a graph can be. The work in this thesis will however focus its attention on the node-link diagram, where this chapter will specifically concern the \emph{layout} of nodes in such a visualisation.
+Hopefully the above examples give a taste of how varied the representation of a graph can be, even if the work in this thesis focuses its attention solely on the node-link diagram. The remainder of this chapter will specifically concern the \emph{layout} of nodes in such a visualisation.
 
 \section{Background}
 \label{sec:nodes_background}
@@ -45,9 +45,9 @@ Note that a necessary initial step is to fix the position of a selection of node
 The powerful insight that Tutte revealed with his algorithm was a remarkable mathematical theorem attached to it. He proved that this barycentre algorithm will always produce a planar drawing, in the specific case that the graph is planar and tri-connected (i.e.\ the graph cannot be disconnected by removing two vertices, no matter which two are removed).
 
 This algorithm has served as the springboard for two main branches of network layout algorithms. Since planarity has been shown to be one of, if not the most important markers for readability in node-link diagrams \cite{Purchase1997}, the first branch is a line of planarity-based algorithms which can guarantee planar node layouts. Examples include the algorithm of Read \cite{Read1987} which recursively removes nodes and adds dummy edges to maintain a triangulated graph at each step.  A problem with this method and Tutte's is \emph{node resolution}, which means that nodes may be placed exponentially close to each other, rendering the graph impossible to read in certain areas.
-A breakthrough for this problem came in 1990 by de Fraysseix et al.\ \cite{DeFraysseix1990} who described the first layout algorithm achieve an asymptotically optimal node resolution of an $\mathcal{O}(|V|\times |V|)$ grid, and in linear time \cite{Chrobak1995}. This was done by constructing a \emph{canonical ordering} of the graph \cite{Zhang2005} which is used to order nodes on the x-axis, and from there y-axis positions can be chosen such to avoid crossings.
-Improvements and refinements have been made with this algorithm in mind \cite{Zhang2005}, but none have managed to solve the problem of poor \emph{angular resolution}, which means that adjacent edges form small angles between each other, another property that has been shown to impact the readability of layouts \cite{Purchase1997}.
-This issue exists until this day \cite{Eades2012}, and is a primary reason why most network visualisation software uses algorithms based on a second, less mathematically rigorous branch of algorithms inspired by Tutte.
+A breakthrough for this problem came in 1990 by de Fraysseix et al.\ \cite{DeFraysseix1990} who described the first layout algorithm to achieve an asymptotically optimal node resolution of an $\mathcal{O}(|V|\times |V|)$ grid, and in linear time \cite{Chrobak1995}. This was done by constructing a \emph{canonical ordering} of the graph \cite{Zhang2005} which is used to order nodes on the x-axis, and from there y-axis positions can be chosen such to avoid crossings.
+Improvements and refinements have been made with this algorithm in mind \cite{Zhang2005}, but such methods suffer from poor \emph{angular resolution}, which means that adjacent edges form small angles between each other, another property that has been shown to negatively impact the readability of layouts \cite{Purchase1997}.
+This issue exists until this day \cite{Eades2012}, and is a primary reason why most network visualisation software uses algorithms based on a second, less mathematically rigorous branch of algorithms also inspired by Tutte.
 
 This second branch comes from an intuitive interpretation of Tutte's algorithm: that each edge is analogous to a spring of zero natural length, where the solution to Tutte's system of linear equations can be seen as the point at which the elastic energy of these springs, according to Hooke's law \cite{Hooke1678}, is minimised. This energy is defined as
 \begin{equation}
@@ -107,7 +107,7 @@ With the view that the action of `force-balancing' is equivalent to gradient des
 This optimisation-centric viewpoint also allows a variety of linear algebra-based methods to be grouped into the same taxonomy.
 The algorithm of Harel and Koren \cite{Harel2004} first embeds a graph in a high-dimensional space, determined by a covariance matrix of graph-theoretic or shortest-path distances, and then finds an optimal projection down to two dimensions by finding the eigenvectors of this this matrix. This is commonly known as principal components analysis (PCA) \cite{Pearson1901}.
 The \emph{classical scaling} approach of Brandes and Pich \cite{Brandes2007Eigensolver} is based on constructing the high-dimensional embedding from a double centered \emph{distance matrix} between high-dimensional points and then performing PCA. The intuition behind this method is that it optimises the inner product between low- and high-dimensional distances.
-The \emph{Spectral} approach, originally developed by Hall in 1970 \cite{Hall1970} and largely ignored by the field until Koren in 2003 \cite{Koren2003}, uses a graph Laplacian as the high-dimensional matrix instead of shortest-paths, upon which PCA is again applied. This approach is particularly closely related to Tutte's algorithm, which in fact utilises the same graph Laplacian when solving for Equation~\eqref{eq:tutte}.
+The \emph{spectral} approach, originally developed by Hall in 1970 \cite{Hall1970} and largely ignored by the field until Koren in 2003 \cite{Koren2003}, uses a graph Laplacian as the high-dimensional matrix instead of shortest-paths, upon which PCA is again applied. This approach is particularly closely related to Tutte's algorithm, which in fact utilises the same graph Laplacian when solving for Equation~\eqref{eq:tutte}.
 The eigenvalue approach even optimises the same energy function, but requires the variance of the embedding to be non-zero, thereby avoiding the need to fix certain nodes around the boundary \cite{Koren2003}.
 In mathematical terms, its energy upon a single dimension of the layout in the column vector $\mathbf{x}$ can be derived as
 \begin{align}
@@ -478,12 +478,6 @@ However they are robust across a wide variety of graphs, as all the results show
 An important consideration is the order in which constraints are satisfied, as naive iteration can introduce biases that cause the algorithm to get caught in local minima.
 The original method behind SGD proposed by Robbins and Monro \cite{Robbins1951} randomizes with replacement, meaning that a random term is picked every time with no guarantee as to how often a term will be picked. Some variants perform random reshuffling (RR) which guarantees that every term is processed once on each iteration. Under certain conditions it can be proven analytically that RR converges faster \cite{Gurbuzbalaban2019}, and the results here support this.
 
-Unfortunately adding randomness incurs a penalty in speed, due to the cost of both random number generation and reduced data cache prefetching.
-This overhead is non-trivial, with iterations taking up to 60\% longer with random reshuffling compared to looping in order. 
-The trade-offs between more randomness for better convergence but slower iterations, versus less randomness for slower convergence but faster iterations, will therefore be explored here.
-Five different degrees of randomness were tried: shuffling only the indices themselves, which removes any bias inherent to the data but still makes use of the cache by iterating in order; randomizing with replacement; shuffling the order of terms once; shuffling twice and alternating between the two orders; and shuffling on every iteration.
-The results can be seen in Figure~\ref{fig:randomisation}.
-
 \begin{figure}
   \centering
   \includegraphics[width=.9\textwidth]{stress/random.pdf}
@@ -492,6 +486,12 @@ The results can be seen in Figure~\ref{fig:randomisation}.
   }
   \label{fig:randomisation}
 \end{figure}
+
+Unfortunately adding randomness incurs a penalty in speed, due to the cost of both random number generation and reduced data cache prefetching.
+This overhead is non-trivial, with iterations taking up to 60\% longer with random reshuffling compared to looping in order. 
+The trade-offs between more randomness for better convergence but slower iterations, versus less randomness for slower convergence but faster iterations, will therefore be explored here.
+Five different degrees of randomness were tried: shuffling only the indices themselves, which removes any bias inherent to the data but still makes use of the cache by iterating in order; randomizing with replacement; shuffling the order of terms once; shuffling twice and alternating between the two orders; and shuffling on every iteration.
+The results can be seen in Figure~\ref{fig:randomisation}.
 
 Five different graphs were selected, each with around 1000 vertices, and show a corresponding good layout for each to visualize the differences between them.
 More mesh-like graphs such as \texttt{dwt\_1005} do not benefit much from added randomness, and receive large gains in speed for a small hit to quality.
@@ -505,27 +505,32 @@ RR is used for the rest of the results here.
 \label{sec:sgd_experiment}
 To test the effectiveness of SGD, symmetric sparse matrices from the SuiteSparse Matrix Collection \cite{Davis2011} will be used as a benchmark, following Khoury et al.\ \cite{Khoury2012}.
 Both SGD and majorization were ran on every graph with 1000 or fewer vertices, and compared the range of stress levels reached after 15 iterations and until convergence, using the two schedules described Section~\ref{sec:annealing}. These results can be seen in Figure~\ref{fig:systematic}.
-A representative selection of larger graphs were also chosen for more detailed timing results, showing multiple implementations of majorization and the time course of convergence, which can be seen in Figure~\ref{fig:stress_plots_big}.
+Each graph in the collection is also assigned to a group as metadata, and graphs that share a group tend to have similar topologies; groups are kept together, ordered alphabetically, and within each group sorted by difference in mean stress when allowing for convergence. Thus both plots have the same order. Groups are demarcated by the alternating shaded background. 
 
+A representative selection of larger graphs were also chosen for more detailed timing results, showing multiple implementations of majorization and the time course of convergence, which can be seen in Figure~\ref{fig:stress_plots_big}.
 
 \begin{figure}
   \centering
-  \includegraphics[height=.8\textheight]{stress/systematic.pdf}
-  \caption[A systematic comparison against majorization over 243 graphs]{Stress achieved over 25 runs on every symmetric matrix with 1000 or fewer vertices in the SparseSuite Matrix Collection \cite{Davis2011}, comprising 243 graphs in total. Markers indicate the mean over all runs, with bars ranging from minimum to maximum on any run.
-  The top plot shows values reached after 15 iterations, and the bottom after convergence.
+  \includegraphics[height=.85\textheight]{stress/systematic.pdf}
+  \caption[A systematic comparison against majorization over 243 graphs]{Stress achieved over 25 runs on 243 graphs in total. Markers indicate the mean over all runs, with bars ranging from minimum to maximum on any run.
+  The left plot shows values reached after 15 iterations, and the right after convergence.
   Stress values are normalized to the lowest value achieved on all runs for either algorithm, as a baseline `correct' layout.
-  Each graph in the collection is also assigned to a group as metadata, and graphs that share a group tend to have similar topologies; groups are kept together, ordered alphabetically, and within each group sort by difference in mean stress after convergence. Thus both plots have the same order. Groups are demarcated by the alternating shaded background. Layouts shown are, from left to right, top then bottom:
-  \texttt{G15}, 
-  \texttt{dwt\_66}, 
-  \texttt{orbitRaising\_2}, 
-  \texttt{celegans\_metabolic},
-  \texttt{ex2},
-  \texttt{dwt\_307},
-  \texttt{494\_bus},
-  \texttt{dwt\_361},
-  \texttt{Sandi\_authors},
-  \texttt{S10PI\_n1}.
-  An animated version of the top plot is included in the supplemental material TODO/youtube link?.
+  Layouts shown are described in Section~\ref{sec:sgd_experiment}.
+  An animated version of the left plot can be viewed at
+%   \url{www.github.com/jxz12/stress\_systematic}.
+  \url{www.youtube.com/watch?v=uv6Vw36KZ0k}.
+  
+%   Layouts shown are, from left to right, top then bottom:
+%   \texttt{G15}, 
+%   \texttt{dwt\_66}, 
+%   \texttt{orbitRaising\_2}, 
+%   \texttt{celegans\_metabolic},
+%   \texttt{ex2},
+%   \texttt{dwt\_307},
+%   \texttt{494\_bus},
+%   \texttt{dwt\_361},
+%   \texttt{Sandi\_authors},
+%   \texttt{S10PI\_n1}.
   }
   \label{fig:systematic}
 \end{figure}
@@ -555,7 +560,15 @@ The layouts displayed in Figure~\ref{fig:systematic} were chosen to highlight th
 SGD consistently outperforms majorization here too.
 Many of the largest ranges in the plot are from graphs similar to \texttt{ex2}; grids are difficult to fully unfold, and majorization often struggles with their many local minima.
 
-On the other hand, \texttt{dwt\_307} is the one graph (of the 243 investigated) where majorization reaches lower stress than SGD as a result of the modifications to standard SGD (Figure~\ref{fig:cylinder}).
+On the other hand, \texttt{dwt\_307} is the one graph (of the 243 investigated) where majorization reaches lower stress than SGD as a result of the modifications to standard SGD (see Figure~\ref{fig:cylinder}).
+
+\begin{figure}
+  \centering
+  \includegraphics[width=1\textwidth]{stress/dwt_307.png}
+  \caption[The one graph in the test set where majorization performs better]{Layouts from \texttt{dwt\_307}, the only one of the 243 graphs considered where majorization (left) yields lower stress than SGD (middle). The cylindrical shape of the graph is illustrated in a view of a 3D layout and projection on the right, which looks similar to if the middle layout were to be rotated slightly clockwise.
+  }
+  \label{fig:cylinder}
+\end{figure}
 
 % \texttt{494\_bus} is an example of a very nice network to draw and is the type of graph where Equation~(\ref{stress}) shines. Its symmetry is clear here, whereas other force-directed algorithms can fail to show this due to the \textit{peripheral effect}~\cite{hu2005efficient}.
 \texttt{494\_bus} is an example of the type of graph where stress as an energy function produces better layouts than other popular models. Its symmetry is clear here, whereas other force-directed algorithms can fail to show this due to the \emph{peripheral effect} \cite{Hu2005}.
@@ -568,23 +581,9 @@ SGD converges to low stress levels in far fewer iterations than majorization. Gr
 The stopping criterion used for majorization was for relative decrease in stress to be less than $10^{-5}$, which is ten times more forgiving than originally suggested by Gansner et al.\ \cite{Gansner2004}, as $10^{-4}$ was not lenient enough to be confident that it had settled completely. Given enough time, majorization does almost always eventually find good minima, but can still settle in unoptimal minima and in some cases never finds the best configuration regardless of initialization.
 Majorization also takes many more iterations to converge than SGD, with means of 237 and 106 iterations respectively.
 
-The real-world time per iteration must also be considered, even though both share a complexity $O(n^2)$. The Cholesky factorization routine from Numerical Recipes \cite{Press2007Cholesky} was adapted to C\#, and found that iterations are around 40\% faster than SGD. However the initial decomposition before back-substitution requires $n^3/6$ iterations involving a multiply and a subtract \cite{Press2007Cholesky}, so the total time quickly tips in favor of SGD.
-Conjugate gradient (CG), with tolerance 0.1 and max iterations 10 as in \cite{Gansner2013}, is an iterative method itself to solve the majorizing function and so iterates slower than Cholesky and SGD, but often beats out Cholesky overall when fewer iterations are necessary.
-CG and Cholesky also both benefit from optimized matrix multiplication routines \cite{Gansner2004} that were not tried here.
-Localized majorization, which is also used to for majorization in the sparse model to be studied in Section~\ref{sec:large_graphs}, iterates fastest of all but converges slowest.
-It is also worth noting that over-shooting has been used before in the context of majorization to achieve an average of 1.5 times speedup \cite{Wang2012}.
-
 \begin{figure}
   \centering
-  \includegraphics[width=1\textwidth]{stress/dwt_307.png}
-  \caption[The one graph in the test set where majorization performs better]{Layouts from \texttt{dwt\_307}, the only one of the 243 graphs considered where majorization (left) yields lower stress than SGD (middle). The cylindrical shape of the graph is illustrated in a view of a 3D layout and projection on the right, which looks similar to if the middle layout were to be rotated clockwise by a little bit.
-  }
-  \label{fig:cylinder}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \makebox[\textwidth][c]{\includegraphics[width=1.09\textwidth]{stress/time_colorblind.pdf}}
+  \makebox[\textwidth][c]{\includegraphics[width=1.09\textwidth]{stress/time.pdf}}
   \caption[Stress measured on a further selection of graphs]{Graphs of stress against time for all three implementations of majorization, and SGD using the 15 iteration annealing schedule. 10 runs were used for each graph, and the line plots run through the mean stress and time per iteration.
   Graphs were considered as unweighted
   and layouts were initialized randomly within a 1$\times$1 square.
@@ -593,6 +592,12 @@ It is also worth noting that over-shooting has been used before in the context o
   }
   \label{fig:stress_plots_big}
 \end{figure}
+
+The real-world time per iteration must also be considered, even though both share a complexity $O(n^2)$. The Cholesky factorization routine from Numerical Recipes \cite{Press2007Cholesky} was adapted to C\#, and found that iterations are around 40\% faster than SGD. However the initial decomposition before back-substitution requires $n^3/6$ iterations involving a multiply and a subtract \cite{Press2007Cholesky}, so the total time quickly tips in favor of SGD.
+Conjugate gradient (CG), with tolerance 0.1 and max iterations 10 as in \cite{Gansner2013}, is an iterative method itself to solve the majorizing function and so iterates slower than Cholesky and SGD, but often beats out Cholesky overall when fewer iterations are necessary.
+CG and Cholesky also both benefit from optimized matrix multiplication routines \cite{Gansner2004} that were not tried here.
+Localized majorization, which is also used to for majorization in the sparse model to be studied in Section~\ref{sec:large_graphs}, iterates fastest of all but converges slowest.
+It is also worth noting that over-shooting has been used before in the context of majorization to achieve an average of 1.5 times speedup \cite{Wang2012}.
 
 Plots of stress against real time can be seen in Figure~\ref{fig:stress_plots_big}, where initial stress values are omitted, which is the cause of the horizontal offset to Cholesky due to its longer initialization time.
 Note that if the time for the first iteration for Cholesky is removed, it outperforms the other implementations of majorization, but still does not ever drop below the curve for SGD.
@@ -809,7 +814,7 @@ However there are still situations where SGD can struggle with local minima, suc
 A potential solution to this is overshooting, or in other words allowing values of $0 < \mu < 2$ in Equation~\eqref{eq:mu}. This greatly reduces the chance of a twist, but results in poorer local minima in most other cases and can also bring back the problem of divergence, so is a potential avenue for future work,
 perhaps to be used in conjunction with an adaptive annealing schedule to further optimize performance depending on the input data.
 
-Another valid option is to set $\mu_{\max}$ to a value somewhere in between one and two. This will be used in Chapter~3, Section~\ref{TODO} for a real-world application, where it will be shown that it is in fact necessary for another domain-specific application in addition to the ones shown in Section~\ref{sec:cookbook}.
+Another valid option is to set $\mu_{\max}$ to a value somewhere in between one and two. This will be used in Chapter~\ref{chap:joy}, Section~\ref{sec:eco_visualisation} for a real-world application, where it will be shown that it is in fact necessary for another domain-specific application in addition to the ones shown in Section~\ref{sec:cookbook}.
 
 Interaction could also allow the user to manually adjust the step size $\eta$ from Equation~\eqref{eq:SGD_step}, allowing them to `shake' the graph out of local minima themselves. The step size annealing from Section~\ref{sec:annealing} is the most ad hoc and data-dependent component of SGD, so handing control over to the user could help, especially in dynamical situations where the structure of the graph changes with time.
 Additionally, if frame rate becomes an issue in an interactive setting, the application does not have to wait until the end of an entire iteration before rendering an updated layout because vertices are continually being moved, keeping the user interface smooth and responsive.

@@ -1,5 +1,5 @@
 \chapter{Edges}
-\label{sec:edges_background}
+\label{chap:edges}
 \begin{figure}
   \centering
   \includegraphics[width=\textwidth]{power/metaunityplaceholder.png}
@@ -83,7 +83,7 @@ Unfortunately Jia et al.\ did not perform any quantitative analysis to evaluate 
   \centering
   \includegraphics[width=\textwidth]{power/lesmis.pdf}
   \caption[A hierarchical edge bundling pipeline]{An example of the hierarchical edge bundling pipeline presented here, on the graph \texttt{lesmis} which describes co-appearances of characters in the musical les Mis\'erables \cite{Knuth1993}. The top-left is a layout from stress optimisation; top-right is a dendrogram computed from agglomerative dissimilarity clustering (see Section~\ref{sec:dissimilarities}); bottom-left is the tidied up hierarchical tree after pruning (see Section~\ref{sec:pruning}); bottom-right is the final hierarchical edge bundling diagram when original edges are rendered using splines (see Section~\ref{sec:heb_background}).
-  TODO: write names on border and tidy up hierarchies}
+  The characters Jean Valjean and Javert are the main protagonist and antagonist respectively, and they are placed next to each other for both the stress and bundled layouts. Those two are highlighted, as well as a third main character, Marius, whose role in the network is much clearer in the bundled layout.}
   \label{fig:lesmis}
 \end{figure}
 To assess the quality of the divisive Girvan-Newman algorithm used by Jia et al.\ \cite{Jia2011}, it will be compared with \emph{agglomerative dissimilarity clustering}.
@@ -293,7 +293,7 @@ The process of tidying up this tree such that it is suitable for use in hierarch
 
 \begin{figure}
   \centering
-  \includegraphics[width=\textwidth]{power/pruning.pdf}
+  \includegraphics[width=.9\textwidth]{power/pruning.pdf}
   \caption[Hierarchical edge bundles without pruning]{An example of the resulting hierarchical edge bundles when pruning is not applied to the hierarchy. On the left is the full hierarchical dendrogram without pruning, and on the right is the resulting bundled diagram, which is clearly worse than the one in Figure~\ref{fig:lesmis}.}
   \label{fig:pruning}   
 \end{figure}
@@ -316,12 +316,10 @@ Code used to generate all figures can be found at \url{www.github.com/jxz12/Hier
 
 \begin{figure}
   \centering
-  \includegraphics[height=.9\textheight]{power/bundled.pdf}
-  \caption[Final hierarchical edge bundled diagrams]{Drawings of the graphs in Table~\ref{tab:bundle_graphs} using both a stress layout (left) and with hierarchical edge bundling (right). Colours of nodes correspond to the ground truth clusters included in the data.
-  For \texttt{football}, 8 of its teams are singleton clusters in independent divisions, and for \texttt{caltech} ??? are unassigned to dorms.
-  branch merge distance = 0.1 of total height
-  branch distance from center = number of leaves cubed.
-  TODO: have karate, football, lfr on top 2 rows, bigger caltech on third}
+  \includegraphics[height=.8\textheight]{power/bundled.png}
+  \caption[Final hierarchical edge bundled diagrams]{Drawings of the graphs in Table~\ref{tab:bundle_graphs} using both a stress layout (left) and with hierarchical edge bundling (right). Colours of nodes correspond to the ground truth clusters included in the data. In \texttt{karate}, the two leaders of the club are coloured lighter.
+  For \texttt{football}, 8 of its teams are singleton clusters in independent divisions, coloured black. For \texttt{caltech}, 168 students are unassigned to dorms, also coloured black.
+  For all graphs, a branch merge distance of 10\% of the dendrogram height was used, with merged branches placed at a polar distance equal to the fraction of leaves it has as children, cubed.}
   \label{fig:untangled_hairballs}
 \end{figure}
 
