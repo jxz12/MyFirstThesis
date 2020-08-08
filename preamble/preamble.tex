@@ -184,10 +184,10 @@
 % for coloured references and urls
 \hypersetup{
     colorlinks=true,
-    citecolor=blue,
-    linkcolor=purple,
-    filecolor=magenta,
-    urlcolor=teal,
+    citecolor=[rgb]{.12,.47,.81}, % tab10 blue
+    linkcolor=[rgb]{0.5,0,0.13}, % tab10 red
+    % filecolor=magenta,
+    urlcolor=[rgb]{.09,.55,.61}, % tab10 cyan
 }
 
 % fix margins
@@ -208,7 +208,7 @@
 \newcommand{\removeAlgorithmFigureError}{\let\@latex@error\@gobble}
 \makeatother
 
-% extra symbols
+% triangle symbol is too big
 \newcommand{\Triangle}{\mathchoice
   {\removeAlgorithmFigureError\raise .175ex\hbox{\larger[-2]$\triangle$}}
   {\removeAlgorithmFigureError\raise .175ex\hbox{\larger[-2]$\triangle$}}

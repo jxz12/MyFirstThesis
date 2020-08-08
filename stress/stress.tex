@@ -1,4 +1,5 @@
 \chapter{Nodes}
+\label{chap:stress}
 \begin{figure}
   \centering
   \includegraphics[width=\textwidth]{stress/representations.pdf}
@@ -10,7 +11,7 @@
 If one were to ask a random group of people to draw a network on a piece of paper, it is likely that most would draw dots to represent the nodes, and lines joining the dots to represent the edges. This is a representation so intuitive that it is often synonymous with the abstract concept of a network entirely.
 This is the reason why this `join-the-dots' representation, known as the node-link diagram, is the most commonly studied and applied \cite{Ghoniem2004}, and is also why it has been chosen for the purposes of this thesis.
 
-However it is useful to have an idea of the other possible representations in order to gain a broader view of what network visualisation entails. A classical example of this includes the \emph{matrix plot}, which is a grid where each vertex is represented by a row and a column, and each edge is a dot filled in at the intersection of a row and column \cite{Liiv2010}.
+However it is useful to have an idea of the other possible graph representations in order to gain a broader view of what network visualisation can be. A classical example of this includes the \emph{matrix plot}, which is a grid where each vertex is represented by a row and a column, and each edge is a dot filled in at the intersection of a row and column \cite{Liiv2010}.
 Specialised types of networks can also have similarly specialised representations. Trees, for example, can be depicted as packed rectangles \cite{Johnson1991} or circles \cite{Wang2006}, in what are known as \emph{treemaps}.
 Graphs with low \emph{boxicity}, such as food webs \cite{Eklof2013}, can be drawn as \emph{intersection graphs} of overlapping lines or rectangles or cuboids.\footnote{Or hypercuboids, although the usefulness of that for visualisation is likely limited.}
 A related and more common example is the \emph{disc graph}, where nodes are represented by circles and edges exist if the circles overlap. This sees widespread use as a Venn diagram, but usually without the connotation of network structure.
@@ -120,6 +121,7 @@ In mathematical terms, its energy upon a single dimension of the layout in the c
 where $w_{ij}$ is an optional weight given to each edge (previously all set to 1 in~\eqref{eq:tutte}) and $\overline{\mathbf{x}}$ is the mean of $\mathbf{x}$. The one-dimensional layout that minimises energy is equal to the second smallest eigenvector of the Laplacian matrix $\mathbf{L}$, defined such that
 \begin{equation}
   \mathbf{x}^T\mathbf{Lx} = \mathrm{energy}(\mathbf{x})
+  \label{eq:spectral_laplacian}
 \end{equation}
 where $\mathbf{x}^T$ denotes the transpose of $\mathbf{x}$. Subsequent dimensions are found by calculating subsequent eigenvectors of $\mathbf{L}$, often through power iteration \cite{Koren2003}.
 All of these methods boil down to finding the eigendecomposition of a certain matrix which describes the graph in a different way, and each set of eigenvectors describes an \emph{optimal projection} into a lower dimension.
@@ -176,6 +178,7 @@ It works by first finding a Laplacian matrix $\mathbf{L}^w$, defined as
     \;-w_{ij} & \text{if }\;i\neq j\\
     \;-\sum_{k\neq i}\mathbf{L}_{ik}^w & \text{if }\;i=j
   \end{cases}
+  \label{eq:major_Lw}
 \end{equation}
 and then another Laplacian matrix $\mathbf{L^X}$, defined as
 \begin{equation}
@@ -184,6 +187,7 @@ and then another Laplacian matrix $\mathbf{L^X}$, defined as
     \;-w_{ij}d_{ij}||\mathbf{X}_i-\mathbf{X}_j||^{-1} & \text{if }\;i\neq j\\
     \;-\sum_{k\neq i}\mathbf{L}_{ik}^\mathbf{X} & \text{if }\;i=j.
   \end{cases}
+  \label{eq:major_LX}
 \end{equation}
 It can be shown that the equation
 \begin{equation}
@@ -191,9 +195,9 @@ It can be shown that the equation
   \label{eq:major_linear}
 \end{equation}
 where $\mathbf{x}$ and $\mathbf{x}'$ are column vectors that represent a single dimension of the full layouts $\mathbf{X}$ and $\mathbf{X}'$ respectively, guarantees that $\text{stress}(\mathbf{X}') \leq \text{stress}(\mathbf{X})$ \cite{Gansner2004}.
-The optimisation process is then performed simply by solving Equation~\eqref{eq:major_linear} as a system of linear equations, with $\mathbf{x}'$ as the column of unknowns being solved for. This is repeated in an iterative manner, where $\mathbf{x}'$ is computed in one iteration and then used as $\mathbf{x}\leftarrow\mathbf{x}'$ in the next, until the algorithm can no longer improve the value of stress by more than a certain threshold. Note that $\mathbf{L}^w$ only needs to be computed once, but $\mathbf{L}_{ij}^\mathbf{X}$ must be recalculated on every iteration.
+The optimisation process is then performed simply by solving Equation~\eqref{eq:major_linear} as a system of linear equations, with $\mathbf{x}'$ as the column of unknowns being solved for. This is repeated in an iterative manner, where $\mathbf{x}'$ is computed in one iteration and then used as $\mathbf{x}$ in the next, until the algorithm can no longer improve the value of stress by more than a certain threshold. Note that $\mathbf{L}^w$ only needs to be computed once, but $\mathbf{L}^\mathbf{X}$ must be recalculated on every iteration.
 
-Additionally in practice, the position of the first vertex is fixed to the origin, and the first row and column of $\mathbf{L}^w$ are removed, as well as the first row of the vector $\mathbf{L^X}$. This is in order to remove translational invariance from the solution, which allows for fast linear equation solving methods to be applied to solve Equation~\ref{eq:major_linear}.
+Additionally in practice, the position of the first vertex is fixed to the origin, and the first row and column of $\mathbf{L}^w$ are removed, as well as the first row of the vector $\mathbf{L^Xx}$. This is in order to remove translational invariance from the solution, which allows for fast linear equation solving methods to be applied to solve Equation~\ref{eq:major_linear}.
 In particular, Gansner et al.\ \cite{Gansner2004} recommend \emph{Cholesky factorization} \cite{Press2007Cholesky} or the \emph{conjugate gradient} method \cite{Press2007Conjugate}, both of which will be tested later in Section~\ref{sec:sgd_experiment}. 
 Ganser et al.\ \cite{Gansner2004} also described another \emph{local} method for solving Equation~\ref{eq:major_linear}, where the system of equations is solved for just one vertex at a time. This is done by setting the position of vertex $i$ to
 \begin{equation}
@@ -301,14 +305,6 @@ This modified algorithm makes updates that are identical to standard SGD when $\
 \end{equation}
 Since this will always eventually be the case because $\eta$ tends to zero, it has the same asymptotic convergence properties as standard SGD, which will be discussed in Section~\ref{sec:annealing}.
 
-Introducing this upper limit on $\mu$ allows for much larger initial step sizes than standard SGD, yielding much faster convergence without needing to worry about divergence due to \emph{exploding gradients} \cite{Goodfellow2016}. It will be shown by experiment that this results in state-of-the-art performance for a wide range of graphs (except for a single specific case, see Section~\ref{sec:sgd_experiment}).
-In addition, \emph{random reshuffling} of terms is used unless otherwise stated; see Section~\ref{sec:randomisation} for further elaboration. A full pass through all the terms $Q_{ij}$ will be referred to as an \emph{iteration}, while a single application of Equation~\eqref{eq:SGD_step} will be referred to as a \emph{step}.
-From now on, the modified SGD algorithm simply as SGD.
-
-Plots of stress achieved using SGD compared to majorization are presented briefly in Figure~\ref{fig:stress_plots}, and in more detail in Section~\ref{sec:sgd_experiment}. Pseudocode is shown in Algorithm~\ref{alg:sgd}, Figure~\ref{fig:pseudo_sgd}.
-All results have vertex positions initialized uniformly randomly within a 1$\times$1 square, with optimisation performed using C\# running in Visual Studio, on an Intel Core i7-4790 CPU with 16GB of RAM.
-Unless stated otherwise, graph data is from the SuiteSparse Matrix Collection \cite{Davis2011}.
-
 \begin{figure}
   \centering
   \includegraphics[width=.9\textwidth]{stress/iterations.pdf}
@@ -374,6 +370,14 @@ Unless stated otherwise, graph data is from the SuiteSparse Matrix Collection \c
   }
   \label{fig:pseudo_sgd}
 \end{figure}
+
+Introducing this upper limit on $\mu$ allows for much larger initial step sizes than standard SGD, yielding much faster convergence without needing to worry about divergence due to \emph{exploding gradients} \cite{Goodfellow2016}. It will be shown by experiment that this results in state-of-the-art performance for a wide range of graphs (except for a single specific case, see Section~\ref{sec:sgd_experiment}).
+In addition, \emph{random reshuffling} of terms is used unless otherwise stated; see Section~\ref{sec:randomisation} for further elaboration. A full pass through all the terms $Q_{ij}$ will be referred to as an \emph{iteration}, while a single application of Equation~\eqref{eq:SGD_step} will be referred to as a \emph{step}.
+From now on, the modified SGD algorithm simply as SGD.
+
+Plots of stress achieved using SGD compared to majorization are presented briefly in Figure~\ref{fig:stress_plots}, and in more detail in Section~\ref{sec:sgd_experiment}. Pseudocode is shown in Algorithm~\ref{alg:sgd}, Figure~\ref{fig:pseudo_sgd}.
+All results have vertex positions initialized uniformly randomly within a 1$\times$1 square, with optimisation performed using C\# running in Visual Studio, on an Intel Core i7-4790 CPU with 16GB of RAM.
+Unless stated otherwise, graph data is from the SuiteSparse Matrix Collection \cite{Davis2011}.
 
 \subsection{Step size annealing}
 \label{sec:annealing}
@@ -593,7 +597,7 @@ Majorization also takes many more iterations to converge than SGD, with means of
   \label{fig:stress_plots_big}
 \end{figure}
 
-The real-world time per iteration must also be considered, even though both share a complexity $O(n^2)$. The Cholesky factorization routine from Numerical Recipes \cite{Press2007Cholesky} was adapted to C\#, and found that iterations are around 40\% faster than SGD. However the initial decomposition before back-substitution requires $n^3/6$ iterations involving a multiply and a subtract \cite{Press2007Cholesky}, so the total time quickly tips in favor of SGD.
+The real-world time per iteration must also be considered, even though both share a complexity $O(|V|^2)$. The Cholesky factorization routine from Numerical Recipes \cite{Press2007Cholesky} was adapted to C\#, and found that iterations are around 40\% faster than SGD. However the initial decomposition before back-substitution requires $|V|^3/6$ iterations involving a multiply and a subtract \cite{Press2007Cholesky}, so the total time quickly tips in favor of SGD.
 Conjugate gradient (CG), with tolerance 0.1 and max iterations 10 as in \cite{Gansner2013}, is an iterative method itself to solve the majorizing function and so iterates slower than Cholesky and SGD, but often beats out Cholesky overall when fewer iterations are necessary.
 CG and Cholesky also both benefit from optimized matrix multiplication routines \cite{Gansner2004} that were not tried here.
 Localized majorization, which is also used to for majorization in the sparse model to be studied in Section~\ref{sec:large_graphs}, iterates fastest of all but converges slowest.
@@ -613,7 +617,7 @@ This can be written as
   \label{split stress}
 \end{equation}
 where $\sigma_{ij} = (||\mathbf{X}_i - \mathbf{X}_j|| - d_{ij})^2$
-Just considering the preprocessing stage for now, it is clear that $d$ and $w$ can be easily computed for the left half of the summation directly from the graph. Real-world graphs are also usually sparse, so for a graph with $n$ vertices and $m$ edges, $m \ll n^2$ making the space required to store these values tolerable. However the second half is not so easy---an all-pairs shortest paths (APSP) calculation takes $O(m + n)$ time per vertex for an unweighted graph with a breadth-first search, or $O(m + n\log n)$ for a weighted graph using Dijkstra's algorithm \cite{Cormen2009}.
+Just considering the preprocessing stage for now, it is clear that $d$ and $w$ can be easily computed for the left half of the summation directly from the graph. Real-world graphs are also usually sparse, so for a graph with $|V|$ vertices and $|E|$ edges, $|E| \ll |V|^2$ making the space required to store these values tolerable. However the second half is not so easy---an all-pairs shortest paths (APSP) calculation takes $O(|E| + |V|)$ time per vertex for an unweighted graph with a breadth-first search, or $O(|E| + |V|\log|V|)$ for a weighted graph using Dijkstra's algorithm \cite{Cormen2009}.
 
 The second stage is iteration, where the layout is gradually improved towards a good minimum. Again, computing the first summation is tolerable, but the number of longer distance contributions quickly grows out of control. Many notable attempts have been made at tackling this second half. A common approach is to ignore $d_{ij}$, and to approximate the summation as an $n$-body repulsion problem, which can be efficiently well approximated using $k$-d trees \cite{Barnes1986}. Hu \cite{Hu2005} and independently Hachul and J\"unger~\cite{Hachul2004} used similar tricks in the context of the force-directed model of Fruchterman and Reingold \cite{Fruchterman1991}, along with a multilevel coarsening scheme to avoid local minima. Gansner et al.\ \cite{Gansner2013} use it with majorization by summing over $-\alpha \log||X_i - X_j||$ instead. Brandes and Pich~\cite{Brandes2007Eigensolver} even ignore the second half completely and capture the long-range structure by first initializing with a fast approximation to \emph{classical scaling} known as PivotMDS \cite{Brandes2008}, which minimizes the inner product rather than Euclidean distance.
 
@@ -644,9 +648,9 @@ These pivots $p\in P$ are then each assigned a region $R(p)$, which is the set o
   \label{eq:pivot_stress}
 \end{equation}
 where $N(i)$ are the neighbors of $i$ to prevent overlap with any edges in the first summation.
-The adapted weight $w_{ip}'$ is then set to $s_{ip} w_{ip}$, where $s_{ip}$ is the number of vertices in $R(p)$ at least as close to $p$ as to $i$:
+The adapted weight $w_{ip}'$ is then set to $s_{ip} w_{ip}$, where $s_{ip}$ is the number of vertices in $R(p)$ at least as close to $p$ as to $i$, defined as
 \begin{equation}
-  s_{ip}=|\{j\in R(p): d_{jp} \leq d_{ip}/2\}|
+  s_{ip}=|\{j\in R(p): d_{jp} \leq d_{ip}/2\}|.
   \label{eq:s}
 \end{equation}
 The reason the weight on vertex $i$ is increased like this is because its contribution acts as an approximation for the stress to all vertices in $R(p)$, and~\eqref{eq:s} is required to prevent the weight on closer vertices from being overestimated.
@@ -714,14 +718,14 @@ This leaves far fewer terms in the summation, and so the complexity per iteratio
   }
 \end{figure}
 
-Resulting layouts are presented in Figures~\ref{fig:pivots}, where the graph \texttt{EVA} is the least well approximated by the sparse model, likely due to its low diameter and high degree distribution. \texttt{3elt} is very well approximated by the model itself, but the performance of majorization declines as the number of pivots exceeds $\sim100$, likely due to the increased number of terms in the summation that introduce more local minima to jump over.
+Resulting layouts are presented in Figures~\ref{fig:pivots}, where the graph \texttt{EVA} is the least well approximated by the sparse model, likely due to its low diameter and high degree distribution. \texttt{3elt} is very well approximated by the model itself, but the performance of majorization declines as the number of pivots exceeds ${\sim}100$, likely due to the increased number of terms in the summation that introduce more local minima to jump over.
 Note that the results here do not use PivotMDS \cite{Brandes2007Eigensolver} to initialize as done by Ortmann et al.\ \cite{Ortmann2017}, and instead initialize randomly within a 1$\times$1 square as before.
 A gallery of larger graphs is presented in and~\ref{fig:showcase}, and pseudocode for the entire algorithm can be seen in Algorithm~\ref{alg:sparse}, Figure~\ref{fig:pseudo_sparse}.
 
 \begin{figure}
   \centering
   \makebox[\textwidth][c]{\includegraphics[width=1.06\textwidth]{stress/ortmann.pdf}}
-  \caption[Results against majorization using sparse stress]{Examples of sparse SGD on the graphs \texttt{USPowerGrid}, \texttt{EVA}, and \texttt{3elt}. From left to right: layouts from 10 pivots, 50, 200, full stress, and plots showing stress over 25 runs for each number of pivots.
+  \caption[Results against majorization using sparse stress]{Examples of sparse SGD on the graphs \texttt{USPowerGrid}, \texttt{EVA}, and \texttt{3elt}. From left to right: best layouts using 10 pivots, 50, 200, full stress, and plots showing stress over 25 runs for each number of pivots.
   The 15 iteration annealing schedule from Section~\ref{sec:annealing} is used for SGD, and majorization is allowed to run for 100 iterations.
   }
   \label{fig:pivots}
@@ -752,11 +756,12 @@ It is often the case that a user will want to examine specific vertices in a gra
 Brandes and Pich~\cite{Brandes2011} presented a general method of doing this in the context of majorization, by interpolating between two stress summations representing general and constrained weights separately.
 
 For SGD, emphasizing specific distances is as simple as weighting the corresponding constraints more heavily.
-For example to focus on vertex $3$, the relevant weights are set to infinity
+For example to focus on vertex 3, the relevant weights are set to infinity
 \begin{equation}
   w_{ij} \leftarrow \infty \quad \text{if}\ i=3\ \text{or}\ j=3.
 \end{equation}
-This causes only the remaining constraints to decay, but the system still converges in this case as there are no conflicts between the ones emphasized. An important remaining step is that multiple iterations with only the infinitely weighted terms are necessary to let the optimisation fully converge. 
+This causes only the remaining constraints to decay, but the system still converges in this case as there are no conflicts between the ones emphasized. Exploding gradients are still prevented by the capping of the step size in Equation~\eqref{eq:mu}.
+An important remaining step is that the step size must be allowed to decay for extra iterations, in order to allow the infinitely weighted terms to essentially become the only remaining contribution at convergence. 
 An example of this method in action can be seen in Figure~\ref{fig:tube}.
 
 \begin{figure}
@@ -782,29 +787,28 @@ Stress as an energy function originated as a general visualisation algorithm for
 where $N(i)$ is the set of neighbors of vertex $i$. This is effectively a measure of how similar the neighbour sets of vertices $i$ and $j$ are to each other.
 This measure will be applied on top of an existing graph layout, but since the two spacial dimensions are already being used, the three-dimensional space of \emph{colour} will be used instead.
 
-Since color is simply a linear mix of red, green, and blue (RGB), it can be used as a 3D space in which Euclidean distances can be embedded, where each color corresponds to a separate axis. Ideally a perceptually uniform colour space would be used such as CIELAB \cite{Smart2019}, but in this small example it was not necessary.
-Since the Jaccard version of $d_{ij}$ is bounded between 0 and 1, embedded distances fit perfectly within the similarly bounded axes of color. This means that vertices not only have coordinates within normal Euclidean space, but also within RGB space. 
-An illustration of this can be seen in Figure~\ref{fig:jaccard}, where vertices are coloured according to their (secondary) embedding in RGB space. Note that in this case $w_{ij}$ is simply set to one.
-
 \begin{figure}
   \centering
   \includegraphics[width=.6\textwidth]{stress/lesmis.png}
   \caption[A graph \texttt{lesmis} with node colours embedded in RGB space]{
   Co-appearances of characters in Les Mis\'erables by Victor Hugo \cite{Knuth1993}.
-  Groups of similarly colored vertices indicate clusters based on Jaccard similarity as in Equation~\eqref{eq:jaccard_sgd}.
+  Groups of similarly colored vertices indicate clusters based on Jaccard dissimilarity as in Equation~\eqref{eq:jaccard_sgd}.
   }
   \label{fig:jaccard}
 \end{figure}
 
+Since color is simply a linear mix of red, green, and blue (RGB), it can be used as a 3D space in which Euclidean distances can be embedded, where each color corresponds to a separate axis. Ideally a perceptually uniform colour space would be used such as CIELAB \cite{Smart2019}, but in this small example it was not necessary.
+Since the Jaccard distance is bounded between $0\leq d_{ij}\leq 1$, embedded distances fit perfectly within the similarly bounded axes of color. This means that vertices not only have coordinates within normal Euclidean space, but also within RGB space. 
+An illustration of this can be seen in Figure~\ref{fig:jaccard}, where vertices are coloured according to their (secondary) embedding in RGB space. Note that in this case $w_{ij}$ is simply set to one.
+
 This process can help to reveal groupings, but can also produce ambiguity when applied to larger graphs due to the lack of distinct color combinations, again a problem caused by a lack of output dimensions. One possibility in this case would be to use an interactive form of visualization in which the user selects a smaller group of vertices at a time, and the algorithm embeds only their selection in an RGB space, by considering dissimilarities only between selected vertices.
 
 \section{Discussion}
-One of the major reasons why previous force-directed algorithms, such as in \cite{Fruchterman1991,Kamada1989,Dwyer2009},
+One of the major reasons why previous force-directed algorithms, such as in \cite{Eades1984,Kamada1989,Fruchterman1991,Frick1995},
 have become popular is how simple and intuitive the concept is. The idea of a physical system pushing and pulling vertices, modeled as sets of springs and electrical forces, makes them easy to understand and quick to implement for practical use.
 
-The geometric interpretation of the SGD algorithm presented
-here shares these qualities, as the concept of moving pairs of vertices one by one towards an ideal distance is just as simple.
-In fact the stress energy function in Equation~\eqref{eq:stress} is commonly known as the spring model \cite{Kamada1989,Hu2005}, and the physical analogy of decompressing one spring at a time very naturally fits this intuition.
+The geometric interpretation of the SGD algorithm presented here shares these qualities, as the concept of moving pairs of vertices one by one towards an ideal distance is just as simple.
+In fact the stress energy function in Equation~\eqref{eq:stress} is commonly known as the \emph{spring model} \cite{Kamada1989,Hu2005}, and so the physical analogy of SGD to decompressing one spring at a time very naturally fits this intuition.
 The implementation also requires no equation solver, and there is no need to consider smart initialization, which can often be just as complex a task \cite{Brandes2008}.
 Considering only a single pair of vertices at a time also makes further constrained layouts easy to implement, and allows an appropriate sparse approximation to grant scalability up to large graphs.
 
@@ -814,10 +818,10 @@ However there are still situations where SGD can struggle with local minima, suc
 A potential solution to this is overshooting, or in other words allowing values of $0 < \mu < 2$ in Equation~\eqref{eq:mu}. This greatly reduces the chance of a twist, but results in poorer local minima in most other cases and can also bring back the problem of divergence, so is a potential avenue for future work,
 perhaps to be used in conjunction with an adaptive annealing schedule to further optimize performance depending on the input data.
 
-Another valid option is to set $\mu_{\max}$ to a value somewhere in between one and two. This will be used in Chapter~\ref{chap:joy}, Section~\ref{sec:eco_visualisation} for a real-world application, where it will be shown that it is in fact necessary for another domain-specific application in addition to the ones shown in Section~\ref{sec:cookbook}.
+Another valid option is to set the maximum value of $\mu$ to a value somewhere in between one and two. This will be used in Chapter~\ref{chap:joy}, Section~\ref{sec:eco_visualisation} for a real-world application, where it will be shown that allowing a slightly higher maxiumum step size is in fact necessary for another domain-specific application, on top of the ones shown in Section~\ref{sec:cookbook}.
 
 Interaction could also allow the user to manually adjust the step size $\eta$ from Equation~\eqref{eq:SGD_step}, allowing them to `shake' the graph out of local minima themselves. The step size annealing from Section~\ref{sec:annealing} is the most ad hoc and data-dependent component of SGD, so handing control over to the user could help, especially in dynamical situations where the structure of the graph changes with time.
-Additionally, if frame rate becomes an issue in an interactive setting, the application does not have to wait until the end of an entire iteration before rendering an updated layout because vertices are continually being moved, keeping the user interface smooth and responsive.
+Additionally, if frame rate becomes an issue in an interactive setting, the application does not have to wait until the end of an entire iteration before rendering an updated layout, because vertices are continually being moved at each satisfaction step. This would keep the application smooth and responsive, whilst still giving an indication of the algorithm's progress.
 
 \subsubsection{Conclusion}
 This chapter has presented a modified version of stochastic gradient descent (SGD) to minimize stress as defined by Equation~\eqref{eq:stress}. An investigation comparing the method to majorization shows consistently faster convergence to lower stress levels, and the fact that only a single pair of vertices is considered at a time makes it well suited for variants such as domain-specific modifications or the pivot-based approximation of Ortmann et al.\ \cite{Ortmann2017}.
