@@ -1,8 +1,5 @@
 # TODO:
 
-## edges:
-Unity in Unity figure better resolution
-tidy up lesmis hierarchies
-
 ## EcoBuilder
-everything omg
+
+do a screenshot with numbered labels to refer to different bits of the UI
