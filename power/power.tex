@@ -4,8 +4,8 @@
   \centering
   \includegraphics[width=\textwidth]{power/unity.png}
   \caption[The Unity game engine, visualised using the Unity game engine]{A visualisation of the Unity game engine, rendered using the Unity game engine. 
-  Edges are bundled using hierarchical edge bundling as described in Section~\ref{sec:heb_background}. The graph has a total of 5,025 vertices and 20,177 edges, reduced to 8,380 included in the final render to reduce clutter. The colour applied to each edge highlights the class being referenced by transitioning from light to dark, in order to emphasise the pattern of certain important nodes that many others depend on. For example, the thickest bundle in the top right comes from a folder called \texttt{Math/}, which is used in calculations all over the source code. The thick bundle coming from the top left is a folder called \texttt{IMGUI}, which is used for debugging in developer tools.
-  Using \texttt{MAX\_EXT} blending as suggested by Holten \cite{Holten2006} allows links flowing in opposite directions to be salient as well as anti-aliasing for smoothing the output.}
+  Edges are bundled using hierarchical edge bundling as described in Section~\ref{sec:heb_background}. The graph has a total of 5,025 vertices and 20,177 edges, reduced to 8,380 included in the final render to reduce clutter. The colour applied to each edge highlights the class being referenced by transitioning from light to dark, in order to emphasise the pattern of certain important nodes that many others depend on. For example, the thickest bundle in the top right comes from a folder called \texttt{Math/}, which is used in calculations all over the source code. The thick bundle coming from the top left is a folder called \texttt{IMGUI/}, which is used for debugging with developer tools.
+  Using \texttt{MAX\_EXT} blending as suggested by Holten \cite{Holten2006} allows links flowing in opposite directions to be salient, and anti-aliasing is crucial for smoothing the output.}
   \label{fig:metaunity}
 \end{figure}
 The previous chapter was an exploration of how to position the vertices of a graph, and the natural question to then ask is how to deal with the only remaining component: the edges. However this question is seemingly redundant at first, as the obvious answer is to simply draw straight lines between adjacent nodes. While this by no means a poor choice, and is exactly how all node-link diagrams have been drawn thus far, this chapter will explore the possibility of drawing links using curves instead.
@@ -15,7 +15,7 @@ The previous chapter was an exploration of how to position the vertices of a gra
 The curving of links in the context of a node-link diagram is known as \textit{edge bundling}. It is a technique that has been developed because many networks, when processed through a standard force-directed layout, result in a seemingly random layout with no discernable structure. See Figure~\ref{fig:untangled_hairballs} for examples of this. The similarity of such layouts to tangled collections of hair has led to them being colloquially termed \textit{hairballs}.
 
 Unfortunately this is not an easily solved problem, because the \textit{curse of dimensionality} \cite{Friedman2001Local} means that most of these networks simply cannot be accurately represented in two dimensions, and the likelihood of this problem only rises as the size of any network increases. This can happen even if there exists a clear underlying structure to these networks, lying beyond the reach of the standard layout algorithm.
-Edge bundling attempts to alleviate this issue by introducing a trade-off---the ability to follow individual links is sacrificed for better representation of global structure, by allowing links to overlap.
+Edge bundling attempts to alleviate this issue by introducing a trade-off: the ability to follow individual links is sacrificed for better representation of global structure, by allowing links to overlap.
 This is analogous to organising the wires in a computer system by tying groups of wires together that share similar endpoints.
 
 The literature is rich with various different methods for performing this bundling, dating all the way back to the 1800s with the flow maps of Minard \cite{Minard1862} or Sankey diagrams \cite{Sankey1896}.
@@ -36,9 +36,9 @@ More precisely, this process of routing involves taking every edge in the origin
 % The hierarchical tree extracted from the Unity game engine can be seen on the TODO hand side, to illustrate its influence on the final visualisation.
 An example of a hierarchical tree with its resulting bundles side by side can be seen later in Figure~\ref{fig:lesmis}.
 
-This technique is so effective because the structure of the bundles is informed by human judgement. To continue within the call graph example, the hierarchy of folders and source files is literally designed by the programmers for organisational purposes, and so it is very likely to admit some utility for also organising, say, a visualisation.
+This technique is so effective because the structure of the bundles is supervised by human judgement. To continue within the call graph example, the hierarchy of folders and source files is literally designed by the programmers for organisational purposes, and so it is very likely to admit some utility for also organising, say, a visualisation.
 Additionally, not only is the curvature links influenced by the ARG, but so is the position of the nodes. Since each node is a leaf in the tree-shaped ARG, their positions around the circle are also influenced by the topology of the tree.
-This idea of using an auxiliary hierarchy to inform bundling is the basis of the work in this chapter, except that I will instead investigate the more common situation of when this metadata is not included with the original data. It must therefore must be generated by the algorithm itself as a preprocessing step.
+This idea of using an auxiliary hierarchy to inform bundling is the basis of the work in this chapter, except that it will instead investigate the more common situation of when this metadata is not included with the original data. It must therefore must be generated by the algorithm itself as a preprocessing step.
 
 \subsection{Clustering}
 \label{sec:clustering_background}
@@ -71,7 +71,7 @@ One reason why there is such a variety of clustering algorithms is due in part t
   \caption[Two examples for why clustering is difficult to define]{An example of different types of clusters. On the left is a situation with edges within clusters, and on the right with edges between clusters.}
   \label{fig:clique_vs_biclique}
 \end{figure}
-It is therefore important to keep in mind that clustering algorithms are attempts to quantify common characteristics of real-world data, and there is generally no `right answer' to the question of which one should be chosen; It depends on both the specific objective and dataset being examined. 
+It is therefore important to keep in mind that clustering algorithms are attempts to quantify common characteristics of real-world data, and there is generally no `right answer' to the question of which one should be chosen; it depends on both the specific objective and dataset being examined. 
 Nevertheless, they have been used to great effect in many applications \cite{Fortunato2016}, and so confidence can be placed in their utility as a tool to help understand patterns in data.
 
 The work in this chapter will focus on \emph{hierarchical clustering}, the family of clustering algorithms where the output is a \textit{dendrogram}: a binary tree used to describe a hierarchical structure.
@@ -180,13 +180,13 @@ The distance is defined as
   \label{eq:walktrap}
 \end{equation}
 where $t>0$ is an input parameter that determines how many times $\mathbf{P}$ should be multiplied by itself.
-Notice that this is very close to being simply the Euclidean distance between columns in $\mathbf{P}$, except with a factor consisting of $\mathbf{D}_{kk}^{\text{--}\sfrac{1}{2}}$. This was done presumably in order to undercompensate for high-degree vertices, although they state that their distance ``can also be seen as the $L^2$ distance between the two probability distributions'' \cite{Pons2006} without mentioning this factor. However a look into their provided source code confirms the use of the factor.
+Notice that this is very close to being simply the Euclidean distance between columns in $\mathbf{P}$, except with a factor consisting of $\mathbf{D}_{kk}^{\text{--}\sfrac{1}{2}}$. This was done presumably in order to undercompensate for high-degree vertices, although they state that their distance ``\textit{can also be seen as the $L^2$ distance between the two probability distributions}'' \cite{Pons2006} without mentioning this factor. However a look into their provided source code confirms the use of the factor.
 Since this measure can also be written as the Euclidean distance between columns in the matrix $\mathbf{D}^{\text{--}\sfrac{1}{2}}\mathbf{P}^t$, it automatically also qualifies as a distance metric.
 \cite{Pons2006} did not study whether the inclusion of this factor performs better quantitatively, and my results showed that the performance on the benchmark used in Section~\ref{sec:clustering_experiment} is in fact higher when this factor is left out. I will therefore use Equation~\eqref{eq:walktrap} without including it, i.e.\ simply $\sqrt{\sum_{k}(\mathbf{P}_{ik}^t - \mathbf{P}_{jk}^t)^2}$. This will be referred to as the \emph{snapshot} embedding, as it captures the random walker state after a fixed number of steps $t$.
 
 The algorithm then proceeds by applying agglomerative clustering using the Ward method, but with one difference: it only merges clusters connected by an edge. This reduces computation time and likely improves the modularity of the resulting clusters, but since the end goal is to produce bundles, edges between clusters are acceptable as they will be bundled. The results here will therefore use the more general algorithm that is unaware of edges between clusters.
 
-It is also not necessary to be restricted to having the embedding capture the random walker at a single walk length. Another type of embedding I will look at is the weighted average over all walk lengths. However this would also converge to the same matrix as an infinite length walk, by virtue of the Markov matrix converging to only depend on in-degrees as previously mentioned. In this case a \emph{damping factor} is used, similar to the one used in PageRank \cite{Page1999} and infomap clustering \cite{Rosvall2008} to simulate a random walker losing a proportion of its energy on each step and eventually coming to a stop. This is defined as
+It is also not necessary to be restricted to having the embedding capture the random walker at a single walk length. Another type of embedding that will be used is the weighted average over all walk lengths. However this would also converge to the same matrix as an infinite length walk, by virtue of the Markov matrix converging to only depend on in-degrees as previously mentioned. In this case a \emph{damping factor} is used, similar to the one used in PageRank \cite{Page1999} and infomap clustering \cite{Rosvall2008} to simulate a random walker losing a proportion of its energy on each step and eventually coming to a stop. This is defined as
 \begin{equation}
   \mathbf{P}' = \sum_{k=0}^\infty t^k\mathbf{P}^{k}
   \label{eq:damped}
@@ -333,7 +333,7 @@ Code used to generate all figures can be found at \url{www.github.com/jxz12/Hier
 The results presented here largely agree with the design choices made by Pons and Latapy \cite{Pons2006} for the use of agglomerative dissimilarity clustering on graphs. That is except for leaving out the extra $\mathbf{D}_{kk}^{\text{--}\sfrac{1}{2}}$ weighting in Equation~\ref{eq:walktrap} as it did not improve performance at all in the benchmark explored here.
 
 The use of dissimilarity measures based on random walks outperforms those derived from other features such as shortest paths, as well as the GN algorithm used by Jia et al.\ \cite{Jia2011}, which also has a higher runtime complexity.
-Calculating betweenness-centrality for each edge is $\mathcal{O}(|V||E|)$ \cite{Brandes2001Centrality} and since this must be recalculated $|E|$ times, the overall complexity of GN is $\mathcal{O}(|V||E|^2)$, compared to $\mathcal{O}(|V|^2\log|V|)$ for the agglomerative methods explored here.
+Calculating the betweenness-centrality for each edge is $\mathcal{O}(|V||E|)$ \cite{Brandes2001Centrality} and since this must be recalculated $|E|$ times, the overall complexity of GN is $\mathcal{O}(|V||E|^2)$, compared to $\mathcal{O}(|V|^2\log|V|)$ for the agglomerative methods explored here.
 Ward's method also consistently outperforms other linkage methods, and a qualitative observation of note is that it also tends to give dendrograms that lend themselves more to the pruning process in Section~\ref{sec:pruning}. Branches in the dendrogram more clearly delineate separately groups of clusters, leading to easier simplification into a streamlined hierarchy for bundling.
 % more systematic study into different methods for pruning 
 When the opposite situation occurs, i.e.\ if differences in branch height are homogenous, the pruning process may merges every single branch into one, since child branches are recursively merged into their parents. However this also usually corresponds to a poor quality clustering in general, because it means that the algorithm could not find large groups of datapoints that were all close to each other.
@@ -742,7 +742,7 @@ This second method is illustrated by the translucent curves to represent repeate
 
 \begin{figure}
   \centering
-  \includegraphics[width=.9\linewidth]{power/basis.pdf}
+  \includegraphics[width=.85\linewidth]{power/basis.pdf}
   \caption[B-spline basis functions]{Examples of two open uniform B-splines and their basis functions below. Control points are spaced evenly along the x-axis such that knots (vertical lines) align with their associated segments. The top spline is quadratic (degree $p=2$), while the bottom is cubic ($p=3$). In both, the left- and rightmost basis functions go to zero at the middle knot, and so another curve that shares the middle $p$ control points is guaranteed to overlap exactly at that knot. Note that the sum of basis functions must always add up to one, so to attach a curve to its endpoints, the final control point is repeated $p$ times. The curves there are also slightly transparent, to match the corresponding repeated basis functions.}
   \label{fig:basis}
 \end{figure}
@@ -763,7 +763,7 @@ Formally, for a directed confluent drawing $B$, this is extra condition \cite{Di
   \item Locally monotone curves in B may share some overlapping portions, but the edges sharing the same portion of a track must all have the same direction along that portion.
 \end{itemize}
 \end{mdframed}
-This means that directed graphs lead to a slightly different power-to-routing graph conversion, where the description in \cite{Bach2017} says \emph{``The only difference is that we create---as necessary---two junctions for each group, one for incoming and one for outgoing edges."}
+This means that directed graphs lead to a slightly different power-to-routing graph conversion, where the description in \cite{Bach2017} says \emph{``The only difference is that we create --- as necessary --- two junctions for each group, one for incoming and one for outgoing edges."}
 Here this short description will be elaborated upon, as simply adding another routing node when its corresponding group has both incoming and outgoing edges is not enough to guarantee that all portions will only flow in one direction.
 This is because any power edges at a power group are propagated down the hierarchy, so that even if flows are correctly directed into separate junctions at one group, they may still clash further down the tree.
 Therefore, all descendants of any such group must also have two routing nodes: one for outgoing edges (flowing up the hierarchy) and one for incoming edges (flowing down the hierarchy).
@@ -807,7 +807,7 @@ Power-confluent is therefore a strictly stronger condition than strict confluent
 
 \subsection{Discussion}
 \label{sec:power_discussion}
-The work presented here has developed the ideas presented by Bach et al.\ \cite{Bach2017} by both improving the power graph decomposition step (Section~\ref{sec:power_graph}) and fixing some practical issues with the conversion to a confluent drawing (Section~\ref{sec:confluent_definition}. Source code for all the algorithms discussed here can be found at \url{www.github.com/jxz12/pconfluent}.
+The work presented here has developed the ideas presented by Bach et al.\ \cite{Bach2017} by both improving the power graph decomposition step (Section~\ref{sec:power_graph}) and fixing some practical issues with the conversion to a confluent drawing (Section~\ref{sec:confluent_definition}. Source code for all the algorithms discussed can be found at \url{www.github.com/jxz12/pconfluent}.
 
 Further directions could involve developing methods to find power-confluent drawings, by guiding the search algorithm towards solutions that produce planar routing graphs.
 Methods such as Monte Carlo or A* search may prove useful for either finding such drawings, or just improving the greedy search presented here.

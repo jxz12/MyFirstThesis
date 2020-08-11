@@ -20,7 +20,7 @@ A more obscure example is \emph{string graphs}, where each vertex is represented
 A gallery of such examples can be seen in Figure~\ref{fig:graph_representations}.
 Each of these each of these representations has its unique benefits and downsides: matrix plots can show a very dense amount of data in a small space, but are very dependent on the ordering of rows and columns \cite{Liiv2010}, as it can be seen in Figure~\ref{fig:graph_representations} that shuffling the order of rows and column can completely hide the underlying structure.
 The intersection-style graphs are intuitive and do not require edges to be explicitly drawn, thus saving on visual clutter. However they cannot be drawn for all graphs for either the circle \cite{McDiarmid2014} or string \cite{Schaefer2003} representations.
-Treemaps effectively convey the idea of a hierarchy, where the root node completely envelops each of its children in a recursive manner. On their own they can only visualise trees, but have been effectively used in conjuction with clustering algorithms to apply them to general graphs; examples of this include \emph{graph thumbnails} \cite{Yoghourdjian2018}, or \emph{power graphs decomposition} \cite{Dwyer2014} that will be studied later in Chapter~\ref{chap:edges}, Section~\ref{sec:power_graph}.
+Treemaps effectively convey the idea of a hierarchy, where the root node completely envelops each of its children in a recursive manner. On their own they can only visualise trees, but have been effectively used in conjuction with clustering algorithms to apply them to general graphs; examples of this include \emph{graph thumbnails} \cite{Yoghourdjian2018}, or \emph{power graphs decomposition} \cite{Dwyer2014} that will be studied later in Chapter~\ref{chap:power}, Section~\ref{sec:power_graph}.
   
 % Because of the difference between the abstract mathematical structure of a network and its representation within a visualisation, the abstract structure itself will henceforth be referred to a graph comprised of vertices and edges, and its representation a a network comprised of nodes and links.\footnote{This is in line with the terminology chosen by the \emph{International Symposium on Graph Drawing and Network Visualisation} to separate its theoretical and applied submission tracks, and so I will attempt to adopt it here. However the distinction between the two can sometimes become blurred depending on the context.}
 
@@ -194,11 +194,12 @@ It can be shown that the equation
   \mathbf{L}^w\mathbf{x}' = \mathbf{L^Xx}
   \label{eq:major_linear}
 \end{equation}
-where $\mathbf{x}$ and $\mathbf{x}'$ are column vectors that represent a single dimension of the full layouts $\mathbf{X}$ and $\mathbf{X}'$ respectively, guarantees that $\text{stress}(\mathbf{X}') \leq \text{stress}(\mathbf{X})$ \cite{Gansner2004}.
+where $\mathbf{x}$ and $\mathbf{x}'$ are column vectors that represent single dimensions of the full layouts $\mathbf{X}$ and $\mathbf{X}'$ respectively, guarantees that $\text{stress}(\mathbf{X}') \leq \text{stress}(\mathbf{X})$ \cite{Gansner2004}.
 The optimisation process is then performed simply by solving Equation~\eqref{eq:major_linear} as a system of linear equations, with $\mathbf{x}'$ as the column of unknowns being solved for. This is repeated in an iterative manner, where $\mathbf{x}'$ is computed in one iteration and then used as $\mathbf{x}$ in the next, until the algorithm can no longer improve the value of stress by more than a certain threshold. Note that $\mathbf{L}^w$ only needs to be computed once, but $\mathbf{L}^\mathbf{X}$ must be recalculated on every iteration.
 
 Additionally in practice, the position of the first vertex is fixed to the origin, and the first row and column of $\mathbf{L}^w$ are removed, as well as the first row of the vector $\mathbf{L^Xx}$. This is in order to remove translational invariance from the solution, which allows for fast linear equation solving methods to be applied to solve Equation~\ref{eq:major_linear}.
 In particular, Gansner et al.\ \cite{Gansner2004} recommend \emph{Cholesky factorization} \cite{Press2007Cholesky} or the \emph{conjugate gradient} method \cite{Press2007Conjugate}, both of which will be tested later in Section~\ref{sec:sgd_experiment}. 
+
 Ganser et al.\ \cite{Gansner2004} also described another \emph{local} method for solving Equation~\ref{eq:major_linear}, where the system of equations is solved for just one vertex at a time. This is done by setting the position of vertex $i$ to
 \begin{equation}
   \mathbf{x}_i' = \frac{\sum_{j\neq i}w_{ij}(\mathbf{x}_j + d_{ij}(\mathbf{x}_i - \mathbf{x}_j)||\mathbf{X}_i - \mathbf{X}_j||^{-1})}{\sum_{j\neq i}w_{ij}}
@@ -247,7 +248,7 @@ Rewriting Equation~\eqref{eq:stress} as
 Q_{ij}(\mathbf{X}) = w_{ij}(||\mathbf{X}_i - \mathbf{X}_j|| - d_{ij})^2,
 \end{gather}
 it can be seen that if every term $Q_{ij}$ in the summation is satisfied as a constraint~\eqref{eq:constraint}, then the total stress is zero, corresponding to an ideal layout. 
-This is exactly the idea behind the method that will be studied here---a constraint is placed on every possible pair of vertices, and then satisfied one by one as above.
+This is exactly the idea behind the method that will be studied here --- a constraint is placed on every possible pair of vertices, and then satisfied one by one as above.
 
 However zero stress is almost always impossible, for the same reasons that the aforementioned tetrahedron cannot be embedded in 2D. In such situations, simply satisfying constraints does not lead to convergence, but a simple extension will now be described that not only converges but, remarkably, also minimises stress.
 
@@ -284,7 +285,7 @@ Note that since this gradient is zero with respect to all $\mathbf{X}_k$ other t
   \label{eq:SGD_step}
 \end{equation}
 
-The constraint relaxation of the previous section is therefore equivalent to a special case of SGD where $w_{ij}=1$ and $\eta=1/4$.\footnote{This equivalence to stochastic gradient descent was not known for a long time, as neither Jakobsen \cite{Jakobsen2001} nor Dwyer \cite{Dwyer2009} classified the algorithm correctly. In fact, not even we knew that this was SGD in the first version of this paper we submitted to a journal.}
+The constraint relaxation of the previous section is therefore equivalent to a special case of SGD where $w_{ij}=1$ and $\eta=1/4$.\footnote{This equivalence to stochastic gradient descent was not known for a long time, as neither Jakobsen \cite{Jakobsen2001} nor Dwyer \cite{Dwyer2009} classified the algorithm correctly. In fact, not even my supervisors and I knew that this was SGD in the first version of this paper we submitted to a journal, where it was called \emph{weighted constraint relaxation}.}
 Additionally in this case, a gradual reduction in the step size $\eta$ is necessary to make the process converge, since not all terms can be simultaneously minimised. This will be further elaborated in Section~\ref{sec:annealing}, and the problem can be interpreted in the context of stress as each edge of the aforementioned tetrahedron satisfying its constraint one by one as in Figure~\ref{fig:satisfaction}, but never finding a configuration where all are satisfied at the same time.
 
 Writing $\mu=4w_{ij}\eta$ as the coefficient of $\mathbf{r}$, it can be seen that $Q_{ij}\leftarrow 0$ when $\mu=1$ and decreases monotonically from $\mu=0$ to $\mu=1$.
@@ -588,7 +589,7 @@ Majorization also takes many more iterations to converge than SGD, with means of
 \begin{figure}
   \centering
   \makebox[\textwidth][c]{\includegraphics[width=1.09\textwidth]{stress/time.pdf}}
-  \caption[Stress measured on a further selection of graphs]{Graphs of stress against time for all three implementations of majorization, and SGD using the 15 iteration annealing schedule. 10 runs were used for each graph, and the line plots run through the mean stress and time per iteration.
+  \caption[Stress measured on a further selection of graphs]{Graphs of stress against time for all three implementations of majorization, and SGD using the 15 iteration annealing schedule. 10 runs were used for each method, and the line plots run through the mean stress and time per iteration.
   Graphs were considered as unweighted
   and layouts were initialized randomly within a 1$\times$1 square.
   The graph \texttt{btree9} is a binary tree of depth 9. 
@@ -617,7 +618,7 @@ This can be written as
   \label{split stress}
 \end{equation}
 where $\sigma_{ij} = (||\mathbf{X}_i - \mathbf{X}_j|| - d_{ij})^2$
-Just considering the preprocessing stage for now, it is clear that $d$ and $w$ can be easily computed for the left half of the summation directly from the graph. Real-world graphs are also usually sparse, so for a graph with $|V|$ vertices and $|E|$ edges, $|E| \ll |V|^2$ making the space required to store these values tolerable. However the second half is not so easy---an all-pairs shortest paths (APSP) calculation takes $O(|E| + |V|)$ time per vertex for an unweighted graph with a breadth-first search, or $O(|E| + |V|\log|V|)$ for a weighted graph using Dijkstra's algorithm \cite{Cormen2009}.
+Just considering the preprocessing stage for now, it is clear that $d$ and $w$ can be easily computed for the left half of the summation directly from the graph. Real-world graphs are also usually sparse, so for a graph with $|V|$ vertices and $|E|$ edges, $|E| \ll |V|^2$ making the space required to store these values tolerable. However the second half is not so easy --- an all-pairs shortest paths (APSP) calculation takes $O(|E| + |V|)$ time per vertex for an unweighted graph with a breadth-first search, or $O(|E| + |V|\log|V|)$ for a weighted graph using Dijkstra's algorithm \cite{Cormen2009}.
 
 The second stage is iteration, where the layout is gradually improved towards a good minimum. Again, computing the first summation is tolerable, but the number of longer distance contributions quickly grows out of control. Many notable attempts have been made at tackling this second half. A common approach is to ignore $d_{ij}$, and to approximate the summation as an $n$-body repulsion problem, which can be efficiently well approximated using $k$-d trees \cite{Barnes1986}. Hu \cite{Hu2005} and independently Hachul and J\"unger~\cite{Hachul2004} used similar tricks in the context of the force-directed model of Fruchterman and Reingold \cite{Fruchterman1991}, along with a multilevel coarsening scheme to avoid local minima. Gansner et al.\ \cite{Gansner2013} use it with majorization by summing over $-\alpha \log||X_i - X_j||$ instead. Brandes and Pich~\cite{Brandes2007Eigensolver} even ignore the second half completely and capture the long-range structure by first initializing with a fast approximation to \emph{classical scaling} known as PivotMDS \cite{Brandes2008}, which minimizes the inner product rather than Euclidean distance.
 
@@ -825,7 +826,7 @@ Additionally, if frame rate becomes an issue in an interactive setting, the appl
 
 \subsubsection{Conclusion}
 This chapter has presented a modified version of stochastic gradient descent (SGD) to minimize stress as defined by Equation~\eqref{eq:stress}. An investigation comparing the method to majorization shows consistently faster convergence to lower stress levels, and the fact that only a single pair of vertices is considered at a time makes it well suited for variants such as domain-specific modifications or the pivot-based approximation of Ortmann et al.\ \cite{Ortmann2017}.
-This improved performance---combined with a simplicity that forgoes an equation solver or smart initialization---makes
+This improved performance --- combined with a simplicity that forgoes an equation solver or smart initialization --- makes
 SGD a strong candidate for general graph layout applications.
 
 All code used for timing experiments, along with a fast C++ implementation with a Python wrapper, is open source and available at \url{www.github.com/jxz12/s_gd2}.
