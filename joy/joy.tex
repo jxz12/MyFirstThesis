@@ -13,7 +13,7 @@ The work in this chapter will explore such a goal to move towards an engineering
 
 \section{Background}
 \label{sec:joy_background}
-The unique selling point of EcoBuilder is that its ecosystem simulation is based on the same mathematical models studied by theoretical ecologists. The review of background literature in this section will therefore begin by discussing the models chosen in the following Section~\ref{sec:predator_prey}. With the knowledge of \emph{how} pairs of species interact with each other, the following Section~\ref{sec:topology} will study the choice of \emph{which} species interact at all. Section~\ref{sec:citizen_science} will outline a brief history of previous attempts to crowdsource research through the citizen science approach, and Section~\ref{sec:yellowstone} will tell the story of the canine inspiration behind the origins of the game.
+The unique selling point of EcoBuilder is that its ecosystem simulation is based on the same mathematical models studied by theoretical ecologists. The review of background literature in this section will therefore begin by discussing the models chosen in the following Section~\ref{sec:predator_prey}. With the knowledge of \emph{how} pairs of species interact with each other, the following Section~\ref{sec:topology} will study the choice of \emph{which} species interact at all. Section~\ref{sec:citizen_science} will outline a brief history of previous attempts to crowdsource research through the citizen science approach, and give context to why EcoBuilder was created.
 
 \subsection{Predator--prey interactions}
 \label{sec:predator_prey}
@@ -122,11 +122,11 @@ Specifically, the allometric functions used for the reproduction rates $\mathbf{
   \label{eq:metabolism_beta}
 \end{equation}
 where $b_0$ and $d_0$ are constants to normalise birth and death rates, and $\mathbf{m}_i$ is the body mass of species $i$ in kilograms. The exponent $\beta$ is a empirically verified relationship between metabolism and individual body mass \cite{Brown2004}, and it is taken minus one in order to convert it into mass-specific units.
-Remarkably, the same exponent of $\beta=\sfrac{3}{4}$ can be applied to species of all sizes, from the smallest bacteria to the largest blue whale \cite{Kleiber1047}. It is theorised to take a value of $\sfrac{3}{4}$ --- rather than the $\sfrac{2}{3}$ that one would expect from a spherical surface area to volume ratio --- due to the fractal pattern of tubes (such as veins) spread throughout the body \cite{West1997}, although not without controversy \cite{Agutter2004}.
+Remarkably, the same exponent of $\beta=\sfrac{3}{4}$ can be applied to species of all sizes, from the smallest bacteria to the largest blue whale \cite{Kleiber1947}. It is theorised to take a value of $\sfrac{3}{4}$ --- rather than the $\sfrac{2}{3}$ that one would expect from a spherical surface area to volume ratio --- due to the fractal pattern of tubes (such as veins) spread throughout the body \cite{West1997}, although not without controversy \cite{Agutter2004}.
 
 \begin{figure}
-    % \centering
-    % \includegraphics{}
+    \centering
+    \includegraphics[width=.8\textwidth]{joy/metabolism.png}
     \caption[A plot of metabolism against individual body mass]{show metabolism against size if you can}
     \label{fig:metabolism}
 \end{figure}
@@ -211,7 +211,7 @@ This study of this topology of food webs has seen many models being developed to
 
 One of the main features that such models attempt to capture is the idea that big things generally eat small things. An early version of this is the cascade model by Cohen \cite{Cohen2012}, which gives begins by placing every species along an axis, and then only allows species to prey on other species that are lower than them on this axis. The placement on this axis can, but is not necessarily, interpreted as body size.
 A notable improvement to this is the Niche model of Williams and Martinez \cite{Williams2000}, who leveraged the fact that big things eat small things, but not too small. They therefore constrain species to only prey on other species within a certain range on the axis, as shown in Figure~\ref{fig:niche}, top.
-Other attempts include the nested hierarchy model \cite{Cattin2004} which captures the clustered nature of food webs, the coherence model \cite{Johnson2014} which captures the layered nature of groups of predators, or the diet breadth \cite{Petchey2008} and speciation \cite{Rossberg2006} models, which simulates foraging and evolutionary processes, respectively, to produce structure as an emergent property. 
+Other attempts include the nested hierarchy model \cite{Cattin2004} which captures the clustered nature of food webs, the coherence model \cite{Johnson2014} which captures the layered nature of groups of predators, or the speciation \cite{Rossberg2006} and diet breadth \cite{Petchey2008} models, which simulate evolutionary and foraging processes, respectively, to produce structure as an emergent property. 
 
 However, none of these models can capture the topology of food webs fully satisfactorily. Furthermore, thinking about the options to give a player who is building a food web, it would be much more interesting to have full control over what interactions exist. That is the choice used from this point on, but a good question to ask at this point is whether it is possible for humans to comprehend the topology of real world webs in the first place.
 
@@ -221,16 +221,16 @@ One thing that all the aforementioned models share is \emph{low dimensionality}.
 % The second critical flaw of the game was the fact that the user had no control over the structure of the food webs they were creating.
 It is important that the dimensionality of topologies players are tasked with recreating is low, because humans struggle with understanding high-dimensional information. After all, the algorithms studied in previous chapters all aimed at reducing the dimensionality of graphs down to two dimensions. To gain an idea of just how complicated structures can become, the number of possible edges in a directed graph is $n(n-1)$, which means that there are $2^{n(n-1)}$ possible configurations for the user to try, assuming edges can go in both directions. Even if edges can only in one direction then there are $3^{n(n-1)/2}$, which is still worse than exponential. To illustrate how fast this grows, with just six species this already corresponds to over ten million possible topologies.
 
-It may then seem impossible for the player to effectively explore this search space, but low-dimensional topologies should mean that simple strategies and patterns can be used to successfully construct them.
-Fortunately, a study by Eklof et al.\ \cite{Eklof2013} collected a massive amount of data to directly ask the question: what dimensionality do empirical food webs exhibit? Dimensionality in this case is defined as the number of \emph{niche axes} required to capture the topology of a food web, which follows the same definition as the aforementioned niche model. An example of this is shown in Figure~\ref{fig:niche}.
-
 \begin{figure}
-%   \centering
-%   \includegraphics[width=.8\linewidth]{niche.pdf}
-  \caption[An illustration of food web dimensionality]{Example of a 1D niche structure (top) and 2D (bottom), with a consumer and its feeding range in red, and resources in green.
-  In one dimension it is not possible to eat only the left and right species, but given another dimension it is possible for the middle species to `escape'.}
+  \centering
+  \includegraphics[width=.9\textwidth]{joy/niche.pdf}
+  \caption[An illustration of food web dimensionality]{An example of a food web that cannot be one-dimensional, when following the definition in Section~\ref{sec:topology}. Top-left is a two-dimensional niche drawing, where coloured boxes indicate the group of prey for a predator. Top-right is the corresponding node-link diagram.
+  The bottom drawing shows why only having one dimension cannot position the prey such that each pair is adjacent.}
   \label{fig:niche}
 \end{figure}
+
+It may then seem impossible for the player to effectively explore this search space, but low-dimensional topologies should mean that simple strategies and patterns can be used to successfully construct them.
+Fortunately, a study by Eklof et al.\ \cite{Eklof2013} collected a massive amount of data to directly ask the question: what dimensionality do empirical food webs exhibit? Dimensionality in this case is defined as the number of \emph{niche axes} required to capture the topology of a food web, which follows the same definition as the aforementioned niche model. An example of this is shown in Figure~\ref{fig:niche}.
 
 The question was answered by searching for the minimum number of niche axes required to describe the topologies present in the data, by applying an algorithm that searches the space by swapping certain species one by one, and then estimating the `best' dimension using the Akaike information criterion \cite{Eklof2013}. This is necessary because there does not exist a polynomial time algorithm for determining the number of axis required.
 Their result was that the number of dimensions needed to describe even the largest webs is surprisingly low. For smaller webs (fewer than 250 interactions) only one dimension was needed, and only four were needed for their best prediction on webs with thousands of species (with a mean of 1.395 over all webs).
@@ -291,61 +291,115 @@ Popular mainstream games have also included citizen science elements within thei
 The success of these projects shows that the general public has great potential as a scientific resource to be tapped into.
 People from non-scientific backgrounds are in general keen to contribute to a scientific cause; Ponti et al.\ \cite{Ponti2018} discuss player motivations and came to the conclusion that participants are driven by scientific ideals such as collaborative progress and democratisation of knowledge. They also warn, however, that introducing too much of a competitive element to the gamification may produce cognitive tension between the two goals of collaboration and rivalry between players.
 
-EcoBuilder aims to exist within this space by creating a symbiotic relationship between players and researchers within the context of the game. Players will learn about how ecosystems function, and why they may fall apart given the wrong structural decisions. In return, players will be tasked with building ecosystems that offer potential solutions to the stability vs.\ complexity debate.
-The design process behind the development of EcoBuilder to create the apparatus where this is possible will be studied in Section~\ref{sec:user_interface}.
-
-\subsection{Yellowstone Park}
+\subsubsection{Canine inspiration}
 \label{sec:yellowstone}
-Story about wolves and stuff
+The story behind EcoBuilder is based around historical events in Yellowstone Park, USA. In 1926, wolves were declared officially extinct in the park due to an excess of hunting due to lack of regulation at the time. 
+The consequence of this was that elk no longer had any natural predators, leaving them to feed excessively on the park's plants without risk of predation. The resulting supression on plant population had a knock-on effect to smaller mammals such as beavers and fish, causing their populations to struggle, and the health of the entire ecosystem to deteriorate.
+This continued until 1995, when ecologists decided to take the action of reintroducing wolves to the park, by capturing fourteen wolves from Canada and transporting them across the border \cite{Smith2003}.
 
-\section{User Interface}
+Thankfully, the operation was a success due to the ensuing \emph{trophic cascade:} elk once again had a natural predator, leading to the restoration of plants, bringing back beavers who could again build dams, drawing fish back into rivers, and so on and so forth \cite{Dobson2014}.
+EcoBuilder aims to give ordinary people the ability to make similar decisions in their own simulated ecosystems. These simulations will be performed using the equations in Section~\ref{sec:predator_prey}, and so phenomena like the chain reactions seen in Yellowstone can be recreated in the simulation, as emergent properties of the underlying dynamical system.
+
+The goal, in terms of citizen science, is to create a symbiotic relationship between players and researchers within the context of the game.
+Players will learn about how ecosystems function, and why they may fall apart given the wrong structural decisions. In return, players will be tasked with building ecosystems that offer potential solutions to the stability vs.\ complexity debate. A further visualisation experiment will also be performed, with the aim of exploring different types of node layout for food webs. These research outcomes of the game are further discussed in Section~\ref{sec:eco_hypotheses}.
+The following section will first study the process behind the design and development of the apparatus where this is made possible.
+
+\section{User interface}
 \label{sec:user_interface}
 \begin{figure}
     \centering
-    \includegraphics[height=.9\textheight]{joy/gameplay.pdf}
-    \caption[A labelled screenshot of EcoBuilder gameplay]{Caption}
-    \label{fig:eco_UI}
+    \makebox[\textwidth][c]{\includegraphics[width=1.09\textwidth]{joy/gameplay.pdf}}
+    \caption[A labelled screenshot of EcoBuilder gameplay]{An illustrative screenshot of gameplay in EcoBuilder. The components labelled 1--8 are explained in Section~\ref{sec:user_interface}.}
+    \label{fig:eco_gameplay}
 \end{figure}
 
-\subsection{Visualisation}
+There are multiple components that go into the development of any game, and EcoBuilder is no different. To illustrate the various engineering challenges behind the user interface, Figure~\ref{fig:eco_gameplay} will be used as a reference screenshot of the gameplay performed by a player. The various moving parts are labelled in the order they will be explained.
+
+\subsection{Label 1: Visualisation}
 \label{sec:eco_visualisation}
-\subsubsection{TROPHIC LEVELS}
-\begin{itemize}
-  \item gauss-seidel iteration because positive definite, optimised to only take O(m) per iteration and O(n) extra space (because we only care about the sum of the rows and not where the rows are placed. In general we find the number of iterations required is <100 (test this) but requires for loops
-  \item whether this laplacian has a solution can also be found using a breadth first search from sources (which is also used for chain)
-  \item note that this is the same set of equations as in \eqref{eq:tutte} and \eqref{eq:major_Lw}, \eqref{eq:major_LX}, \eqref{eq:spectral_laplacian}
-\end{itemize}
-\subsubsection{Layout}
-\begin{itemize}
-  \item SGD is so fast that we use it on every topological change
+The most complex component of the gameplay is the visualisation of the ecosystem itself. For that reason, this whole section will be devoted to its explanation, and the following Section~\ref{sec:HUD} will concern the remaining label.
+
+As shown by the label 1 in the screenshot, a node-link diagram is used for visualising the topology of the food web.
+species mesh and colour dependent on traits, CIELAB used for colour map \cite{Smart2019}
+battery icon for health a third for red area (negative equilibrium abundance), a third for green. Low health not shown in this picture but can be seen in Figure~\ref{fig:ecobuilder_device}.
+
+However the introduction of interaction adds multiple extra factors that need to be taken into consideration.
+The first is the question of how the player adds new interactions to the graph. This is done in the simplest and most intuitive manner: the player simply drags in between the two nodes they wish to attach to each other. Since the flow of biomass is directed from prey to predator, the first intuition may be to drag from the prey to predator, however play tests showed that people found it more intuitive to think in terms of `this eats that'. The default setting in the game therefore has the player drag from predator to prey, but this is left as an option in the settings.
+
+\subsubsection{Interactive layout}
+The layout of the nodes is computed by minimising stress, as studied in Chapter~\ref{chap:stress}.
+However, a big difference is that the topology will change every time the player adds a link, and so the layout must be recomputed each time.
+The main problem with this is that stress as an energy function is rotation- and translation-invariant, and so there is no guarantee that any two topologies will line up well at all.
+A preliminary idea was to use the previous layout as the initialisation for the next. This is effective at maintaining nodes close to each other, but unfortunately this initialisation can throw the optimisation directly into a local minimum, leading to low-quality layouts. The work in Chapter~\ref{chap:stress} showed that stochastic gradient descent (SGD) does not require smart initialisation to effectively minimise stress, but unfortunately it is not good enough to escape if it is dropped directly into a bad initialisation.
+
+The game therefore proceeds by reinitialising the layout randomly each time the topology of the graph is edited, and running SGD from scratch every time. The Unity game engine works by providing the programmer with functions to implement that will be run once per frame, but SGD is not quite fast enough to be completely computed every frame and still maintain a good frame rate.
+Because of this, the layout routine is implemented as a thread that runs concurrently alongside the main frame-by-frame thread, and only returns the layout to display it on the screen once it is completed. SGD is fast enough to only require a couple of frames, even on mobile devices, but threading is still required to prevent stutter.
+On top of this, the local version of majorization (see Section~\ref{sec:majorization}) is used once per vertex per frame in order to fine tune the layout slowly.
+
+The next step is to problem is to make sure that the translation, rotation, and reflection differences between layouts is minimal.
+Procrustes is linear way of doing this, and widely used.
+Removing the translational component is easy, simply center.
+Removing the rotational component requires rotating by an angle
+\begin{equation}
+  \theta(\mathbf{x},\mathbf{y}, \mathbf{x^\prime}, \mathbf{y^\prime}) = 
+  \tan^{\text{--}1}\left(\frac{\sum_i(\mathbf{y}_i\mathbf{x}^\prime_i-\mathbf{x}_i\mathbf{y}^\prime_i)}{\sum_i(\mathbf{x}_i\mathbf{x}^\prime_i-\mathbf{y}_i\mathbf{y}^\prime_i)}\right)
+\end{equation}
+
+\begin{equation}
+  \mathrm{procrustes}(\mathbf{X}, \mathbf{X'}) = 
+  \sqrt{\sum_i}
+\end{equation}
+
+Unfortunately, minimising stress is not able to prevent the problem of crowded layouts. This situation can happenespecially for cliques. superfocus was our eventual solution, but we do the learning world controlled test without. 
+
+\subsubsection{Constraining the y-axis}
   \item 3D vs 2D: originally used 3D, but we found that players could not quickly pick up the rotational interface. Nodes would also often become obscured in the center of the layout, so we switched to 2D instead. 
   \item however this also made trophic level constraints more difficult to satisfy because there is one fewer dimension to move around in (previously all that was needed was to always keep the y-position. The best solution was to add 5 iterations of $\mu=1$ at the beginning, as an initialization step. TODO graph on this
 % We concluded that dense networks such as foodwebs require some use of metadata to extract an accurate representation.
 % The technique that we decided worked best was to still use a force-directed method, but to additionally constrain the y-axis positions to something meaningful. In the case of food webs, we choose the
-  \item localised majorization is used every frame for one node in order to fine-tune layout
-  \item we compare constrained to non-constrained to see who performs better. They both use the same initial layout (SGD constrained to trophic levels) but with either constrained or non-constrained majorization when fine tuning.
-  \item TODO equations: procrustes then performed on each connected component
-  \item initialising with the previous layout did NOT work, because it could sometimes be stuck in a local minima. However, starting from random every time was sad because of certain situations (impossible procustes). PivotMDS/some other linear solver would have been great, but it is not obvious how to constrain the y-axis for that.
-  \item there is also the problem of crowded layouts, especially for cliques. superfocus was our eventual solution, but we do the learning world controlled test without.
-  \item johnson's algorithm for loops didn't work
-  \item mention old idea for chess-board and why it didn't work
-\end{itemize}
-
-\subsubsection{UI}
 \begin{itemize}
-  \item database in sql
-  \item indexed using...
-  \item 
-  \item battery icon for health
-  \item stars and leaderboards
-  \item species mesh and colour dependent on traits
+  \item gauss-seidel iteration because positive definite, optimised to only take O(m) per iteration and O(n) extra space (because we only care about the sum of the rows and not where the rows are placed. In general we find the number of iterations required is <100 (test this) but requires for loops
+  \item whether this laplacian has a solution can also be found using a breadth first search from sources (which is also used for chain)
+  \item note that this is the same set of equations as in \eqref{eq:tutte} and \eqref{eq:major_Lw}, \eqref{eq:major_LX}, \eqref{eq:spectral_laplacian}
+  \item normalised by chain length in order to stop loops from getting too tall
 \end{itemize}
 
-What is the outcome? Test both visualisations and see which group gets higher scores and/or finishes quicker and/or gives up earlier!
+\subsection{Heads-up display}
+\label{sec:HUD}
+The remaining labels on Figure~\ref{fig:eco_gameplay} point to elements of a 2D overlay, upon which exists what is known as a heads-up display (HUD). The idea of a HUD is now archetypal to game interfaces, but its name originated from the military aviation, where the pilot would need information available whilst leaving their view unobstructed. For these reasons, 
 
-show figure of 
+\subsubsection{Label 2: Constraints}
+Different levels offer different scenarios, with specific topological constraints shown on htis panel. In later levels, a minimum number of edges or chain length become prerequisites to passing the level.
 
-\section{Experimental Design and Hypotheses}
+We tried loops but they suck
+
+\subsubsection{Label 3: Score}
+One more issue we needed to solve was to develop a suitable scoring system.
+The scoring metric we had before was to simply count the number of species, but we found that there were many simple strategies to easily maximise this metric, such as adding a single producer and many identical consumers.
+
+\subsubsection{Label 4: Level}
+There are 18 levels in total... plus 3 in research
+
+\subsubsection{Label 5: Help}
+Present throughout the game.
+Press the green arrow on the edge to show/hide
+After two minutes, shows a hint.
+
+\subsubsection{Label 6: Inspector}
+size goes from one gram to one thousand kilograms
+interference goes from 1e-5 to 1 (reference hsi-cheng's work)
+
+\subsubsection{Label 7: Initiator}
+plants and animals
+plants are always 3 or below, because they are cheating.
+
+\subsubsection{Label 8: Recorder}
+undoing and redoing
+all recorded and transformed into a string to send to server
+
+
+\section{Experimental design and hypotheses}
+\label{sec:eco_hypotheses}
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{joy/worlds.png}
@@ -363,19 +417,16 @@ show figure of
 \begin{itemize}
   \item USED to be real time ODE solver, but changed into analytic equilibrium point finder. Makes it a PUZZLE game.
   \item levels are designed to introduce concepts such as competitive exclusion and apparent competition along the way.
-  \item scoring metric used in the end is 
-  \item diagonals of interaction matrix (reference hsi-cheng's work)
   \item math.net library
 \end{itemize}
 
-One more issue we needed to solve was to develop a suitable scoring system.
-The scoring metric we had before was to simply count the number of species, but we found that there were many simple strategies to easily maximise this metric, such as adding a single producer and many identical consumers.
 
+What is the outcome? Test both visualisations and see which group gets higher scores and/or finishes quicker and/or gives up earlier!
 
 what is the outcome? analyse the most successful strategies for structural (average chain length/trophic level, number of edges, all the niche model stuff) and dynamical features (average body size/interferences, paradox of enrichment, flux/abundance)
 find patterns in this.
 
-\section{Results and Analysis}
+\section{Results and analysis}
 
 plot density plots of each level for time and score
 
@@ -384,6 +435,7 @@ find common features of topology
 discuss sampling bias for empirical webs
 
 \subsection{Discussion}
+  mention old idea for chess-board and why it didn't work
      chess board not used anymore
         We will use this result by restricting the player to an interface based on a two-dimensional niche space, presented as a board game not unlike chess, where pieces represent species and boxes will be drawn to decide what the species eats.
 
@@ -391,4 +443,5 @@ discuss sampling bias for empirical webs
         Either way for us it does not matter, because in the first case it means our restrictions are more realistic, and in the second case we are just helping the user towards stable configurations.
         Our goal is to model the real world as close as possible, and that is what we are doing by restricting the structure; that it also keeps our interface for designing such structures scalable is a fortunate side-effect.
 
-I have no results to report soz
+vertical screens get very crowded
+A sequel should be on desktop, with niche chess board as interface

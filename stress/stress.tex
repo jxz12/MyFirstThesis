@@ -625,14 +625,11 @@ The second stage is iteration, where the layout is gradually improved towards a 
 There are a couple of issues with this idea, one being that treating all long-range forces equally is unfaithful to
 graph-theoretic distances,
 and another being that the relative strength of these forces depends on an extra parameter that can greatly affect the final layout of the graph \cite{Hu2005}.
-Keeping these dependent on their graph-theoretic distance sidesteps both of these issues, but brings back the problem of computing and storing shortest paths. One approach to maintaining this dependence comes from Khoury et al.\ \cite{Khoury2012}, who use a low-rank approximation of the distance matrix based on its singular value decomposition. This can work extremely well,
-% especially on graphs that the method we will describe struggles with,
-but still requires APSP unless $w_{ij} = d_{ij}^{-1}$.
+Keeping these dependent on their graph-theoretic distance sidesteps both of these issues, but brings back the problem of computing and storing shortest paths. One approach to maintaining this dependence comes from Khoury et al.\ \cite{Khoury2012}, who use a low-rank approximation of the distance matrix based on its singular value decomposition. This can work extremely well, but still requires APSP unless $w_{ij} = d_{ij}^{-1}$.
 
 \subsection{Sparse approximation}
 \label{sec:sparse_explanation}
 Within the normal MDS community, there have been multiple attempts to approximate stress, such as Halko et al.\ \cite{Halko2011} or GLINT \cite{Ingram2012}. However an additional problem with graphs is that shortest paths still need to be computed, and so even the distances between datapoints are not immediately available. This is an assumption that these approximations usually have, and so they cannot be directly used in the contexts of graphs.
-% multisource shortest paths is still used to find regions but we present a simpler algorithm to find weights (make pseudocode)
 % note that it does not really minimise a particular function because the weights are asymmetric.
 Fortunately, Ortmann et al.\ \cite{Ortmann2017} developed an approach designed around graphs. They pick a set of `pivot' vertices whose shortest paths are used as an approximation for the shortest paths of vertices close to them.
 Since this approach reduces the number of terms in the summation, using it in the context of SGD also reduces the amount of work per iteration.

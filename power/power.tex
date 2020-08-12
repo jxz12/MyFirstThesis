@@ -74,7 +74,7 @@ One reason why there is such a variety of clustering algorithms is due in part t
 It is therefore important to keep in mind that clustering algorithms are attempts to quantify common characteristics of real-world data, and there is generally no `right answer' to the question of which one should be chosen; it depends on both the specific objective and dataset being examined. 
 Nevertheless, they have been used to great effect in many applications \cite{Fortunato2016}, and so confidence can be placed in their utility as a tool to help understand patterns in data.
 
-The work in this chapter will focus on \emph{hierarchical clustering}, the family of clustering algorithms where the output is a \textit{dendrogram}: a binary tree used to describe a hierarchical structure.
+The work in this chapter will focus on \emph{hierarchical clustering}, the family of clustering algorithms where the output is a \textit{dendrogram:} a binary tree used to describe a hierarchical structure.
 This can either be done from the bottom up, i.e.\ each node starts in its own cluster and pairs of clusters are progressively merged until only one remains, or top down, i.e\ every node starts in the same cluster that is recursively split into two halves. The former is known as \emph{agglomerative} clustering, and the latter as \emph{divisive} clustering.
 The output fits well here, since the goal is to construct a hierarchical edge bundling visualisation like the one in Figure~\ref{fig:metaunity}, but without a prior hierarchy included with the data; the dendrogram produced from such a clustering algorithm can be used as this missing hierarchy.
 
@@ -180,9 +180,9 @@ The distance is defined as
   \label{eq:walktrap}
 \end{equation}
 where $t>0$ is an input parameter that determines how many times $\mathbf{P}$ should be multiplied by itself.
-Notice that this is very close to being simply the Euclidean distance between columns in $\mathbf{P}$, except with a factor consisting of $\mathbf{D}_{kk}^{\text{--}\sfrac{1}{2}}$. This was done presumably in order to undercompensate for high-degree vertices, although they state that their distance ``\textit{can also be seen as the $L^2$ distance between the two probability distributions}'' \cite{Pons2006} without mentioning this factor. However a look into their provided source code confirms the use of the factor.
+Notice that this is very close to being simply the Euclidean distance between columns in $\mathbf{P}$, except with a factor consisting of $\mathbf{D}_{kk}^{\text{--}\sfrac{1}{2}}$. This was done presumably in order to undercompensate for high-degree vertices, although they state that their distance \textit{``can also be seen as the $L^2$ distance between the two probability distributions"} \cite{Pons2006} without mentioning this factor. However a look into their provided source code confirms the use of the factor.
 Since this measure can also be written as the Euclidean distance between columns in the matrix $\mathbf{D}^{\text{--}\sfrac{1}{2}}\mathbf{P}^t$, it automatically also qualifies as a distance metric.
-\cite{Pons2006} did not study whether the inclusion of this factor performs better quantitatively, and my results showed that the performance on the benchmark used in Section~\ref{sec:clustering_experiment} is in fact higher when this factor is left out. I will therefore use Equation~\eqref{eq:walktrap} without including it, i.e.\ simply $\sqrt{\sum_{k}(\mathbf{P}_{ik}^t - \mathbf{P}_{jk}^t)^2}$. This will be referred to as the \emph{snapshot} embedding, as it captures the random walker state after a fixed number of steps $t$.
+\cite{Pons2006} did not study whether the inclusion of this factor performs better quantitatively, and the performance on the benchmark used in Section~\ref{sec:clustering_experiment} is in fact always higher when this factor is left out. Equation~\eqref{eq:walktrap} will therefore be used without including it, i.e.\ simply $\sqrt{\sum_{k}(\mathbf{P}_{ik}^t - \mathbf{P}_{jk}^t)^2}$. This will be referred to as the \emph{snapshot} embedding, as it captures the random walker state after a fixed number of steps $t$.
 
 The algorithm then proceeds by applying agglomerative clustering using the Ward method, but with one difference: it only merges clusters connected by an edge. This reduces computation time and likely improves the modularity of the resulting clusters, but since the end goal is to produce bundles, edges between clusters are acceptable as they will be bundled. The results here will therefore use the more general algorithm that is unaware of edges between clusters.
 
@@ -221,7 +221,7 @@ The distances derived from Equations~\eqref{eq:jaccard}--\eqref{eq:commute} will
 
 \subsection{Experimental study}
 \label{sec:clustering_experiment}
-Since clustering is an undefined problem, I will measure the quality of clusters by using a benchmark set of graphs where a ground truth clustering configuration is known.
+Since clustering is an undefined problem, the quality of clusters will be measured by using a benchmark set of graphs where a ground truth clustering configuration is known.
 
 \begin{table}
   \centering
@@ -278,7 +278,7 @@ Results are presented in Figures~\ref{fig:ARI1} and~\ref{fig:ARI2}, where all di
 
 \subsubsection{Results}
 The aim of this study is to answer two questions: which dissimilarity measure is best, and which linkage method is best for clustering this dissimilarity?
-Unfortunately there is no clear-cut answer to either question, but the results can be interpreted to give some recommendations. Looking at the bottom right panels for each graph, it is immediately clear that single linkage is the least effective and should be avoided. The best scores for the remaining linkage methods generally hover around the same value, and so it is clear that the remaining four linkage methods all \emph{can} result in high quality results. Looking at the mean ARI scores, however, it becomes apparent that Ward's method produces the best results on average. This is consistent with the choice made my Pons and Latapy \cite{Pons2006} for their clustering method, now with quantitative results to verify the decision.
+Unfortunately there is no clear-cut answer to either question, but the results can be interpreted to give some recommendations. Looking at the bottom right panels for each graph, it is immediately clear that single linkage is the least effective and should be avoided. The best scores for the remaining linkage methods generally hover around the same value, and so it is clear that the remaining four linkage methods all \emph{can} result in high quality results. Looking at the mean ARI scores, however, it becomes apparent that Ward's method produces the best results on average. This is consistent with the choice made by Pons and Latapy \cite{Pons2006} for their clustering method, now with quantitative results to verify the decision.
 
 % A more qualitative observation is that Ward also tends to give the best hierarchical structure in terms of neat trees without branches that, which is difficult to measure but results in the best bundles.
 The best dissimilarity for Ward over all graphs is Euclidean on snapshot embedding with $t=5$ in Equation~\eqref{eq:walktrap}, and it seems the original authors in \cite{Pons2006} agree with this choice too, as they performed their analysis using either $t=2$ or $t=5$.
@@ -378,7 +378,7 @@ Confluent drawing has its roots in the more theoretical side of graph drawing, a
 The precise definition of what defines a confluent drawing will be studied later in Section~\ref{sec:confluent_definition}.
 
 The remaining work in this chapter will study a subset of confluent drawing known as \emph{power-confluent} drawing.
-The process of producing a power-confluent drawing consists of three steps: finding the \emph{power graph decomposition}; converting this decomposition into an equivalent auxiliary routing graph (ARG), similarly to hierarchical edge bundling in Section~\ref{sec:pruning}; and finally drawing curves back on top to render a confluent drawing. Each step is illustrated in Figure~\ref{fig:power_teaser}. This was an idea originally explored by Bach et al.\ \cite{Bach2017}, and the work presented here will aim to further develop and formalise the methods there.
+The process of producing a power-confluent drawing consists of three steps: finding the \emph{power graph decomposition;} converting this decomposition into an equivalent auxiliary routing graph (ARG), similarly to hierarchical edge bundling in Section~\ref{sec:pruning}; and finally drawing curves back on top to render a confluent drawing. Each step is illustrated in Figure~\ref{fig:power_teaser}. This was an idea originally explored by Bach et al.\ \cite{Bach2017}, and the work presented here will aim to further develop and formalise the methods there.
 Specifically, the speed and quality of the first step will be improved, and two theoretical issues will be resolved for the second and third.
 
 \subsection{Power graph decomposition}
@@ -706,7 +706,7 @@ Note that this also means all adjacency information is now preserved in the ARG,
   \caption[Pseudocode for power-confluent drawing]{Pseudocode for the conversion from a set of power graph modules (see the output of Algorithm~\ref{alg:pgd} in Figure~\ref{fig:pseudo_pgd}) to a rendered drawing, described in Section~\ref{sec:hierarchical_routing}. 
   Note that the edges on line~\ref{code:pcd:directed} are ordered pairs, while those on line~\ref{code:pcd:undirected} are unordered. This allows, on line~\ref{code:pcd:inout}, for $N^+$ to indicate a set of outgoing neighbours, and $N^{-*}$ a set of incoming neighbours plus any connected by power edges in $P$.
   The split operation on line~\ref{code:pcd:split} then moves $N^+$ and $N^{-*}$ to separate routing nodes, as in Figure~\ref{fig:radial}.
-  In practice a shorter edge length is placed between split routing nodes, and so for line~\ref{code:pcd:sgd} require a layout method that can embed edge lengths, such as the stress layout in Section~\ref{sec:stress_background}.
+  In practice a shorter edge length is placed between split routing nodes, and so line~\ref{code:pcd:sgd} requires a layout method that can embed edge lengths, such as the stress layout in Section~\ref{sec:stress_background}.
   The specifics of the spline function on line~\ref{code:pcd:spline} are outlined in Section~\ref{sec:bspline_details}}
   \label{fig:pseudo_pcd}
 \end{figure}
@@ -801,7 +801,7 @@ Power-confluent is therefore a strictly stronger condition than strict confluent
 \begin{figure}
   \centering
   \includegraphics[width=\linewidth]{power/stricter.pdf}
-  \caption[A strict confluent drawing that is not power-confluent]{An example of a strict confluent drawing that cannot be reverse-engineered into a valid power graph, unless power group boundaries are allowed to overlap. On the left is the confluent drawing (with junctions marked by transparent blue circles), and on the right is a power graph that shows all possible groupings to match these junctions.}
+  \caption[A strict confluent drawing that is not power-confluent]{An example of a strict confluent drawing that cannot be reverse-engineered into a valid power graph, unless power group boundaries are allowed to overlap. On the left is the confluent drawing (with junctions marked by transparent blue circles), and on the right is a power graph that shows all possible groupings to match these junctions. The proof is further explained in Section~\ref{sec:power_planarity}.}
   \label{fig:strict}
 \end{figure}
 
@@ -823,6 +823,6 @@ The layout function (Figure~\ref{fig:pseudo_pcd}, line~\ref{code:pcd:sgd}) is cu
 \begin{figure}
   \centering
   \includegraphics[width=\linewidth]{power/power_karate_lesmis.pdf}
-  \caption[Examples of networks drawn with the power-confluent algorithm]{Two examples of graphs drawn with the Algorithms~\ref{alg:pgd} then~\ref{alg:pcd}, in Figures~\ref{fig:pseudo_pgd} and~\ref{fig:pseudo_pcd} respectively. On the left is \texttt{karate}, previously shown in Figure~\ref{fig:untangled_hairballs}, top. On the right is \texttt{lesmis}, previously shown in Figure~\ref{fig:lesmis}.}
+  \caption[Examples of networks drawn with the power-confluent algorithm]{Two examples of graphs drawn with Algorithms~\ref{alg:pgd} then~\ref{alg:pcd}, in Figures~\ref{fig:pseudo_pgd} and~\ref{fig:pseudo_pcd} respectively. On the left is \texttt{karate}, previously shown in Figure~\ref{fig:untangled_hairballs}, top. On the right is \texttt{lesmis}, previously shown in Figure~\ref{fig:lesmis}.}
   \label{fig:power_karate_lesmis}
 \end{figure}
