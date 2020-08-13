@@ -223,6 +223,15 @@ The distances derived from Equations~\eqref{eq:jaccard}--\eqref{eq:commute} will
 \label{sec:clustering_experiment}
 Since clustering is an undefined problem, the quality of clusters will be measured by using a benchmark set of graphs where a ground truth clustering configuration is known.
 
+Table~\ref{tab:bundle_graphs} contains the four graphs used in this study.
+The graph \texttt{karate} is a classic dataset that has been extensively studied in the network research literature \cite{Fortunato2016}, originally compiled by Zachary \cite{Zachary1977}. It is a social network containing relationships between members of a karate club, in which a rift between two club leaders caused the club to split into two new clubs, where the resulting members of the two clubs form the ground truth clustering of the data.
+The \texttt{footballTSE} graph is a network of American football games between Colleges in the US, where the ground truth is the conference in which they belong. It was originally studied by Girvan and Newman \cite{Girvan2002} in the same paper as the GN algorithm was presented. The ground truth data used is a version corrected by Evans \cite{Evans2010}, as the original data clusters were assigned from the 2001 season instead of the correct 2000 season. 
+The \texttt{caltech} graph is a social network of students at the California Institute of Technology, extracted from the website Facebook and originally studied by Traud et al.\ \cite{Traud2012}. It has been shown to demonstrate clique structure \cite{Nocaj2015}, where the ground truth used here are the dorms in which students were living. This is the most messy data and so the dorm ground truth is the least well matched by the clustering algorithms used.
+% The original graph contains 769 vertices, so the largest connected component was used here.
+The \texttt{lfr} graph is a sample graph from the Lancichinetti Fortunato Radicchi (LFR) benchmark \cite{Lancichinetti2008} which is a model to generate graphs with a clustered structure, given a number of parameters to account for power law distributions in cluster size and vertex degree. The parameters used here were $\tau_1=3$, $\tau_2=1.5$, and $\mu=0.1$. They represent the degree distribution, community size, and fraction of edges to place between communities, respectively. The LFR benchmark was developed in order to improve the popular random model of Girvan and Newman \cite{Girvan2002}.
+%In practice the \texttt{networkx} implementation is not very robust to changes in parameters $\alpha=?$
+All graphs are undirected and unweighted.
+
 \begin{table}
   \centering
   \caption[Benchmark graphs used for the experiment in Section~\ref{sec:clustering_experiment}]{Benchmark graphs used for the experiment in Section~\ref{sec:clustering_experiment}. $|V|$ denotes the number of vertices, $|E|$ the number of edges, and $|M|$ the number of ground truth clusters.}
@@ -244,14 +253,6 @@ Since clustering is an undefined problem, the quality of clusters will be measur
   \label{tab:bundle_graphs}
 \end{table}
 
-Table~\ref{tab:bundle_graphs} contains the four graphs used in this study.
-The graph \texttt{karate} is a classic dataset that has been extensively studied in the network research literature \cite{Fortunato2016}, originally compiled by Zachary \cite{Zachary1977}. It is a social network containing relationships between members of a karate club, in which a rift between two club leaders caused the club to split into two new clubs, where the resulting members of the two clubs form the ground truth clustering of the data.
-The \texttt{footballTSE} graph is a network of American football games between Colleges in the US, where the ground truth is the conference in which they belong. It was originally studied by Girvan and Newman \cite{Girvan2002} in the same paper as the GN algorithm was presented. The ground truth data used is a version corrected by Evans \cite{Evans2010}, as the original data clusters were assigned from the 2001 season instead of the correct 2000 season. 
-The \texttt{caltech} graph is a social network of students at the California Institute of Technology, extracted from the website Facebook and originally studied by Traud et al.\ \cite{Traud2012}. It has been shown to demonstrate clique structure \cite{Nocaj2015}, where the ground truth used here are the dorms in which students were living. This is the most messy data and so the dorm ground truth is the least well matched by the clustering algorithms used.
-% The original graph contains 769 vertices, so the largest connected component was used here.
-The \texttt{lfr} graph is a sample graph from the Lancichinetti Fortunato Radicchi (LFR) benchmark \cite{Lancichinetti2008} which is a model to generate graphs with a clustered structure, given a number of parameters to account for power law distributions in cluster size and vertex degree. The parameters used here were $\tau_1=3$, $\tau_2=1.5$, and $\mu=0.1$. They represent the degree distribution, community size, and fraction of edges to place between communities, respectively. The LFR benchmark was developed in order to improve the popular random model of Girvan and Newman \cite{Girvan2002}.
-%In practice the \texttt{networkx} implementation is not very robust to changes in parameters $\alpha=?$
-All graphs are undirected and unweighted.
 
 These four graphs were run through each of the agglomerative methods presented in Section~\ref{sec:dissimilarities}. For methods that first require a high dimensional embedding, a range of parameters were used for the values of $t$ for Equations~\eqref{eq:walktrap} and~\eqref{eq:damped}.
 To assess the quality of the results, the adjusted random index (ARI) was used to compare a ground truth clustering against the clusters predicted by the algorithm. The benefit of using ARI is that it is robust to cluster labels being swapped, avoiding the situation where the clusters are correct but the order of labels is not.
@@ -334,23 +335,23 @@ The results presented here largely agree with the design choices made by Pons an
 
 The use of dissimilarity measures based on random walks outperforms those derived from other features such as shortest paths, as well as the GN algorithm used by Jia et al.\ \cite{Jia2011}, which also has a higher runtime complexity.
 Calculating the betweenness-centrality for each edge is $\mathcal{O}(|V||E|)$ \cite{Brandes2001Centrality} and since this must be recalculated $|E|$ times, the overall complexity of GN is $\mathcal{O}(|V||E|^2)$, compared to $\mathcal{O}(|V|^2\log|V|)$ for the agglomerative methods explored here.
-Ward's method also consistently outperforms other linkage methods, and a qualitative observation of note is that it also tends to give dendrograms that lend themselves more to the pruning process in Section~\ref{sec:pruning}. Branches in the dendrogram more clearly delineate separately groups of clusters, leading to easier simplification into a streamlined hierarchy for bundling.
+Ward's method also consistently outperforms other linkage methods, and a qualitative observation of note is that it also tends to give dendrograms that lend themselves more to the pruning process in Section~\ref{sec:pruning}. Branches in Ward dendrograms more clearly delineate separately groups of clusters, leading to easier simplification into a streamlined hierarchy for bundling.
 % more systematic study into different methods for pruning 
-When the opposite situation occurs, i.e.\ if differences in branch height are homogenous, the pruning process may merges every single branch into one, since child branches are recursively merged into their parents. However this also usually corresponds to a poor quality clustering in general, because it means that the algorithm could not find large groups of datapoints that were all close to each other.
+When the opposite situation occurs, i.e.\ if differences in branch height are homogenous, the pruning process may merges every single branch into one, since child branches are recursively merged into their parents. However this also usually corresponds to a poor quality clustering in general, because the algorithm could not find large groups of datapoints all close to each other.
 In a real-world visualisation pipeline, this pruning process would ideally be human driven, with methods such as MLCut of Vogogias et al.\ \cite{Vogogias2016} allowing dendrograms to be interactively explored and cut to form flat clusters. Such a tool could be easily applied to perform multiple cuts in order to form a hierarchy for bundling.
 % trees can be interactively explored using \cite{Archambault2008}
-Pruning is also not the only way to solve the dendrogram issues of Figure~\ref{fig:lesmis}. For example, different types of splines may not result in the same issues from occuring.
-A more thorough examination into the use of B-splines can be found in Section~\ref{sec:bspline_details}.
+Pruning is also not the only way to solve the dendrogram issues of Figure~\ref{fig:lesmis}. For example, different types of splines may not result in the same issues. A more thorough examination into the use of B-splines can be found in Section~\ref{sec:bspline_details}.
 
 Interaction would also greatly improve the utility of these visualisations. Holten \cite{Holten2006} suggested ideas such as dynamically tweaking the amount that bundles are relaxed, and highlighting interesting bundles by hiding other links. An additional possibility in this context would be to interactively prune the hierarchical tree in order to neaten bundles, or being switching between different clustering algorithms to reveal different patterns depending on the algorithm selected.
+The need for interaction can also be seen in the complex final render \texttt{caltech} in Figure~\ref{fig:untangled_hairballs}, second-from-bottom; an option such as \emph{GrouseFlocks} by Archambault et al.\ \cite{Archambault2008} would be useful here.
 
 A quantitative assessment of the actual utility of resulting bundles is something missing from the literature, but out of scope for the work here.
-It is however clear that certain topological features are made much more salient by these diagrams. A good example of this is can be seen in the \texttt{karate} graph in Figure~\ref{fig:untangled_hairballs}, where it is clear that the two nodes on the left are central to the topology of the graph, due to the thickness of the bundles stemming from them. These two are in fact the two club leaders whose disagreement caused the club to split into the two factions used as ground truth for clustering. The algorithm was able to place them next to each other in a completely unsupervised manner, due to the quality of the extracted hierarchy combined with the optimal ordering \cite{Bar-Joseph2001} outlined in Section~\ref{sec:pruning}.
+It is however clear that certain topological features are made more salient by these diagrams. A good example of this is can be seen in the \texttt{karate} graph in Figure~\ref{fig:untangled_hairballs}, where it is clear that the two nodes on the left are central to the topology of the graph, due to the thickness of the bundles stemming from them. These two are in fact the two club leaders whose disagreement caused the club to split into the two factions used as ground truth for clustering. The algorithm was able to place them next to each other in a completely unsupervised manner, due to the quality of the extracted hierarchy combined with the optimal ordering \cite{Bar-Joseph2001} outlined in Section~\ref{sec:pruning}.
 A possible study to quantify the effectiveness of bundles could be to ask participants to identify ground truth cliques or bicliques from different bundling configurations.
 
 % Applying hierarchical edge bundles to the test set leads to smaller edges being within clusters and larger ones being across the 
 Future work could also include testing on a larger benchmark, especially with graphs with more biclique than clique structure.
-The current benchmark also measures the quality of clustering, but not bundling directly. If a dissimilarity measure or energy function could be formulated that that directly quantifies bundling quality, it could be directly optimised to produce high-quality bundles.
+The current benchmark also measures the quality of clustering, but not bundling directly. A dissimilarity measure or energy function that quantifies bundling quality could be directly optimised to produce high-quality bundles.
 
 % Another benefit to agglomerative methods is that it is easy to interpret and understand what the algorithm is doing, even if the answer is suboptimal. I would always pick an algorithm that I fully understand for a visualisation over a black-box algorithm that produces slightly better results. But this is just opinion.
 
@@ -817,12 +818,12 @@ Methods such as Monte Carlo or A* search may prove useful for either finding suc
 On the theoretical side, it may be the case that relaxing the non-overlapping group boundary condition, as explored by Ahnert \cite{Ahnert2014}, could result in an equivalent classification to strict confluent drawing.
 The potential proof or refutation of this equivalence is left as an open question, along with determining the exact relationship between power decomposition and confluent drawing in general.
 
-To finish on a practical note, a more tailored layout algorithm than standard force-directed methods will be necessary for the algorithm to become a truly practical tool, as layouts can often become tangled and unreadable. See Figure~\ref{fig:power_karate_lesmis} for two examples of this on graphs previously studied in this chapter.
-The layout function (Figure~\ref{fig:pseudo_pcd}, line~\ref{code:pcd:sgd}) is currently only given the routing graph as input, but may benefit from extra information, such as which edges are power edges and which are hierarchical. An effective radial layout that can avoid crossings, like the one shown in Figure~\ref{fig:radial} but automatic, may also offer a superior solution.
-
 \begin{figure}
   \centering
   \includegraphics[width=\linewidth]{power/power_karate_lesmis.pdf}
   \caption[Examples of networks drawn with the power-confluent algorithm]{Two examples of graphs drawn with Algorithms~\ref{alg:pgd} then~\ref{alg:pcd}, in Figures~\ref{fig:pseudo_pgd} and~\ref{fig:pseudo_pcd} respectively. On the left is \texttt{karate}, previously shown in Figure~\ref{fig:untangled_hairballs}, top. On the right is \texttt{lesmis}, previously shown in Figure~\ref{fig:lesmis}.}
   \label{fig:power_karate_lesmis}
 \end{figure}
+
+To finish on a practical note, a more tailored layout algorithm than standard force-directed methods will be necessary for the algorithm to become a truly practical tool, as layouts can often become tangled and unreadable. See Figure~\ref{fig:power_karate_lesmis} for two examples of this on graphs previously studied in this chapter.
+The layout function (Figure~\ref{fig:pseudo_pcd}, line~\ref{code:pcd:sgd}) is currently only given the routing graph as input, but may benefit from extra information, such as which edges are power edges and which are hierarchical. An effective radial layout that can avoid crossings, like the one shown in Figure~\ref{fig:radial} but automatic, may also offer a superior solution.

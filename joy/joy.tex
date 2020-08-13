@@ -4,7 +4,7 @@
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{joy/device.png}
-    \caption[A screenshot of EcoBuilder displayed on mobile devices.]{A screenshot of EcoBuilder displayed on two mobile devices. The particular ecosystem shown depicts the bottom-right plant going extinct due to apparent competition, as well as the top-right animal going extinct due to competitive exclusion.}
+    \caption[EcoBuilder displayed on two mobile devices.]{Screenshots of EcoBuilder displayed on an iPhone and an iPad. The particular ecosystem shown depicts the bottom-right plant going extinct due to apparent competition, as well as the top-right animal going extinct due to competitive exclusion.}
     \label{fig:ecobuilder_device}
 \end{figure}
 
@@ -19,70 +19,70 @@ The unique selling point of EcoBuilder is that its ecosystem simulation is based
 \label{sec:predator_prey}
 Ever since Isaac Newton formulated his physical laws of motion, it has become clear that nature speaks in the language of differential equations. From simple mechanical systems such as the oscillating swing of a pendulum \cite{Fulcher1976}, to the cosmic dance of celestial bodies in space \cite{Marchal2012}, and even the electrical action potentials across every neuron in the brain that is deciding which words should go into this sentence \cite{Hodgkin1952}, calculus has time and again been an invaluable tool for describing the natural world. 
 
-The behaviour of species ecosystems is no different, where the most widely used models are function by defining the change in population over time.
+The behaviour of species ecosystems is no different, where the most widely used models are function by defining the change in abundance (measured by biomass per unit area) over time.
 There are many such examples of this, ranging from the simple and linear systems to be studied here, to highly complex data-driven models such as \emph{EcoPath with EcoSim}, which has been used for decades to inform environmental policy for aquatic conservation \cite{Christensen2004}.
-Other models include ones that consider the effects of temperature on metabolic rate \cite{Savage2004, Dell2014},  spatio-temporal dynamics such as turbulance in water \cite{Watteaux2015}, or evolution to produce the correct dynamics as an emergent property \cite{Laird2008}
+Other models include ones that consider the effects of temperature on metabolic rate \cite{Savage2004, Dell2014}, spatio-temporal dynamics such as turbulance in water \cite{Watteaux2015}, or evolution to produce the correct dynamics as an emergent property \cite{Laird2008}
 
 But perhaps the oldest and most commonly studied of these models is known as the Lotka-Volterra equations, defined as
 \begin{equation}
-  \frac{d\mathbf{x}_i}{dt} = \mathbf{x}_i(\mathbf{r}_i + \sum_j\mathbf{A}_{ij}\mathbf{x}_j)
+  \frac{d\mathbf{z}_i}{dt} = \mathbf{z}_i(\mathbf{r}_i + \sum_j\mathbf{A}_{ij}\mathbf{z}_j)
   \label{eq:lotka_volterra}
 \end{equation}
-where $\mathbf{x}_i$ is the population of species $i$, $\mathbf{r}_i$ is its growth rate (or death rate if it is negative), and $\mathbf{A}_{ij}$ is the strength of the interaction between two species, which is positive if $i$ eats $j$ and negative if $j$ eats $i$. 
+where $\mathbf{d}_i$ is the abundance of species $i$, $\mathbf{r}_i$ is its growth rate (or death rate if it is negative), and $\mathbf{A}_{ij}$ is the strength of the interaction between two species, which is positive if $i$ eats $j$ and negative if $j$ eats $i$. 
 This can be written to include all species simultaneously as
 \begin{equation}
-    \frac{d\mathbf{x}}{dt} = \mathbf{x}(\mathbf{r} + \mathbf{Ax}).
+    \frac{d\mathbf{z}}{dt} = \mathbf{z}(\mathbf{r} + \mathbf{Az}).
     \label{eq:interaction_matrix}
 \end{equation}
 The matrix $\mathbf{A}$ is known as the \emph{interaction matrix}, and is called that because it contains all the information on how each pair of species interact with each other.
 There are five classifications of interaction possible in such a model, designated by the nature of the values in the corresponding pair of values in this matrix. For example, if $\mathbf{A}_{ij}>0$ and $\mathbf{A}_{ji}<0$, then it is a standard example of species $i$ preying on species $j$, where the `sign' of the interaction is $(+,-)$. The remaining types are mutualism $(+,+)$, competition $(-,-)$, commensalism $(+,0)$, and amensalism $(-,0)$.
 Different models include differing amounts of each type of interaction, and the proportion of types can strongly influence the behaviour of the system \cite{Tang2014Correlation}. However the predator--prey type is the most commonly studied and most prevalent in nature, and so will be the only one considered here.
 
-The purpose of the above equations is to use them to find values of $\mathbf{x}$, and the standard way of doing this for differential equations is to simulate by performing numerical integration at each time step, using methods such as Runge-Kutta \cite{Press2007Runge}.\footnote{this was what was done in older versions of the game, but brings with it numerical problems such as stiff equations leading to instability \cite{Press2007Runge}, or choosing the correct integration time step. It also sidesteps the issue of having to choose an arbitrary extinction threshold for species to go extinct.}
-However the simplicity of the model chosen allows something different: it can be analytically solved for an \emph{equilibrium} point. This is the solution at which the interactions fully balance each other such that the instantaneous change in population is zero. Note the similarity of this method to the graph layout algorithm of Tutte shown in Section~\ref{sec:nodes_background}, Equation~\eqref{eq:tutte}.
+The purpose of the above equations is to use them to find values of $\mathbf{x}$, and the standard way of doing this for differential equations is to simulate by performing numerical integration at each time step, using methods such as Runge-Kutta \cite{Press2007Runge}.\footnote{This was used in older versions of the game, but brings with it numerical problems such as stiff equations leading to instability \cite{Press2007Runge}, or having to choose a suitable integration time step. It also sidesteps the issue of having to choose an arbitrary abundance threshold for species to go extinct.}
+However the simplicity of the model chosen allows something different: it can be analytically solved for an \emph{equilibrium} point. This is the solution at which the interactions fully balance each other such that the instantaneous change in abundance is zero. Note the similarity of this method to the graph layout algorithm of Tutte shown in Section~\ref{sec:nodes_background}, Equation~\eqref{eq:tutte}.
 This is done by setting the left-hand side of Equation~\eqref{eq:interaction_matrix} to zero, where it is clear that the system contains many trivial solutions with any species $x=0$, which corresponds to the natural case of an extinct species staying extinct.
-Since the solution at which every species has non-zero population is one of interest, the $\mathbf{x}$ outside bracket is simply cancelled out to reach the solution
+Since the solution at which every species has non-zero abundance is one of interest, the $\mathbf{x}$ outside bracket is simply cancelled out to reach the solution
 \begin{equation}
-  \mathbf{x^*} = -\mathbf{A}^{-1}\mathbf{r}.
+  \mathbf{z^*} = -\mathbf{A}^{-1}\mathbf{r}.
   \label{eq:equilibrium}
 \end{equation}
-where $\mathbf{x}^*$ is the strictly non-zero populations of every species at equilibrium.
+where $\mathbf{z}^*$ is the strictly non-zero abundances of every species at equilibrium.
 This is equivalent to a linear system of equations and so can be solved exactly by numerical methods.
-If the solution $\mathbf{x^*}$ contains any negative numbers the system of equations is said to not be \emph{feasible} i.e.\ it is not possible for all species to coexist.
+If the solution $\mathbf{z^*}$ contains any negative numbers the system of equations is said to not be \emph{feasible} i.e.\ it is not possible for all species to coexist.
 
 \subsubsection{Local asymptotic stability}
 If the system is feasible, another benefit of this technique is that it allows for the derivation of the \emph{local asymptotic stability} of this fixed point, which has been widely used in the literature as a mathematically elegant and computationally tractable measure of the stability of food webs~\cite{May1973, Emmerson2004}. This definition will be henceforth referred to simply as stability. 
 To find if a system is stable, the first step is to find the Jacobian matrix
 \begin{equation}
   \mathbb{J} = \begin{bmatrix}
-    \frac{\partial f_1}{\partial \mathbf{x}_1} & 
+    \frac{\partial f_1}{\partial \mathbf{z}_1} & 
     \cdots &
-    \frac{\partial f_1}{\partial \mathbf{x}_n} \\
+    \frac{\partial f_1}{\partial \mathbf{z}_n} \\
     \vdots &
     \ddots &
     \vdots \\
-    \frac{\partial f_n}{\partial \mathbf{x}_1} & 
+    \frac{\partial f_n}{\partial \mathbf{z}_1} & 
     \cdots &
-    \frac{\partial f_n}{\partial \mathbf{x}_n}
+    \frac{\partial f_n}{\partial \mathbf{z}_n}
   \end{bmatrix}
 \end{equation}
-where $f_i$ is the right side of Equation~\eqref{eq:lotka_volterra} and $n$ is the total number of species in the food web.
-This is the matrix of all possible partial derivatives of a system, which describes the instantaneous behaviour of the system by linearising it. This Jacobian is then evaluated at the feasible equilibrium point $\mathbf{x}^*$, resulting in what is known as a \emph{community matrix}. For the Lotka-Volterra equations studied here, this is
+where $f_i$ is the right side of Equation~\eqref{eq:lotka_volterra} and $n=|V|$ is the total number of species (vertices) in the food web (graph).
+This is the matrix of all possible partial derivatives of a system, which describes the instantaneous behaviour of the system by linearising it. This Jacobian is then evaluated at the feasible equilibrium point $\mathbf{z}^*$, resulting in what is known as a \emph{community matrix}. For the Lotka-Volterra equations studied here, this is calculated by
 \begin{equation}
-  \mathbb{J}|_\mathbf{x^*} = \begin{bmatrix}
-    \mathbf{r}_1 + 2\mathbf{A}_{11}\mathbf{x}_1^* + \sum_{i\neq 1}^n\mathbf{A}_{1i}\mathbf{x}_i^*
+  \mathbb{J}|_\mathbf{z^*} = \begin{bmatrix}
+    \mathbf{r}_1 + 2\mathbf{A}_{11}\mathbf{z}_1^* + \sum_{i\neq 1}^n\mathbf{A}_{1i}\mathbf{z}_i^*
     \;\cdots\;
-    \mathbf{A}_{1n}\mathbf{x}_1^*\\
+    \mathbf{A}_{1n}\mathbf{z}_1^*\\
     \vdots 
     \qquad\qquad\quad\;\;\ddots\qquad\qquad\quad\;\;
     \vdots \\
-    \mathbf{A}_{n1}\mathbf{x}_n^*
+    \mathbf{A}_{n1}\mathbf{z}_n^*
     \;\cdots\;
-    \mathbf{r}_n + 2\mathbf{A}_{nn}\mathbf{x}_n^* + \sum_{i\neq n}^n\mathbf{A}_{ni}\mathbf{x}_i^* 
+    \mathbf{r}_n + 2\mathbf{A}_{nn}\mathbf{z}_n^* + \sum_{i\neq n}^n\mathbf{A}_{ni}\mathbf{z}_i^* 
   \end{bmatrix}
   \label{eq:jacobian_evaluated}
 \end{equation}
-which also conveniently simplifies to $\mathbb{J}|_\mathbf{x^*} = \mathrm{diag}(\mathbf{x^*})\mathbf{A}$ after substituting $\mathbf{x^*}$ back in using Cramer's rule \cite{May1973}.
+which also conveniently simplifies to $\mathbb{J}|_\mathbf{z^*} = \mathrm{diag}(\mathbf{z^*})\mathbf{A}$, after substituting $\mathbf{z^*}$ back in using Cramer's rule \cite{May1973}.
 The system can then be declared locally stable if the largest real part of any eigenvalue of the community matrix is non-negative
 \begin{equation}
     \Lambda \leq 0.
@@ -92,7 +92,7 @@ The system can then be declared locally stable if the largest real part of any e
 An intuitive physical interpretation of this type of stability can be seen by imagining the two ways of holding a chopstick vertically when gripping only a single end. If the chopstick is pointing upwards, even the slightest nudge will make it fall over due to gravity. If it is dangling downwards, gravity will reset its position after a nudge, and it can be called stable.
 In the context of ecosystems, the chopstick is a species, and the nudge is an environmental perturbation such as a natural disaster or invading species.
 
-The behaviour of the community matrix $\mathbb{J}|_\mathbf{x^*}$ is what is usually studied in mathematical ecology, due to the fact that it can be reverse-engineered to apply to any system of differential equations. It therefore sidesteps the problem of choosing which model to use, by jumping straight to this matrix.
+The behaviour of the community matrix $\mathbb{J}|_\mathbf{z^*}$ is what is usually studied in mathematical ecology, due to the fact that it can be reverse-engineered to apply to almost any system of differential equations. It therefore sidesteps the problem of choosing which model to use, by jumping straight to this matrix.
 It is also the source of the long standing `complexity vs.\ stability' debate in the world of ecology, because it can be shown that as the number of species, i.e.\ size of $\mathbf{A}$, grows, the chance of Equation~\eqref{eq:lambda_stability} being satisfied tends to zero, even for small ecosystems of only a few dozen species \cite{May1973}.
 The reason for the debate is that systems exist in the real world with many more species than the math suggests is possible, and many subsequent works have studied what features of ecosystems allow such a contradiction to occur.
 For example, Tang et al.\ \cite{Tang2014Correlation} show that the correlation between elements of $\mathbf{A}$ can improve stability, Brose et al.\ \cite{Brose2006} study the consequences of body size, and Johnson et al.\ \cite{Johnson2014} study the layered nature of groups of species.
@@ -107,10 +107,10 @@ However a common criticism is the assumption of the existence of a feasible equi
 
 
 \subsubsection{Metabolic scaling}
-The steps so far have discussed how to find populations given the interaction matrix $\mathbf{A}$, but it has not yet been discussed how to find the numerical values to go into the matrix in the first place, i.e.\ its parameterisation.
+The steps so far have discussed how to find abundances given the interaction matrix $\mathbf{A}$, but it has not yet been discussed how to find the numerical values to go into the matrix in the first place, i.e.\ its parameterisation.
 To fill this gap, a methodology known as \emph{metabolic scaling} will be used. It leverages the idea that each species has a metabolism rate that can be measured, i.e.\ the speed at which an organism converts a food source into either energy for movement or materials for growth. For plants this involves mainly converting nutrients and sunlight into biomass, and for animals this involves mainly converting biomass into movement to hunt prey.
 
-Metabolism is useful for two main reasons. The first is that, as it essentially measures the energy output of a species, it is strongly correlated with other traits such as movement speed \cite{Hirt2017} and therefore has been successfully used for parameterisation of $\mathbf{A}$ \cite{Savage2004, Vucic-Pestic2010, Pawar2015}. The second is that metabolism can be estimated very closely through an inverse relationship to individual body mass, a connection that has been empirically measured and verified \cite{Brown2004}. The study of the relationships between mass and other biological traits is known as \emph{allometry}.
+Metabolism is useful for two main reasons. The first is that, as it essentially measures the energy output of a species, it is strongly correlated with other traits such as movement speed \cite{Hirt2017} and therefore has been successfully used for parameterisation of $\mathbf{A}$ \cite{Savage2004, Vucic-Pestic2010, Pawar2015}. The second is that metabolism can be closely estimated through an inverse relationship to individual body mass, a connection that has been empirically measured and verified \cite{Brown2004}. The study of the relationships between mass and other biological traits is known as \emph{allometry}.
 
 Specifically, the allometric functions used for the reproduction rates $\mathbf{r}$ in Equation~\eqref{eq:lotka_volterra} are
 \begin{equation}
@@ -122,7 +122,7 @@ Specifically, the allometric functions used for the reproduction rates $\mathbf{
   \label{eq:metabolism_beta}
 \end{equation}
 where $b_0$ and $d_0$ are constants to normalise birth and death rates, and $\mathbf{m}_i$ is the body mass of species $i$ in kilograms. The exponent $\beta$ is a empirically verified relationship between metabolism and individual body mass \cite{Brown2004}, and it is taken minus one in order to convert it into mass-specific units.
-Remarkably, the same exponent of $\beta=\sfrac{3}{4}$ can be applied to species of all sizes, from the smallest bacteria to the largest blue whale \cite{Kleiber1947}. It is theorised to take a value of $\sfrac{3}{4}$ --- rather than the $\sfrac{2}{3}$ that one would expect from a spherical surface area to volume ratio --- due to the fractal pattern of tubes (such as veins) spread throughout the body \cite{West1997}, although not without controversy \cite{Agutter2004}.
+Remarkably, the same exponent of $\beta=\sfrac{3}{4}$ can be applied to species of all sizes, from the smallest bacteria to the largest blue whale \cite{Kleiber1947}. It is theorised to take a value of $\sfrac{3}{4}$ --- rather than the $\sfrac{2}{3}$ that one would expect from a spherical surface area to volume ratio --- due to the fractal spreading pattern of tubes (such as veins) \cite{West1997}, although not without controversy \cite{Agutter2004}.
 
 \begin{figure}
     \centering
@@ -138,6 +138,7 @@ The interaction strengths of predator--prey interactions are defined as
     \;-a_0\mathcal{F}(i,j)\mathbf{m}_j^{\text{--}1} & \text{if $i$ is prey}\\
     \;e_0a_0\mathcal{F}(j,i)\mathbf{m}_i^{\text{--}1} & \text{if $i$ is predator}
   \end{cases}
+  \label{eq:interaction_matrix}
 \end{equation}
 where $a_0$ is a normalising constant, $e_0$ measures biomass conversion efficiency, and $\mathcal{F}(i,j)$ is a function describing the rate at which an individual predator comes into contact with its prey. The $\mathbf{m}^{\text{--}1}$ factor at the end is to account for individuality and convert it into mass-specific units, just as the minus one in the exponent of Equation~\eqref{eq:metabolism_beta}.
 The function $\mathcal{F}(i,j)$ can be expressed in many ways, and is more difficult to measure than individual metabolism as it involves the interaction between two species. To overcome this, Pawar et al.\ \cite{Pawar2012} constructed an allometric model that simulates species as randomly moving individuals, such that they can be treated as particles colliding under a Brownian motion approximation \cite{Ocubo1980}. Traits such as movement speed and eye strength all also have allometric relationships, and so were carefully combined (and validated against empirical data) to construct a mechanistic model of species interaction.
@@ -188,18 +189,18 @@ The equations outlined above only require a two parameters per species in order 
 The final set of values that require parameterisation is the diagonal values of $\mathbf{A}$, which will be discussed in the following section.
 
 \subsubsection{Intraspecific interference}
-It is well known that no species can grow exponentially forever, as there is always some point at which the population of any species reaches its carrying capacity. 
+It is well known that no species can grow exponentially forever, as there is always some point at which the abundance of any species reaches its carrying capacity. 
 % This is because exponential growth is almost always logistic growth in disguise
 This applies to almost every example of exponential growth in the real world, from the growth of a business on the stock market, to the spread of a deadly virus.
 
-This is captured by the diagonal elements of the interaction matrix $\mathbf{A}_{ii}$. This can be interpreted as the amount that species interacts with itself, or in other words the \emph{intraspecific interference}. It is always a negative value, because otherwise the population of a species would grow even faster than exponentially, and can be interpreted as competition between individuals over space.
+This is captured by the diagonal elements of the interaction matrix $\mathbf{A}_{ii}$. This can be interpreted as the amount that species interacts with itself, or in other words the \emph{intraspecific interference}. It is always a negative value, because otherwise the abundance of a species would grow even faster than exponentially, and can be interpreted as competition between individuals over space.
 
 This value has a strong effect on the dynamics of the model. In fact, it can be shown that any ecosystem can be made stable by simply increasing the magnitude of the diagonal values of the community matrix in Equation~\eqref{eq:jacobian_evaluated}. 
 Barab\'as et al.\ \cite{Barabas2017} further showed the importance of these values, as they proved that it only takes one weak interference value to spoil the stability of an entire ecosystem.
 
-Unfortunately, there is no easy way to measure this value in real world ecosystems, as quantifying the amount a species competes with itself is difficult. Previous works have overcome this problem by assuming every species can coexist at a population following Damuth's law, which states that the species with larger body sizes tend to have smaller overall populations. The values for $\mathbf{A}_{ii}$ are then calculated for these populations, and used as a proxy for the health of an ecosystem \cite{Tang2014Correlation, Pawar2015}. However this is the opposite order of causation, as the behaviour of $\mathbf{A}$ should be the mechanism underlying Damuth's law in the first place.
+Unfortunately, there is no easy way to measure this value in real world ecosystems, as quantifying the amount a species competes with itself is difficult. Previous works have overcome this problem by assuming every species can coexist at an abundance following Damuth's law, which states that the species with larger body sizes tend to have smaller populations (in terms of individuals). The values for $\mathbf{A}_{ii}$ are then calculated for these abundances (such that eigenvalues are pushed left and Equation~\eqref{eq:lambda_stability} is satisfied), and used as a proxy for the health of an ecosystem \cite{Tang2014Correlation, Pawar2015}. However this is the opposite order of causation, as the behaviour of $\mathbf{A}$ should be the mechanism underlying Damuth's law in the first place.
 
-Without a good way of deriving these diagonal values through a biological trait, the work here will simply leave them as another input parameter. The interference of each species, alongside the body mass to parameterise the off-diagonals as in the previous section, will therefore be free parameters for the work done here. 
+Without a good way of deriving these diagonal values through a biological trait, the work here will simply leave them as another input parameter. This interference of each species, alongside the body mass to parameterise the off-diagonals as in the previous section, will therefore be free parameters for the work done here. 
 
 % values following Hsi-Cheng were chosen for a\_ii
 % chicken and egg problem: either pick abundances with damuth's law measure a\_ii, or pick a\_ii and then find feasibility. WTF
@@ -239,32 +240,31 @@ This means that simple strategies and patterns should be able to describe any re
 \subsubsection{Trophic levels}
 A final topological feature that will be considered is the \emph{trophic level} of each species, specifically the prey-averaged trophic level \cite{Williams2004}, defined as
 \begin{equation}
-  t_j = 1 + \sum_i^n p_{ij}t_i
+  \mathbf{y}_j = 1 + \sum_i \mathbf{P}_{ji}\mathbf{y}_i
   \label{eq:trophic}
 \end{equation}
-where $p_{ij}$ is the proportion of the diet of $j$ that $i$ contributes to.
+where $\mathbf{P}_{ji}$ is the proportion of the diet of $j$ that $i$ contributes to.
 % I sort of regret only taking constant values for p in the game...
 This essentially means that the trophic level of a species is equal to the average trophic level of its prey plus one.
-The similarity of this definition to Tutte's algorithm back in Chapter~\ref{chap:stress}, Equation~\eqref{eq:tutte} is worth noting, as the matrix to be solved here is also a graph laplacian.
-
-Equation~\eqref{eq:trophic} solved by moving the summation to the other side and converting it into a system of linear equations
+The similarity of this definition to Tutte's algorithm back in Chapter~\ref{chap:stress}, Equation~\eqref{eq:tutte} is worth noting, as the matrix to be solved here is also a graph laplacian, defined as
 \begin{equation}
-    \begin{bmatrix}
-    1&-p_{2,1}&\cdots&-p_{n,1}\\
-    -p_{1,2}&1&\cdots&-p_{n,2}\\
-    \vdots&\vdots&\ddots&\vdots\\
-    -p_{1,n}&-p_{2,n}&\cdots&1
-    \end{bmatrix}
-    \begin{bmatrix}
-    t_1\\t_2\\\vdots\\t_n
-    \end{bmatrix}
-    =
-    \begin{bmatrix}
-    1\\1\\\vdots\\1
-    \end{bmatrix}
+  \begin{bmatrix}
+  1&-\mathbf{P}_{1,2}&\cdots&-\mathbf{P}_{1,n}\\
+  -\mathbf{P}_{2,1}&1&\cdots&-\mathbf{P}_{2,n}\\
+  \vdots&\vdots&\ddots&\vdots\\
+  -\mathbf{P}_{n,1}&-\mathbf{P}_{n,2}&\cdots&1
+  \end{bmatrix}
+  \begin{bmatrix}
+  \mathbf{y}_1\\\mathbf{y}_2\\\vdots\\\mathbf{y}_n
+  \end{bmatrix}
+  =
+  \begin{bmatrix}
+  1\\1\\\vdots\\1
+  \end{bmatrix}
+  \label{eq:trophic_matrix}
 \end{equation}
-where most of the values of $p_{ij}$ will be zero because the structure will be reasonably sparse.
-The matrix also has the nice property of being diagonally dominant, which means that iterative methods such as Gauss-Seidel are guaranteed to converge~\cite{Young2014}. This will be made use of later in Section~\ref{sec:eco_visualisation}.
+where most of the values of $\mathbf{P}_{ji}$ will be zero because the structure will be reasonably sparse.
+The matrix also has the nice property of being diagonally dominant, which means that iterative methods such as Jacobi or Gauss-Seidel are guaranteed to converge~\cite{Young2014}. This will be made use of later in Section~\ref{sec:eco_visualisation}.
 
 It is widely accepted that the trophic level of species has a deep meaning within the context of ecosystems~\cite{Post2002, Johnson2014}. This is because species with high trophic levels tend to be more biologically complex, as they are at the top of the food chain, like humans for example. Trophic level will therefore be made use of in Section~\ref{sec:eco_visualisation} within a visualisation context.
 
@@ -282,7 +282,7 @@ The projects most related to the work done here are however the gamified ones. S
 \begin{itemize}[leftmargin=*]
   \item \emph{Foldit} \cite{Cooper2010}, a game where the player is given the ablity to fold proteins, with the objective being to find folded configurations with the lowest \emph{Rosetta} energy. This is important because real proteins fold into low energy configurations, and knowing the topology of such states is important to understanding their chemistry. The search space of topologies is too large for computers to currently handle, and so they turn to the spacial reasoning of humans (although Google have recently made attempts at solving this with machine learning \cite{Senior2020}
   \item \emph{Eyewire} \cite{Bae2018}, where players are tasked with analysing pictures of 3D images of brains, collected using an electron microscope. The game aims to leverage the pattern recognition abilities of humans in order to map the exact locations of huge numbers of neurons.
-  \item \emph{EteRNA} \cite{Lee2014} is conceptually very similar to Foldit, except that it is applied to RNA sequences instead. It is also presented as a 2D interface instead of 3D, which presents a slightly different type of reasoning required to solve its puzzles.
+  \item \emph{EteRNA} \cite{Lee2014}, a game conceptually very similar to Foldit, except that it is applied to RNA sequences instead. It is also presented as a 2D interface instead of 3D, which presents a slightly different type of reasoning required to solve its puzzles.
 %   \item \emph{BioBlox} 
 \end{itemize}
 
@@ -313,69 +313,104 @@ The following section will first study the process behind the design and develop
     \label{fig:eco_gameplay}
 \end{figure}
 
-There are multiple components that go into the development of any game, and EcoBuilder is no different. To illustrate the various engineering challenges behind the user interface, Figure~\ref{fig:eco_gameplay} will be used as a reference screenshot of the gameplay performed by a player. The various moving parts are labelled in the order they will be explained.
+There are multiple components that go into the development of any game, and EcoBuilder is no different. The Unity game engine \cite{Goldstone2009} was chosen as the computational framework, due to its ease of compilation to various platforms, including mobile and WebGL. To illustrate the various engineering challenges behind the user interface, Figure~\ref{fig:eco_gameplay} will be used as a reference screenshot of the gameplay performed by a player. The various moving parts are labelled in the order they will be explained.
+However, the best way to gain an understanding of the interface is to try it --- links for downloading the game on iOS and Android can be found at \url{www.ecobuildergame.org}.
 
 \subsection{Label 1: Visualisation}
 \label{sec:eco_visualisation}
-The most complex component of the gameplay is the visualisation of the ecosystem itself. For that reason, this whole section will be devoted to its explanation, and the following Section~\ref{sec:HUD} will concern the remaining label.
+The most complex component of the gameplay is the visualisation of the ecosystem itself, as it must simultaneously display its topology and dynamical behaviour. For that reason, this whole section will be devoted to its explanation, and the following Section~\ref{sec:HUD} will concern the remaining labels.
 
-As shown by the label 1 in the screenshot, a node-link diagram is used for visualising the topology of the food web.
-species mesh and colour dependent on traits, CIELAB used for colour map \cite{Smart2019}
-battery icon for health a third for red area (negative equilibrium abundance), a third for green. Low health not shown in this picture but can be seen in Figure~\ref{fig:ecobuilder_device}.
+As shown by the label~1 in Figure~\ref{fig:eco_gameplay}, a node-link diagram is used for visualising the topology of the food web.
+The nodes of the diagram represent species, where their shape and colour are dependent on the two traits, size and interference (further explained in Section~\ref{sec:HUD}, label~6).
+Node colour depends on both traits simultaneously, to span a 2D plane in the 3D CIELAB colour space to maintain perceptual uniformity \cite{Smart2019}.
+Node shapes were designed to be relatively spherical in order to resemble a classical node-link diagram, and change depending on the choice of plant or animal. The cute faces are procedurally generated using random combinations of eyes and mouths.
+Links are rendered with low opacity, except with moving circles that flow in the direction of biomass transfer. Such animated edges were studied by Holten et al.\ \cite{Holten2011} to be effective at showing link direction, and also recommended in \cite{Bach2017}.
+Coloured outlines around nodes and links are also used to indicate their status, for example in Figure~\ref{fig:eco_gameplay} a blue outline means the component cannot be edited, and a yellow outline means it is the current focus of the panel pointed at by label~6.
 
-However the introduction of interaction adds multiple extra factors that need to be taken into consideration.
-The first is the question of how the player adds new interactions to the graph. This is done in the simplest and most intuitive manner: the player simply drags in between the two nodes they wish to attach to each other. Since the flow of biomass is directed from prey to predator, the first intuition may be to drag from the prey to predator, however play tests showed that people found it more intuitive to think in terms of `this eats that'. The default setting in the game therefore has the player drag from predator to prey, but this is left as an option in the settings.
+To show the equilibrium abundance of each species, as calculated by Equation~\ref{eq:equilibrium}, a small symbol is placed next to each species, which follows the same conventions as battery indicators on mobile devices. Because this abundance can be negative, negative values are shown as red for `low battery', and positive values as green. An example of negative abundance can be seen in Figure~\ref{fig:ecobuilder_device}.
+Numbers showing the exact traits of each species are also placed above the battery icons, so that the exact definition of the species can be exactly identified.
 
 \subsubsection{Interactive layout}
-The layout of the nodes is computed by minimising stress, as studied in Chapter~\ref{chap:stress}.
-However, a big difference is that the topology will change every time the player adds a link, and so the layout must be recomputed each time.
-The main problem with this is that stress as an energy function is rotation- and translation-invariant, and so there is no guarantee that any two topologies will line up well at all.
-A preliminary idea was to use the previous layout as the initialisation for the next. This is effective at maintaining nodes close to each other, but unfortunately this initialisation can throw the optimisation directly into a local minimum, leading to low-quality layouts. The work in Chapter~\ref{chap:stress} showed that stochastic gradient descent (SGD) does not require smart initialisation to effectively minimise stress, but unfortunately it is not good enough to escape if it is dropped directly into a bad initialisation.
+The introduction of interaction adds multiple extra factors that need to be taken into consideration.
+The first is the question of how the player adds new edges to the graph. This is done in the simplest and most intuitive manner: the player simply drags in between the two nodes they wish to attach to each other. Since the flow of biomass is directed from prey to predator, the first intuition may be to drag from the prey to predator, however preliminary tests showed that players found it more intuitive to think in terms of `this eats that'. The default setting in the game therefore has the player drag from predator to prey, but this is left as an option in the settings.
 
-The game therefore proceeds by reinitialising the layout randomly each time the topology of the graph is edited, and running SGD from scratch every time. The Unity game engine works by providing the programmer with functions to implement that will be run once per frame, but SGD is not quite fast enough to be completely computed every frame and still maintain a good frame rate.
-Because of this, the layout routine is implemented as a thread that runs concurrently alongside the main frame-by-frame thread, and only returns the layout to display it on the screen once it is completed. SGD is fast enough to only require a couple of frames, even on mobile devices, but threading is still required to prevent stutter.
+The layout of the nodes is computed by minimising stress, as studied in Chapter~\ref{chap:stress}.
+However, an issue is that the topology will change every time the player adds a link, and so the layout must be recomputed each time.
+The main problem with this is that stress as an energy function is invariant to rotation, translation, and reflection, so there is no guarantee that any two layouts will line up well at all.
+A first attempt to solve this was to use the previous layout as the initialisation for the next. This is effective at maintaining nodes close to each other, but unfortunately can throw the optimisation directly into a local minimum, leading to low-quality layouts. The work in Chapter~\ref{chap:stress} showed that stochastic gradient descent (SGD) does not require smart initialisation to effectively minimise stress, but unfortunately it is not good enough to escape from a bad (i.e.\ worse than random) initialisation.
+
+The game therefore proceeds by reinitialising the layout randomly when the topology of the graph changes, and running SGD from scratch every time. The Unity game engine works by providing the programmer with functions to implement that will be run once per frame, but SGD is not quite fast enough to be completely computed every frame and still maintain a good frame rate.
+Because of this, the layout code is implemented as a thread that runs concurrently alongside the primary frame-by-frame thread, and only returns the layout to display on the screen once it is completed. SGD is fast enough to only require a couple of frames, even on mobile devices, but threading is still required to prevent stutter.
 On top of this, the local version of majorization (see Section~\ref{sec:majorization}) is used once per vertex per frame in order to fine tune the layout slowly.
 
-The next step is to problem is to make sure that the translation, rotation, and reflection differences between layouts is minimal.
-Procrustes is linear way of doing this, and widely used.
-Removing the translational component is easy, simply center.
-Removing the rotational component requires rotating by an angle
+However, this brings back the problem of subsequent layouts not lining up well with each other, thus impairing the user's mental map \cite{Eades1991, Diehl2001} of the graph. This problem is known as \emph{dynamic} graph layout in the literature.
+A variety of ideas to deal with this problem have been proposed, such as tweaking a force-directed model to minimize Bayesian probability differences between layouts \cite{Brandes1997}, or considering the two graphs at the same time but with additional edges attached between corresponding nodes \cite{Erten2003}. Simplifying the union of the two graphs using a hierarchical decomposition, similarly to those studied in Chapter~\ref{chap:power}, and depicting only the movement of the hierarchy is another effective idea \cite{Archambault2009}. Presenting the user with multiple timeslices of the transition in a grid, rather than an animation, has also been shown to improve task response times, although at the expense of accuracy \cite{Archambault2011}.
+
+Since the changes from subsequent topologies only differ by at most a single edge, and the considered graphs are small i.e.\ fewer than a couple dozen vertices, it was decided that the state-of-the-art methods mentioned above were not necessary for this use case. A simple linear equation to describe the player's mental map is instead used, known as the \emph{Procrustes} statistic.\footnote{The name Procrustes is derived from Greek mythology, and translates to `stretcher'. It is based on the story of a man named Damastes, who was given it as a nickname because he would offer unsuspecting travellers a place to stay for the night, but proceed to stretch their limbs on a rack if they did not exactly fit the bed. Damastes eventually experienced the same fate as his guests, as punishment at the hands of Theseus \cite{Cox2000}.}
+This is simply defined by the sum of squared distances between two layouts
+\begin{equation}
+  \rho^2(\mathbf{X}, \mathbf{X}^\prime) = \sum_{i\in V} ||\mathbf{X}_i - \mathbf{X}_i^\prime||^2
+  \label{eq:procrustes}
+\end{equation}
+and can be exactly minimised using linear transformations. Removing the translational component is performed by simply placing the barycenter of both layouts at the origin. Traditionally $\mathbf{X}'$ is then dilated, but stress is not invariant to scaling. The rotational component is then removed by differentiating the right-hand side of Equation~\eqref{eq:procrustes} with respect to a rotation $\theta$ and solving for the derivative equalling zero, resulting in
 \begin{equation}
   \theta(\mathbf{x},\mathbf{y}, \mathbf{x^\prime}, \mathbf{y^\prime}) = 
   \tan^{\text{--}1}\left(\frac{\sum_i(\mathbf{y}_i\mathbf{x}^\prime_i-\mathbf{x}_i\mathbf{y}^\prime_i)}{\sum_i(\mathbf{x}_i\mathbf{x}^\prime_i-\mathbf{y}_i\mathbf{y}^\prime_i)}\right)
 \end{equation}
+where $\mathbf{x}$ and $\mathbf{y}$ are the two dimensions of the layout $\mathbf{X}$, and similarly for $\mathbf{X}^\prime$. Since the dilation step was skipped, this process is performed for both the new layout and its reflection, where the result with a lower value of $\rho$ from Equation~\eqref{eq:procrustes} is chosen.
 
-\begin{equation}
-  \mathrm{procrustes}(\mathbf{X}, \mathbf{X'}) = 
-  \sqrt{\sum_i}
-\end{equation}
+This definition has been previously used to assess the similarity of layouts given any linear transformation \cite{Ortmann2017}, and is used in the game in order to align subsequent layouts. If there are different vertices between topologies, then the union of vertices is instead compared.
+To transition smoothly between aligned layouts, the \texttt{SmoothDamp} function provided by Unity is used, which attaches a critically damped spring between an object and its target position, to avoid jerky movement by maintaining continuity \cite{Kirmse2004}.
 
-Unfortunately, minimising stress is not able to prevent the problem of crowded layouts. This situation can happenespecially for cliques. superfocus was our eventual solution, but we do the learning world controlled test without. 
+% Unfortunately, minimising stress is not able to prevent the problem of crowded layouts. This situation can happen easily for topologies with many edges, and leads to nodes being bunched up closely together. superfocus was our eventual solution, but we do the learning world controlled test without. 
 
 \subsubsection{Constraining the y-axis}
-  \item 3D vs 2D: originally used 3D, but we found that players could not quickly pick up the rotational interface. Nodes would also often become obscured in the center of the layout, so we switched to 2D instead. 
-  \item however this also made trophic level constraints more difficult to satisfy because there is one fewer dimension to move around in (previously all that was needed was to always keep the y-position. The best solution was to add 5 iterations of $\mu=1$ at the beginning, as an initialization step. TODO graph on this
-% We concluded that dense networks such as foodwebs require some use of metadata to extract an accurate representation.
-% The technique that we decided worked best was to still use a force-directed method, but to additionally constrain the y-axis positions to something meaningful. In the case of food webs, we choose the
-\begin{itemize}
-  \item gauss-seidel iteration because positive definite, optimised to only take O(m) per iteration and O(n) extra space (because we only care about the sum of the rows and not where the rows are placed. In general we find the number of iterations required is <100 (test this) but requires for loops
-  \item whether this laplacian has a solution can also be found using a breadth first search from sources (which is also used for chain)
-  \item note that this is the same set of equations as in \eqref{eq:tutte} and \eqref{eq:major_Lw}, \eqref{eq:major_LX}, \eqref{eq:spectral_laplacian}
-  \item normalised by chain length in order to stop loops from getting too tall
-\end{itemize}
+A domain-specific feature of food webs is that any valid topology allows for the trophic level to be calculated for each species, following the process outlined in Section~\ref{sec:topology}. For this reason, an additional constraint to the layout is included, that constrains the y-axis to the trophic level of the species.
+
+The simplicity of the Laplacian matrix that needs to be inverted in order to solve for trophic levels allows for the Jacobi method to be used. Expressing the trophic level Equation~\eqref{eq:trophic_matrix} as 
+\begin{equation}
+  \mathbf{y} = \mathbf{L}^{\text{--}1}\mathbf{b},
+  \label{eq:trophic_laplacian}
+\end{equation}
+ordinary Jacobi proceeds by assigning
+\begin{equation}
+  \mathbf{y}_i^\prime = \frac{1}{\mathbf{L}_{ii}}\left(\mathbf{b}_i - \sum_{i\neq j}\mathbf{L}_{ij}\mathbf{y}_i\right)
+\end{equation}
+for each vertex $i$. In this case, $\mathbf{b}$ is simply a column vector of ones.
+An iterative method was chosen because the topology of the graph will only change by a single edge at a time, and so previously calculated trophic levels is a good approximation for subsequent values. From experience, the number of iterations required for convergence is almost always fewer than ten. Since the matrix $\mathbf{L}$ contains an entry for every edge, the complexity per iteration is proportional to the number of edges, as opposed to solving the system exactly. 
+Equation~\eqref{eq:trophic_laplacian} does not have a solution if any component has no vertex with an in-degree of zero (i.e.\ no primary producers). In this case, trophic level computations are simply ignored.
+
+% 3D vs 2D: originally used 3D, but we found that players could not quickly pick up the rotational interface. Nodes would also often become obscured in the center of the layout, so we switched to 2D instead. 
+A problem here is that stress is more difficult to optimise, because there is now only one degree of freedom for vertices to move around in. The solution here was to increase the maximum value of $\mu$ in Equation~\eqref{eq:mu} to $1.1$, as well as adding five extra initialisation iterations at the beginning of the optimisation. This is however an ad hoc solution and future work should involve testing variations of this systematically.
+The aforementioned Procrustes statistic also skips the rotation step here, as any rotation would break the orientation of these constraints.
+
+The final and important question is whether constraining the y-axis is helpful to the user in the first place. In fact, this will be systematically tested in the game by giving half of the players a constrained layout, and half an unconstrained layout. More detail on this is outlined in Section~\ref{sec:eco_hypotheses}.
 
 \subsection{Heads-up display}
 \label{sec:HUD}
-The remaining labels on Figure~\ref{fig:eco_gameplay} point to elements of a 2D overlay, upon which exists what is known as a heads-up display (HUD). The idea of a HUD is now archetypal to game interfaces, but its name originated from the military aviation, where the pilot would need information available whilst leaving their view unobstructed. For these reasons, 
+The remaining labels on Figure~\ref{fig:eco_gameplay} point to elements of a 2D overlay, upon which exists what is known as a heads-up display (HUD). The idea of a HUD is now ubiquitous to video game interfaces, but its name originated from the military aviation, where the pilot would need information available whilst leaving their view unobstructed. 
+Its purpose in the context of games is the same, where it gives the player the remaining information required to complete the game, whilst leaving the main visualisation as visible as possible.
 
 \subsubsection{Label 2: Constraints}
-Different levels offer different scenarios, with specific topological constraints shown on htis panel. In later levels, a minimum number of edges or chain length become prerequisites to passing the level.
+Different levels offer different scenarios, with specific topological constraints shown on this first panel. The top two icons show the maximum numbers of plants and animals the player may introduce, and the bottom two show the number of edges and the maximum chain length. Chain length is defined for each plant as zero, and each animal as the shortest path from any plant to it. These are all used throughout the game as conditions required to pass each level.
 
-We tried loops but they suck
+Earlier versions of the game also included maximum loop length as an extra constraint, but there does not exist a polynomial time algorithm to search for all loops in a graph. Johnson's algorithm was attempted for this, but its running time grew unacceptable and so it was cut from the game.
 
 \subsubsection{Label 3: Score}
-One more issue we needed to solve was to develop a suitable scoring system.
-The scoring metric we had before was to simply count the number of species, but we found that there were many simple strategies to easily maximise this metric, such as adding a single producer and many identical consumers.
+This panel displays the player's score, as well as how many stars they have obtained. To obtain the first star, the only conditions are that all species coexist and that there is a single connected component. The second and third stars require the player to reach certain numerical score thresholds set by the developer to be challenging.
+
+Many different metrics were tried for use as a score, most of which were unsuitable. For example, the total abundance every species was a good candidate, but this is maximised by having only plants in the food web, as any animals simply lose too much biomass via the efficiency factor $e_0$ in Equation~\eqref{eq:interaction_matrix}. The score should instead continuously increase as the food web becomes more complex. Another related option was to take the total \emph{flux} of the food web, defined as the total amount of biomass flow through every interaction. This is defined here as the sum of the positive off diagonals of Equation~\eqref{eq:jacobian_evaluated}.
+
+One definition of `complex' that is closely related to stability is $\rho\sqrt{SC}$, where $\rho$ is the standard deviation of the off-diagonals of the community matrix in Equation~\ref{eq:jacobian_evaluated}, $S$ is the number of species, and $C$ is the connectance, defined as the proportion of realised to possible interactions and thus $0\leq C\leq1$. This was shown by May to negatively correlate with the probability of stability as defined in Equation~\eqref{eq:lambda_stability}, and acted as the springboard for the complexity vs.\ stability debate.
+This criterion has been taken and updated to more accurately match real ecosystem structure \cite{Allesina2012, Tang2014Correlation}, but all contain the aforementioned components $\rho$, $R$, and $C$.
+Unfortunately, none of these metrics were able to fit our purposes because the factor $\rho$ is not very interpretable, and players found it difficult to work out why it would go up or down.
+
+The final formulation settled upon was a compromise between the aforementioned options: the factor $\rho$ is replaced by the total abundance to construct a final score of
+\begin{equation}
+  \mathrm{score} = \left(\sum\mathbf{z^*}\right)\sqrt{SC}
+\end{equation}
+where $\mathbf{z^*}$ is from Equation~\eqref{eq:equilibrium}. This is not as mathematically significant as the other definitions of complexity, but is interpretable and goes up as the food web grows in size.
+% The purpose of the score is to give the player something interesting to play with, and this 
 
 \subsubsection{Label 4: Level}
 There are 18 levels in total... plus 3 in research
