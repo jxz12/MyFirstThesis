@@ -656,7 +656,7 @@ It is important to note that if both vertices $p$ and $q$ are pivots then $w_{pq
 
 This leaves far fewer terms in the summation, and so the complexity per iteration for SGD is now $\mathcal{O}(|E| + |P||V|)$, as any terms that have been cut are simply ignored. In the context of majorization this new model must be used with the local method described at the end of Section~\ref{sec:majorization}, resulting in the same complexity.
 
-\begin{figure}[ht]
+\begin{figure}
   \removeAlgorithmFigureError
   \begin{algorithm}[H]
     \SetKwProg{SGD}{SparseSGD}{}{} \SetKwInOut{Input}{inputs}
@@ -760,13 +760,13 @@ For example to focus on vertex 3, the relevant weights are set to infinity
 \end{equation}
 This causes only the remaining constraints to decay, but the system still converges in this case as there are no conflicts between the ones emphasized. Exploding gradients are still prevented by the capping of the step size in Equation~\eqref{eq:mu}.
 An important remaining step is that the step size must be allowed to decay for extra iterations, in order to allow the infinitely weighted terms to essentially become the only remaining contribution at convergence. 
-An example of this method in action can be seen in Figure~\ref{fig:tube}.
+An example of this method in action can be seen in Figure~\ref{fig:tube}.\footnote{Data collected from
+\url{www.github.com/petertrotman/london-underground-travel-time-map}, accessed 13/8/20.}
 
 \begin{figure}
   \centering
   \includegraphics[width=0.6\textwidth]{stress/tube.png}
-  \caption[The London tube map with a focus on Green Park station]{The London Underground map with a focus on Green Park, created using the method described in Section~\ref{sec:sgd_radial}. The distances are based on travel time rather than real world distance.
-  Data from~\cite{Trotman2016}.}
+  \caption[The London tube map with a focus on Green Park station]{The London Underground map with a focus on Green Park, created using the method described in Section~\ref{sec:sgd_radial}. The distances are based on travel time rather than real world distance.}
   \label{fig:tube}
 \end{figure}
 

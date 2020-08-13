@@ -549,7 +549,7 @@ The original definition of a confluent drawing~$A$ for a graph~$G$ is:
 \begin{itemize}[leftmargin=*]
   \item There is a one-to-one mapping between the vertices in $G$ and $A$, so that, for each vertex $v\in V(G)$, there is a corresponding vertex $v'\in A$, which has a unique point placement in the plane.
   % \item There is an edge $(v_i,v_j)$ in $E(G)$ if and only if there is a locally-monotone curve $e'$ connecting $v_i'$ and $v_j'$ in A.
-  \item There is an edge $(v_i,v_j) \in E(G)$ iff there is a locally-monotone curve (defined as having no self intersections or sharp turns) $e'$, connecting $v_i'$ and $v_j'$ in $A$. 
+  \item There is an edge $(v_i,v_j) \in E(G)$ iff there is a locally-monotone curve [defined as having no self intersections or sharp turns] $e'$, connecting $v_i'$ and $v_j'$ in $A$. 
   \item $A$ is planar. That is, while locally-monotone curves in $A$ can share overlapping portions, no two can cross.
 \end{itemize}
 \end{mdframed}
@@ -591,11 +591,6 @@ Here it will be explained why routing edges through their graph-theoretic shorte
 % A power graph is an extension to the conventional node-link diagram, that compresses the number of edges by grouping similar vertices together into \emph{power groups}, and merging edges among group members that share the same target vertex into a single \emph{power edge} instead (see the leftmost two drawings in Figure~\ref{fig:power_teaser}).
 A power decomposition is converted into an ARG by (a) connecting the members of each power group to a new vertex corresponding to the group, and (b) connecting pairs of vertices whose corresponding power groups are connected by power edges.
 % The hierarchical structure of power decompositions means that (a) forms a tree, and (b) forms bridges between vertices in that tree.
-Since the original edges do not exist in this auxiliary graph, they are instead drawn back on top by finding the graph-theoretic shortest path between the vertices on either end of the edge, using the nodes on this path as the control points for a spline.
-However, since (a) and (b) both result in edges in the routing graph, with nothing to differentiate between them, this can cause a \emph{short-circuit} effect, that potentially introduces false adjacencies into the resulting drawing.
-This is shown in Figure~\ref{fig:overlap}, where two intermediate routing nodes are used because that is the minimum number of shared control points required for quadratic splines to overlap (see Section~\ref{sec:bspline_details}).
-Note that every power group in this example is intentionally redundant for clarity; a full version of this example can be seen in Figure~\ref{fig:overlap_sm}.
-
 \begin{figure}
   \centering
   \includegraphics[width=.8\linewidth]{power/shortcircuit.pdf}
@@ -606,7 +601,6 @@ Note that every power group in this example is intentionally redundant for clari
   }
   \label{fig:overlap}
 \end{figure}
-
 \begin{figure}
   \centering
   \includegraphics[width=.8\linewidth]{power/shortcircuit_big.pdf}
@@ -620,6 +614,10 @@ Note that every power group in this example is intentionally redundant for clari
   }
   \label{fig:overlap_sm}
 \end{figure}
+Since the original edges do not exist in this auxiliary graph, they are instead drawn back on top by finding the graph-theoretic shortest path between the vertices on either end of the edge, using the nodes on this path as the control points for a spline.
+However, since (a) and (b) both result in edges in the routing graph, with nothing to differentiate between them, this can cause a \emph{short-circuit} effect, that potentially introduces false adjacencies into the resulting drawing.
+This is shown in Figure~\ref{fig:overlap}, where two intermediate routing nodes are used because that is the minimum number of shared control points required for quadratic splines to overlap (see Section~\ref{sec:bspline_details}).
+Note that every power group in this example is intentionally redundant for clarity; a full version of this example can be seen in Figure~\ref{fig:overlap_sm}.
 
 This effect can be explained as follows. The structure of groups within a power graph can be represented as a tree, where groups are represented by branches and vertices by leaves.
 Trees are geodetic (i.e.\ there exists a unique shortest path between any pair of vertices), but the connections introduced by power edges can act like bridges between branches, to invalidate this property and produce ambiguity either in the choice of path (if the shortest paths are equal) or in which edges exist at all, by routing splines in the wrong direction entirely.
@@ -631,8 +629,19 @@ The key detail here is that only one power edge should ever be traversed for any
 \subsection{Hierarchical routing}
 \label{sec:hierarchical_routing}
 
-The solution to these problems is to retain the hierarchical structure of power groups as a directed tree, with all routing edges directed towards the leaves. Power edges are then added back, except as a special type of edge that is incoming at both ends (the purpose of which will soon be made clear). If the root of the tree is then discarded, what is left is the exact same ARG as before, except now with all routing edges explicitly directed (see Figure~\ref{fig:radial}, middle column).
+% The solution to these problems is to retain the hierarchical structure of power groups as a directed tree, with all routing edges directed towards the leaves. Power edges are then added back, except as a special type of edge that is incoming at both ends (the purpose of which will soon be made clear). If the root of the tree is then discarded, what is left is the exact same ARG as before, except now with all routing edges explicitly directed (see Figure~\ref{fig:radial}, middle column).
+The solution to these problems is to instead construct the ARG as follows:
+\begin{mdframed}[backgroundcolor=WhiteSmoke]
+\begin{itemize}[leftmargin=*]
+  \item The hierarchical structure of power groups is retained as a directed tree, with all routing edges directed towards its leaves.
+  \item Power edges are reattached between their corresponding branch vertices, as a special type of routing edge that is incoming at both branch vertices.
+  \item The root of the tree is discarded.
+\end{itemize}
+\end{mdframed}
+This leaves the same ARG as before, except now with all routing edges explicitly directed (see Figure~\ref{fig:radial}, middle column).
 Note that this also means all adjacency information is now preserved in the ARG, such that the original graph can be recovered.
+The purpose of having power edges outgoing at both ends will soon be made clear.
+
 
 \begin{figure}
   \centering
