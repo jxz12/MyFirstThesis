@@ -155,7 +155,7 @@ The numerical values of the constants used for this model can be seen in Table~\
 
 \begin{table}
   \centering
-  \caption[Values of constants used for the model in Section~\ref{sec:predator_prey}]{Constants used for the model in Section~\ref{sec:predator_prey}. The value for $e_0$ takes two values to account for prey being more difficult to digest as a plant (0.2) than an animal (0.5).}
+  \caption[Values of constants used for the model in Section~\ref{sec:predator_prey}]{Constants used for the model in Section~\ref{sec:predator_prey}. The value for $e_0$ takes two values to account for prey being more difficult to digest as a plant (0.2) than an animal (0.5), close to the naturally observed values \cite{Lindeman1942, Kozlovsky1968}.}
   \setlength{\tabcolsep}{1em} % for the horizontal padding
   {\renewcommand{\arraystretch}{1.25}% for the vertical padding
   \begin{tabular}{|c|c|c|}
@@ -447,7 +447,7 @@ This decision was made because of the difficulty behind parameterising these ext
 The final component of the gameplay in EcoBuilder is that ability to undo and redo actions, a feature now considered standard among most consumer applications. The arrow pointing left goes backward to undo an action, and the arrow pointing right goes forward to redo a previously undone action, as is conventional. It is implemented simply using a stack, and so undone actions are lost forever if a new action is performed.
 The criteria for being an action is a topological change, i.e.\ the addition or removal of vertices or edges, or a change in value for the trait of a species.
 
-The entire sequence of actions performed by the player is recorded, and when the level is completed it is transformed into a string to sent to a server, along with other playthrough data. The remaining contents of this data will be explained in the following section, which outlines the data collection process.
+The entire sequence of actions performed by the player is recorded, and when the level is completed it is transformed into a string to sent to a server, along with other playthrough data. The remaining contents of this data will be explained in the following section.
 
 \subsection{Data collection}
 
@@ -466,13 +466,11 @@ These fields are received by the server and stored in an SQL database for future
 
 The middle screenshot in Figure~\ref{fig:eco_server} shows the registration page that is shown the first time the application is opened. An account is required for two purposes: the first is to ensure that the data being collected can be matched to a single player, even if they decide to switch devices; the second is to have them tick a box to indicate that they are aware of the general data protection regulation (GDPR) their data will be held under. Note that since there is no `sensitive' personal data being collected, such as ethnicity or political opinions, a tick box is not strictly necessary.
 Some general demographic information, such as age and education background, is optionally collected at registration.
-The player may also delete their account whenever they wish, as shown by the settings page to the right of Figure~\ref{fig:eco_server}. Here they may also change game settings such as volume or drag direction. They may also view the GDPR privacy policy in full, or a credits page to thank the lab members who kindly gave their time to help playtest the game.
+The player may also delete their account whenever they wish, as shown by the settings page to the right of Figure~\ref{fig:eco_server}. Here they may also change game settings such as volume or drag direction. They may also view the GDPR privacy policy in full, and a credits page to thank the lab members who kindly gave their time to help playtest the game.
 
-\section{Experimental design and hypotheses}
+\section{Experimental design}
 The gameplay of EcoBuilder is split into two sets of levels. The first set is called `Learning World', and the second is `Research World'. 
 When the player first opens the game, they are greeted with two large buttons that lead to the two Worlds. Initially, Research World is locked and may only be entered when they complete all the levels in Learning World, as shown in Figure~\ref{fig:eco_worlds}, left. This gives the player an incentive to complete the Learning levels, and also ensures that all players have received the same introduction before tackling the more difficult problems presented in the Research levels.
-
-The two sets of levels also separate the two experiments being performed by the game. The purpose and design of these experiments will be outlined in the following two sections.
 
 \label{sec:eco_hypotheses}
 \begin{figure}
@@ -487,18 +485,19 @@ The two sets of levels also separate the two experiments being performed by the 
 \label{sec:learning_world}
 Learning World contains 18 levels in total, all of which contain relatively simple scenarios designed to be instructive. For example, levels 3 and 4 both force the use of a heavy animal that cannot be saved with a single plant, to teach the player that heavier species consume slower and so require more abundant food sources. Levels 5 and 6 present the player with a situation known as `competitive exclusion', a well-known natural phenomenon that states that if two predators share the exact same prey, then the predator with a faster intake rate will almost always drive the slower to extinction.
 The real-world example of this told to the player is the exclusion of red squirrels after the introduction of grey squirrels in Britain, due to their superior foraging ability \cite{Gurnell2004}.
-This principle, although predicted by the mathematical model, is however not as common in nature as one would think. Examples such as the `paradox of the plankton' seemingly ignore the principle entirely, as tens or hundreds of plankton species are able to coexist despite sharing the same resources \cite{Hutchinson1961}.%, prompting criticism of the modelling method.
+This principle, although predicted by the mathematical model, is however not as common in nature as one would think. Examples such as the `paradox of the plankton' seemingly ignore the principle entirely, as tens or hundreds of plankton species are able to coexist despite sharing the same resources \cite{Hutchinson1961}; the results from the game may help to reveal why this occurs.
 
-EcoBuilder is a \emph{puzzle} game, in that the player is not tasked with time constraints or dexterity checks. It is therefore a direct test of the ability of the player to understand the dynamics of the underlying simulation.
-This presents the opportunity to perform a controlled test using this understanding, to compare two types of visualisation. In this case the two visualisations to be tested are both node-link diagrams, were one layout is computed by minimizing stress, and the othe additionally has the y-axis positions of species constrained to its trophic level. 
+EcoBuilder is a \emph{puzzle} game, in that the player is not tasked with time constraints or tests of dexterity. It is therefore a direct test of the ability of the player to understand the dynamics of the underlying simulation.
+This presents the opportunity to perform a controlled test to measure this understanding, when the player is shown different visualisations. In this case, two node layout methods will be tested, where is computed by simply minimizing stress, and the other additionally has the y-axis positions of species constrained to their trophic level. 
 Other experiments in the literature generally give participants topological tasks such as finding paths between nodes \cite{Bach2017, Okoe2018} or deciding which nodes would disconnect the network if removed \cite{Purchase1997}. A novel difference with the experiment here is that there is an actual dynamical system for the participant to further understand.
 
 \subsection{Research World}
 \label{sec:research_world}
-Research world contains 3 further levels for the player to play, each with a different scoring metric. These levels act more like a \emph{sandbox}, where players are given no upper limit to the number of species they can add, and no constraints on the chosen topology.
+Research world contains 3 further levels for the player to play, each with a different scoring metric. These levels act more like a \emph{sandbox}, where players may add up to 48 species (limited due to the uniqueness constraint) in whatever topology they wish.
 They are given a single task: get as high a score as possible. This score in level 1 is simple the same as in Learning World, i.e.\ Equation~\ref{eq:score}. Level 2 adds an extra one million points per each additional animal, which is so large that it effectively means that Equation~\ref{eq:score} is only included as a tie-breaker. 
 Level 3 also gives blocks of a million points, but for each additional max chain length instead of each animal.
 To incentivise players to reach for high scores, each of these three levels has a leaderboard for skilled players to aim to be the best, as shown in Figure~\ref{fig:eco_worlds}, right.
+The purpose of Research World is to see how players approach these three situations, all of which do not have an immediately obvious solution.
 
 There are a couple of extra details that first must be addressed, however, before letting players loose. The first issue is that there are many trivial solutions if the player is allowed to add many identical species. This is because the main cause of extinctions in the simulation is due to chain reactions such as the aforementioned competitive exclusion, but these do not occur if species are identical \cite{Armstrong1980}. For this reason, no two species are allowed to have the same set of traits. Since there are 9 possible values for body mass and 5 for interference, this results in an upper limit of 45 combinations, plus the binary choice of plant or animal. The number of plants is limited to 3, leaving a total of 48 species per web, more than enough to comfortably fill the screen of a mobile device.
 
@@ -506,14 +505,20 @@ The final addition to Research world is another tool for navigating the topology
 This extra feature was necessary because as the number of species goes up, layouts may become crowded and difficult such that it is difficult to see fine details. The extra layer of interaction helps to alleviate this.
 % Unfortunately, minimising stress is not able to prevent the problem of crowded layouts. This situation can happen easily for topologies with many edges, and leads to nodes being bunched up closely together. superfocus was our eventual solution, but we do the learning world controlled test without.
 
-The purpose of Research World is to see how players approach these three situations, all of which do not have an immediately obvious solution. With this in mind, it is possible to state the hypotheses to be tested in the game:
+\subsection{Hypotheses}
+With these details in mind, it is possible to state two hypotheses:
 \begin{mdframed}[backgroundcolor=WhiteSmoke]
   \begin{itemize}[leftmargin=*]
-    \item \textbf{Hypothesis 1:} trophic level layout constraints will help players to complete Learning World faster.
-    \item \textbf{Hypothesis 2:} players will be able to successfully find strategies to achieve high scores in Research World, but most will not.
+    \item \textbf{Hypothesis 1:} Trophic level layout constraints will help players to complete Learning World faster.
+    \item \textbf{Hypothesis 2:} Players will be able to successfully find strategies to achieve high scores in Research World, but most will not.
     \end{itemize}
 \end{mdframed}
-The second statement is slightly vague on purpose, because it is not known what is meant by a `high' score, before letting players try their best. The evaluation of this second hypothesis will involve more exploratory analysis than the first, both of which will be outlined in the following section.
+The reason for the first hypothesis is because constraining species to their trophic level tends to orient edges upwards, which should help to preserve the player's mental map of the flow of biomass through the system. However this does remove a degree of freedom from the optimisation of stress, and so layouts may become more difficult to read for more dense topologies, thus hindering the player instead.
+
+The second statement is slightly vague on purpose, because it is not known what is meant by a `high' score, before letting players try it themselves.
+The reason for predicting that most will not find success is because the dynamical systems involved are complex and sometimes counterintuitive, and expecting all players to gain a good intuition for what strategies work well is unrealistic.
+The evaluation of this second hypothesis in general will therefore involve more exploratory analysis than the first.
+% Both will be outlined in the following section.
 
 \section{Results and analysis}
 \label{sec:eco_results}
