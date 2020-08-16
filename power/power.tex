@@ -337,13 +337,13 @@ The use of dissimilarity measures based on random walks outperforms those derive
 Calculating the betweenness-centrality for each edge is $\mathcal{O}(|V||E|)$ \cite{Brandes2001Centrality} and since this must be recalculated $|E|$ times, the overall complexity of GN is $\mathcal{O}(|V||E|^2)$, compared to $\mathcal{O}(|V|^2\log|V|)$ for the agglomerative methods explored here.
 Ward's method also consistently outperforms other linkage methods, and a qualitative observation of note is that it also tends to give dendrograms that lend themselves more to the pruning process in Section~\ref{sec:pruning}. Branches in Ward dendrograms more clearly delineate separately groups of clusters, leading to easier simplification into a streamlined hierarchy for bundling.
 % more systematic study into different methods for pruning 
-When the opposite situation occurs, i.e.\ if differences in branch height are homogenous, the pruning process may merges every single branch into one, since child branches are recursively merged into their parents. However this also usually corresponds to a poor quality clustering in general, because the algorithm could not find large groups of datapoints all close to each other.
+When the opposite situation occurs, i.e.\ if differences in branch height are homogenous, the pruning process may merge every single branch into one, since child branches are recursively merged into their parents. However this also usually corresponds to a poor quality clustering in general, because the algorithm could not find large groups of datapoints all close to each other.
 In a real-world visualisation pipeline, this pruning process would ideally be human driven, with methods such as MLCut of Vogogias et al.\ \cite{Vogogias2016} allowing dendrograms to be interactively explored and cut to form flat clusters. Such a tool could be easily applied to perform multiple cuts in order to form a hierarchy for bundling.
 % trees can be interactively explored using \cite{Archambault2008}
 Pruning is also not the only way to solve the dendrogram issues of Figure~\ref{fig:lesmis}. For example, different types of splines may not result in the same issues. A more thorough examination into the use of B-splines can be found in Section~\ref{sec:bspline_details}.
 
 Interaction would also greatly improve the utility of these visualisations. Holten \cite{Holten2006} suggested ideas such as dynamically tweaking the amount that bundles are relaxed, and highlighting interesting bundles by hiding other links. An additional possibility in this context would be to interactively prune the hierarchical tree in order to neaten bundles, or being switching between different clustering algorithms to reveal different patterns depending on the algorithm selected.
-The need for interaction can also be seen in the complex final render \texttt{caltech} in Figure~\ref{fig:untangled_hairballs}, second-from-bottom; an option such as \emph{GrouseFlocks} by Archambault et al.\ \cite{Archambault2008} would be useful here.
+The need for interaction can also be seen in the complex final render \texttt{caltech} in Figure~\ref{fig:untangled_hairballs}, second-from-bottom; a dynamic option such as \emph{GrouseFlocks} by Archambault et al.\ \cite{Archambault2008} would be useful here.
 
 A quantitative assessment of the actual utility of resulting bundles is something missing from the literature, but out of scope for the work here.
 It is however clear that certain topological features are made more salient by these diagrams. A good example of this is can be seen in the \texttt{karate} graph in Figure~\ref{fig:untangled_hairballs}, where it is clear that the two nodes on the left are central to the topology of the graph, due to the thickness of the bundles stemming from them. These two are in fact the two club leaders whose disagreement caused the club to split into the two factions used as ground truth for clustering. The algorithm was able to place them next to each other in a completely unsupervised manner, due to the quality of the extracted hierarchy combined with the optimal ordering \cite{Bar-Joseph2001} outlined in Section~\ref{sec:pruning}.
@@ -380,7 +380,7 @@ The precise definition of what defines a confluent drawing will be studied later
 
 The remaining work in this chapter will study a subset of confluent drawing known as \emph{power-confluent} drawing.
 The process of producing a power-confluent drawing consists of three steps: finding the \emph{power graph decomposition;} converting this decomposition into an equivalent auxiliary routing graph (ARG), similarly to hierarchical edge bundling in Section~\ref{sec:pruning}; and finally drawing curves back on top to render a confluent drawing. Each step is illustrated in Figure~\ref{fig:power_teaser}. This was an idea originally explored by Bach et al.\ \cite{Bach2017}, and the work presented here will aim to further develop and formalise the methods there.
-Specifically, the speed and quality of the first step will be improved, and two theoretical issues will be resolved for the second and third.
+Specifically, the speed and quality of the power decomposition algorithm will be improved, and two theoretical issues will be resolved for the conversion to a confluent drawing.
 
 \subsection{Power graph decomposition}
 \label{sec:power_graph}
@@ -391,7 +391,7 @@ This idea was originally developed for use in biological protein--protein intera
 This is also the method chosen by Bach et al.\ \cite{Bach2017}, to construct their initial power graphs, and so is the one studied here. Note that the following description is specific to undirected graphs; the changes required for directed graphs are described in Section~\ref{sec:power_directed}.
 
 \subsubsection{Greedy agglomeration, again}
-The algorithm works taking advantage of the fact that the hierarchy of power groups can also be represented as a tree, with vertices as the leaves, similarly to the hierarchical clustering of Section~\ref{sec:dissimilarities}. It first initializes every vertex as the sole member of a trivial power group, henceforth referred to as a \emph{module}, and initializes a set of neighbours for each module based on the edges of the graph.
+The algorithm works taking advantage of the fact that the hierarchy of power groups can also be represented as a tree, with vertices as the leaves, similarly to the hierarchical clustering of Section~\ref{sec:dissimilarities}. It first initializes every vertex as the sole member of a power group, henceforth referred to as a \emph{module}, and initializes a set of neighbours for each trivial module based on the edges of the graph.
 It then greedily merges pairs of top-level modules at a time, picking the merge that eliminates the most edges at each step, until no more edges can be eliminated.
 The number of eliminated edges for any given merge is given by
 \begin{equation}
@@ -535,7 +535,7 @@ The networks are, from top to bottom, Italian families linked by marriage \cite{
   \label{fig:pseudo_pgd}
 \end{figure} 
 
-It is important to note that this is still a simple greedy heuristic, which does not make any guarantees about the quality of the final result.
+It is important to note that this is still a simple greedy heuristic, which does not make any guarantees about the optimality of the final result.
 The original method in \cite{Dwyer2014} gives the option to somewhat alleviate this, by optionally maintaining a priority queue of the best configurations seen so far, along with some dynamic programming to prevent re-evaluating configurations already seen.
 A further exploration of this extended algorithm is out of scope for this paper, and Dwyer et al. \cite{Dwyer2014} additionally note that the qualitative improvement that results from including this priority queue is minimal.
 

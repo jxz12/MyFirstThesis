@@ -38,7 +38,7 @@ The matrix $\mathbf{A}$ is known as the \emph{interaction matrix}, and is called
 There are five classifications of interaction possible in such a model, designated by the nature of the values in the corresponding pair of values in this matrix. For example, if $\mathbf{A}_{ij}>0$ and $\mathbf{A}_{ji}<0$, then it is a standard example of species $i$ preying on species $j$, where the `sign' of the interaction is $(+,-)$. The remaining types are mutualism $(+,+)$, competition $(-,-)$, commensalism $(+,0)$, and amensalism $(-,0)$.
 Different models include differing amounts of each type of interaction, and the proportion of types can strongly influence the behaviour of the system \cite{Tang2014Correlation}. However the predator--prey type is the most commonly studied and most prevalent in nature, and so will be the only one considered here.
 
-The purpose of the above equations is to use them to find values of $\mathbf{x}$, and the standard way of doing this for differential equations is to simulate by performing numerical integration at each time step, using methods such as Runge-Kutta \cite{Press2007Runge}.\footnote{This was used in older versions of the game, but brings with it numerical problems such as stiff equations leading to instability \cite{Press2007Runge}, or having to choose a suitable integration time step. It also sidesteps the issue of having to choose an arbitrary abundance threshold for species to go extinct.}
+The purpose of the above equations is to use them to find values of $\mathbf{x}$, and the standard way of doing this for differential equations is to simulate by performing numerical integration at each time step, using methods such as Runge-Kutta \cite{Press2007Runge}.\footnote{This was used in older versions of the game, but brings with it numerical problems such as stiff equations leading to instability \cite{Press2007Runge}, or having to choose a suitable integration time step. It also adds the issue of having to choose an arbitrary abundance threshold for species to go extinct.}
 However the simplicity of the model chosen allows something different: it can be analytically solved for an \emph{equilibrium} point. This is the solution at which the interactions fully balance each other such that the instantaneous change in abundance is zero. Note the similarity of this method to the graph layout algorithm of Tutte shown in Section~\ref{sec:nodes_background}, Equation~\eqref{eq:tutte}.
 This is done by setting the left-hand side of Equation~\eqref{eq:interaction_matrix} to zero, where it is clear that the system contains many trivial solutions with any species $x=0$, which corresponds to the natural case of an extinct species staying extinct.
 Since the solution at which every species has non-zero abundance is one of interest, the $\mathbf{x}$ outside bracket is simply cancelled out to reach the solution
@@ -95,9 +95,9 @@ In the context of ecosystems, the chopstick is a species, and the nudge is an en
 The behaviour of the community matrix $\mathbb{J}|_\mathbf{z^*}$ is what is usually studied in mathematical ecology, due to the fact that it can be reverse-engineered to apply to almost any system of differential equations. It therefore sidesteps the problem of choosing which model to use, by jumping straight to this matrix.
 It is also the source of the long standing `complexity vs.\ stability' debate in the world of ecology, because it can be shown that as the number of species, i.e.\ size of $\mathbf{A}$, grows, the chance of Equation~\eqref{eq:lambda_stability} being satisfied tends to zero, even for small ecosystems of only a few dozen species \cite{May1973}.
 The reason for the debate is that systems exist in the real world with many more species than the math suggests is possible, and many subsequent works have studied what features of ecosystems allow such a contradiction to occur.
-For example, Tang et al.\ \cite{Tang2014Correlation} show that the correlation between elements of $\mathbf{A}$ can improve stability, Brose et al.\ \cite{Brose2006} study the consequences of body mass, and Johnson et al.\ \cite{Johnson2014} study the layered nature of groups of species.
+For example, Tang et al.\ \cite{Tang2014Correlation} show that the correlation between pairs of elements in $\mathbf{A}$ can improve stability, Brose et al.\ \cite{Brose2006} study the consequences of body mass, and Johnson et al.\ \cite{Johnson2014} study the layered nature of groups of species.
 
-However a common criticism is the assumption of the existence of a feasible equilibrium in the first place, and this is far from guaranteed. It has also been showed that in simple systems like the Lotka-Volterra equations studied here, that feasibility almost always leads to stability anyway \cite{Dougoud2018}. For this reason, the work done here will focus solely on feasibility, where nevertheless any results found can also apply to stability.
+However a common criticism is that this method assumes the existence of a feasible equilibrium in the first place, and this is far from guaranteed. It has also been showed that in simple systems like the Lotka-Volterra equations studied here, that feasibility almost always leads to stability anyway \cite{Dougoud2018}. For this reason, the work done here will focus solely on feasibility, where nevertheless any results found can also apply to stability.
 
 % We plan on using \eqref{eq:lambda_stability} directly within the game as one of the possible metrics for a high-score.
 % Other possible metrics include the total energy flow (flux) of the system, the trophic height (largest trophic level), or the reactivity of the fixed point~\cite{Tang2014Reactivity}.
@@ -110,7 +110,14 @@ However a common criticism is the assumption of the existence of a feasible equi
 The steps so far have discussed how to find abundances given the interaction matrix $\mathbf{A}$, but it has not yet been discussed how to find the numerical values to go into the matrix in the first place, i.e.\ its parameterisation.
 To fill this gap, a methodology known as \emph{metabolic scaling} will be used. It leverages the idea that each species has a metabolism rate that can be measured, i.e.\ the speed at which an organism converts a food source into either energy for movement or materials for growth. For plants this involves mainly converting nutrients and sunlight into biomass, and for animals this involves mainly converting biomass into movement to hunt prey.
 
-Metabolism is useful for two main reasons. The first is that, as it essentially measures the energy output of a species, it is strongly correlated with other traits such as movement speed \cite{Hirt2017} and therefore has been successfully used for parameterisation of $\mathbf{A}$ \cite{Savage2004, Vucic-Pestic2010, Pawar2015}. The second is that metabolism can be closely estimated through an inverse relationship to individual body mass, a connection that has been empirically measured and verified \cite{Brown2004}. The study of the relationships between mass and other biological traits is known as \emph{allometry}.
+\begin{figure}
+    \centering
+    \includegraphics[width=.8\textwidth]{joy/metabolism.pdf}
+    \caption[A plot of metabolism against individual body mass]{A plot of metabolism against individual body mass for a selection of animals. Note the outlier position of the sloth, showing that the model is imperfect, but still a very good estimate when considering the complexity of life. Data taken from \cite{Nagy1999}, power law slope and intercept from \cite[Fig.~2]{Brown2004}.}
+    \label{fig:metabolism}
+\end{figure}
+
+Metabolism is useful for two main reasons. The first is that, as it essentially measures the energy output of a species, it is strongly correlated with other traits such as movement speed \cite{Hirt2017} and therefore has been successfully used for parameterisation of $\mathbf{A}$ \cite{Savage2004, Vucic-Pestic2010, Pawar2015}. The second is that metabolism can be closely estimated through an inverse relationship to individual body mass, a connection that has been empirically measured and verified \cite{Brown2004}. The study of the relationships between mass and other biological traits is known as \emph{allometry}. Some examples of species and their metabolisms can be seen in Figure~\ref{fig:metabolism}.
 
 Specifically, the allometric functions used for the reproduction rates $\mathbf{r}$ in Equation~\eqref{eq:lotka_volterra} are
 \begin{equation}
@@ -123,13 +130,6 @@ Specifically, the allometric functions used for the reproduction rates $\mathbf{
 \end{equation}
 where $b_0$ and $d_0$ are constants to normalise birth and death rates, and $\mathbf{m}_i$ is the body mass of species $i$ in kilograms. The exponent $\beta$ is a empirically verified relationship between metabolism and individual body mass \cite{Brown2004}, and it is taken minus one in order to convert it into mass-specific units.
 Remarkably, the same exponent of $\beta=\sfrac{3}{4}$ can be applied to species of all sizes, from the smallest bacteria to the largest blue whale \cite{Kleiber1947}. It is theorised to take a value of $\sfrac{3}{4}$ --- rather than the $\sfrac{2}{3}$ that one would expect from a spherical surface area to volume ratio --- due to the fractal spreading pattern of tubes (such as veins) \cite{West1997}, although not without controversy \cite{Agutter2004}.
-
-\begin{figure}
-    \centering
-    \includegraphics[width=.8\textwidth]{joy/metabolism.png}
-    \caption[A plot of metabolism against individual body mass]{show metabolism against size if you can}
-    \label{fig:metabolism}
-\end{figure}
 
 The interaction strengths of predator--prey interactions are defined as
 \begin{equation}
@@ -355,7 +355,7 @@ This is simply defined by the sum of squared distances between two layouts
 \end{equation}
 and can be exactly minimised using linear transformations.
 % The square root of the right-hand side is usually taken as the final value
-Removing the translational component is performed by simply placing the barycenter of both layouts at the origin. Traditionally $\mathbf{X}'$ is then dilated, but stress is not invariant to scaling and so this step is skipped here. The rotational component is then removed by differentiating the right-hand side of Equation~\eqref{eq:procrustes} with respect to a rotation $\theta$ and solving for the derivative equalling zero, resulting in
+Removing the translational component is performed by simply placing the barycenter of both layouts at the origin. Traditionally $\mathbf{X}'$ is then dilated, but stress is not invariant to scaling so this step is skipped here. The rotational component is then removed by differentiating the right-hand side of Equation~\eqref{eq:procrustes} with respect to a rotation $\theta$ and solving for the derivative equalling zero, resulting in
 \begin{equation}
   \theta(\mathbf{x},\mathbf{y}, \mathbf{x^\prime}, \mathbf{y^\prime}) = 
   \tan^{\text{--}1}\left(\frac{\sum_i(\mathbf{y}_i\mathbf{x}^\prime_i-\mathbf{x}_i\mathbf{y}^\prime_i)}{\sum_i(\mathbf{x}_i\mathbf{x}^\prime_i-\mathbf{y}_i\mathbf{y}^\prime_i)}\right)
@@ -368,7 +368,7 @@ To transition smoothly between aligned layouts, the \texttt{SmoothDamp()} functi
 \subsubsection{Constraining the y-axis}
 A domain-specific feature of food webs is that any valid topology allows for the trophic level to be calculated for each species, following the process outlined in Section~\ref{sec:topology}. For this reason, an additional constraint to the layout is included, that constrains the y-axis to the trophic level of the species.
 
-The simplicity of the Laplacian matrix that needs to be inverted in order to solve for trophic levels allows for the Jacobi method to be used. Expressing the trophic level Equation~\eqref{eq:trophic_matrix} as 
+The diagonal dominance of the Laplacian matrix to be inverted in order to solve for trophic levels allows for the Jacobi method to be used. Expressing the trophic level Equation~\eqref{eq:trophic_matrix} as 
 \begin{equation}
   \mathbf{y} = \mathbf{L}^{\text{--}1}\mathbf{b},
   \label{eq:trophic_laplacian}
@@ -377,7 +377,7 @@ ordinary Jacobi solves for $\mathbf{y}$ by assigning
 \begin{equation}
   \mathbf{y}_i^\prime = \frac{1}{\mathbf{L}_{ii}}\left(\mathbf{b}_i - \sum_{j\neq i}\mathbf{L}_{ij}\mathbf{y}_i\right)
 \end{equation}
-for each vertex $i$. In this case, $\mathbf{b}$ is simply a column vector of ones.
+for each vertex $i$ \cite{Young2014}. In this case, $\mathbf{b}$ is simply a column vector of ones.
 An iterative method was chosen because the topology of the graph will only change by a single edge at a time, and so previously calculated trophic levels is a good approximation for subsequent values. From experience, the number of iterations required for convergence is almost always fewer than ten. Since the matrix $\mathbf{L}$ contains an entry for every edge, the complexity per iteration is $\mathcal{O}(|E|)$, as opposed to solving the system exactly. 
 Equation~\eqref{eq:trophic_laplacian} does not have a solution if any component has no vertex with an in-degree of zero (i.e.\ no primary producers). In this case, trophic level computations are simply ignored.
 
@@ -385,7 +385,8 @@ Equation~\eqref{eq:trophic_laplacian} does not have a solution if any component 
 A problem here is that stress is more difficult to optimise, because there is now only one degree of freedom for vertices to move around in. The solution found was to increase the maximum value of $\mu$ in Equation~\eqref{eq:mu} to $1.1$, as well as adding five extra initialisation iterations at the beginning of the optimisation. This is however an ad hoc solution and future work should involve testing variations of this systematically.
 The aforementioned Procrustes statistic also skips the rotation step in this case, as any rotation would break the orientation of these constraints.
 
-An important question is whether constraining the y-axis is helpful to the user in the first place. In fact, this will be systematically tested in the game by giving half of the players a constrained layout, and half an unconstrained layout. More detail on this experiment is outlined in Section~\ref{sec:eco_hypotheses}.
+An important question is whether constraining the y-axis is helpful to the user in the first place. Intuition says the constraint will largely make edges point upwards, which should help to preserve the player's mental map of the flow of biomass throughout the system. The opposing argument is that layouts will have higher stress, and so may become more crowded.
+This question will be systematically tested by the game. Half of the players will be given an standard layout and the other half a constrained layout, and data collected from the game will be used to study which is more effective. More detail on this experiment is outlined in Section~\ref{sec:eco_hypotheses}.
 
 \subsection{Heads-up display}
 \label{sec:HUD}
@@ -427,7 +428,11 @@ If the player does not find the solution to a level after two minutes, the text 
 
 \subsubsection{Label 6: Inspector}
 This panel is known as the inspector, and is the avenue through which the player views and changes the traits of their species.
-These two traits, body mass and interference, take a wide range of values: mass goes from one gram to one thousand kilograms, therefore spanning six orders of magnitude; interference goes from 10$^{\text{--}5}$ to 1, also spanning six orders of magnitude. This range for mass was chosen to capture species of almost all sizes in the natural world. Smaller species do exist and are vital to Earth's ecosystem (such as bacteria and the smallest insects) but they are left as out of scope for the game. The range of interference values is set to span the range of values that the off-diagonals of the interaction matrix can possibly take when parameterised with Equation~\ref{eq:interaction_strength}, using the aforementioned range of body masses. This was done because it is not known what range of values interference takes in nature, and so the assumption was taken that it should not differ too greatly from the magnitude of inter-species interactions.
+These two traits, body mass and interference, take a wide range of values: mass goes from one gram to one thousand kilograms, therefore spanning six orders of magnitude; interference goes from 10$^{\text{--}4}$ to 10$^{\text{--}1}$, spanning three orders of magnitude. This range for mass was chosen to capture species of almost all sizes in the natural world. Smaller species do exist and are vital to Earth's ecosystem (such as bacteria and the smallest insects) but they are left as out of scope for the game.
+The range of interference values was set to span this range, as preliminary playtests showed that species with any larger interference tended to be very difficult to keep alive at all, and species with any smaller interference tended to destabilise the rest of the food web.
+Preliminary tests also showed that allowing the player to choose interference on top of body mass was too much information for players to begin with. The ability to tweak interference by hand is therefore not unlocked until the second set of levels known as Research World is reached (see Section~\ref{sec:eco_hypotheses}).
+Further discussion of interference values can be found in Section~\ref{sec:hypothesis2}.
+% The range of interference values is set to span the range of values that the off-diagonals of the interaction matrix can possibly take when parameterised with Equation~\ref{eq:interaction_strength}, using the aforementioned range of body masses. This was done because it is not known what range of values interference takes in nature, and so the assumption was taken that it should not differ too greatly from the magnitude of inter-species interactions.
 % interference goes from 1e-5 to 1 (reference hsi-cheng's work)
 
 Both traits are also set according to a log scale, so that all orders of magnitude are accessible. The sliders themselves are constrained to only take discrete values, so that the player knows the exact values being used. This also means that values can be displayed using a single number next to the species, as shown in the screenshot in Figure~\ref{fig:eco_gameplay}.
@@ -469,10 +474,10 @@ Some general demographic information, such as age and education background, is o
 The player may also delete their account whenever they wish, as shown by the settings page to the right of Figure~\ref{fig:eco_server}. Here they may also change game settings such as volume or drag direction. They may also view the GDPR privacy policy in full, and a credits page to thank the lab members who kindly gave their time to help playtest the game.
 
 \section{Experimental design}
+\label{sec:eco_hypotheses}
 The gameplay of EcoBuilder is split into two sets of levels. The first set is called `Learning World', and the second is `Research World'. 
 When the player first opens the game, they are greeted with two large buttons that lead to the two Worlds. Initially, Research World is locked and may only be entered when they complete all the levels in Learning World, as shown in Figure~\ref{fig:eco_worlds}, left. This gives the player an incentive to complete the Learning levels, and also ensures that all players have received the same introduction before tackling the more difficult problems presented in the Research levels.
 
-\label{sec:eco_hypotheses}
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{joy/worlds.png}
@@ -483,17 +488,17 @@ When the player first opens the game, they are greeted with two large buttons th
 
 \subsection{Learning World}
 \label{sec:learning_world}
-Learning World contains 18 levels in total, all of which contain relatively simple scenarios designed to be instructive. For example, levels 3 and 4 both force the use of a heavy animal that cannot be saved with a single plant, to teach the player that heavier species consume slower and so require more abundant food sources. Levels 5 and 6 present the player with a situation known as `competitive exclusion', a well-known natural phenomenon that states that if two predators share the exact same prey, then the predator with a faster intake rate will almost always drive the slower to extinction.
+Learning World contains 18 levels in total, all of which contain relatively simple scenarios designed to be instructive. For example, levels 3 and 4 both force the use of a heavy animal that cannot be saved with a single plant, to teach the player that heavier species consume slower (on a mass-specific basis) and so require more abundant food sources. Levels 5 and 6 present the player with a situation known as \emph{competitive exclusion}, a well-known natural phenomenon that states that if two predators share the exact same prey, then the predator with a faster intake rate will almost always drive the slower to extinction.
 The real-world example of this told to the player is the exclusion of red squirrels after the introduction of grey squirrels in Britain, due to their superior foraging ability \cite{Gurnell2004}.
-This principle, although predicted by the mathematical model, is however not as common in nature as one would think. Examples such as the `paradox of the plankton' seemingly ignore the principle entirely, as tens or hundreds of plankton species are able to coexist despite sharing the same resources \cite{Hutchinson1961}; the results from the game may help to reveal why this occurs.
+This principle, although predicted by the mathematical model, is however not as common in nature as one would think. Examples such as the `paradox of the plankton' seemingly ignore the principle entirely, as tens or hundreds of plankton species are able to coexist despite sharing the same resources \cite{Hutchinson1961}; results from the game may help to reveal why this occurs.
 
 EcoBuilder is a \emph{puzzle} game, in that the player is not tasked with time constraints or tests of dexterity. It is therefore a direct test of the ability of the player to understand the dynamics of the underlying simulation.
-This presents the opportunity to perform a controlled test to measure this understanding, when the player is shown different visualisations. In this case, two node layout methods will be tested, where is computed by simply minimizing stress, and the other additionally has the y-axis positions of species constrained to their trophic level. 
+This presents the opportunity to perform a controlled test to measure the extent of this understanding. In this case, two node layout methods will be tested, where is computed by simply minimizing stress, and the other additionally has the y-axis positions of species constrained to their trophic level. The layout with only stress optimised will be referred to as the \emph{standard} layout, and with y-axis constrained as the \emph{trophic} layout.
 Other experiments in the literature generally give participants topological tasks such as finding paths between nodes \cite{Bach2017, Okoe2018} or deciding which nodes would disconnect the network if removed \cite{Purchase1997}. A novel difference with the experiment here is that there is an actual dynamical system for the participant to further understand.
 
 \subsection{Research World}
 \label{sec:research_world}
-Research world contains 3 further levels for the player to play, each with a different scoring metric. These levels act more like a \emph{sandbox}, where players may add up to 48 species (limited due to the uniqueness constraint) in whatever topology they wish.
+Research world contains 3 further levels for the player to play, each with a different scoring metric. These levels act more like a \emph{sandbox}, where players may add up to 48 species (limited due to the uniqueness constraint explained below) in whatever topology they wish.
 They are given a single task: get as high a score as possible. This score in level 1 is simple the same as in Learning World, i.e.\ Equation~\ref{eq:score}. Level 2 adds an extra one million points per each additional animal, which is so large that it effectively means that Equation~\ref{eq:score} is only included as a tie-breaker. 
 Level 3 also gives blocks of a million points, but for each additional max chain length instead of each animal.
 To incentivise players to reach for high scores, each of these three levels has a leaderboard for skilled players to aim to be the best, as shown in Figure~\ref{fig:eco_worlds}, right.
@@ -518,22 +523,80 @@ The reason for the first hypothesis is because constraining species to their tro
 The second statement is slightly vague on purpose, because it is not known what is meant by a `high' score, before letting players try it themselves.
 The reason for predicting that most will not find success is because the dynamical systems involved are complex and sometimes counterintuitive, and expecting all players to gain a good intuition for what strategies work well is unrealistic.
 The evaluation of this second hypothesis in general will therefore involve more exploratory analysis than the first.
-% Both will be outlined in the following section.
 
 \section{Results and analysis}
 \label{sec:eco_results}
 
+Here the data collected from the game will be explored to study the validity of the aforementioned hypotheses.
+Data from a total of 842 players were analysed, from demographics of...
 
-plot density plots of each level for time and score
-no statistically significant difference in number of stars, so can assume players eventually got to the same point.
-research world is probably worse for trophic though.
+\subsection{Hypothesis 1}
+\label{sec:hypothesis1}
+Hypothesis 1 concerns the performance of players as they progressed through Learning World, depending on the type of visualisation they were presented with.
+The visualisation with y-axis positions constrained to trophic level 
+The first question to ask is: how many levels were players able to complete before quitting? This is answered in Figure~\ref{fig:player_progression}.
+100,000 replicates, null hypothesis is no difference in median, permutation tests
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{joy/stars.pdf}
+    \caption[Histograms showing player progressed]{Histograms showing how far players progressed through the game, for both the standard stress layout and trophically constrained groups. On the left is how many levels were completed, and on the right is how many stars were collected. The smooth curves denote a kernel density function over all bins, and the dotted vertical lines mark the median. The p-value of the trophic median being larger than the standard is written above each plot.}
+    \label{fig:player_progression}
+\end{figure}
+
+There is a big cutoff at levels 8 and 9 - it seems they were likely too difficult.
+The biggest proportion of players persevered and got to the end, which is nice.
+It is clear that players got slightly further with a trophic layout than standard.
+It is therefore not correct to test the total play time of players; in fact the median play time of trophic players was longer.
+Because of this, the time taken will be analysed on a level by level basis
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{joy/times.pdf}
+    \caption[Histograms showing the time spent on each level]{Caption}
+    \label{fig:level_times}
+\end{figure}
+
+Not many of these are statistically significant, as defined by p-values below 5\%. However, almost every level has a better median for trophic than standard.
+The levels that it does do very well on are levels where there more than one trophic level is required.
+Level 7 seems to be an anomaly. It is also the level that players completed fastest, and so should not really be taken seriously
+This does not mean a shining recommendation for trophic, but it does show small and consistent improvement.
+
+On the flip side, standard players did a little better on research world 101, with a p value of 0.096. This is likely due to the score metric requiring high connectance, and so food webs are especially crowded there, which means that a regular layout should prevail, due to the better spreading out of .
+The remaining research world levels had little to no difference in median scores at all.
+
+\subsection{Hypothesis 2}
+\label{sec:hypothesis2}
 
 find numbers of small/big and inteference/notinterference. also correlate the two
 find common features of topology
 discuss sampling bias for empirical webs
 
+\begin{figure}
+  \centering
+  \includegraphics[height=.85\textheight, right]{joy/101.pdf}
+  \caption[Results from Research World level 1]{Caption}
+  \label{fig:101}
+\end{figure}
+\begin{figure}
+  \centering
+  \includegraphics[height=.85\textheight, right]{joy/102.pdf}
+  \caption[Results from Research World level 2]{Caption}
+  \label{fig:102}
+\end{figure}
+\begin{figure}
+  \centering
+  \includegraphics[height=.85\textheight, right]{joy/103.pdf}
+  \caption[Results from Research World level 3]{Caption}
+  \label{fig:103}
+\end{figure}
+
+The food webs built in Research World can also be used to examine the choice of range of interference strengths (diagonals in Equation~\eqref{eq:interaction_matrix}), which was 10$^{\text{--}4}$ to 10$^{\text{--}1}$. Looking at all off-diagonal values in all interaction matrices in the 3 Research levels shows that 95\% of the values lie in between the range 5$\times$10$^{\text{--}6}$ to 7$\times$10$^{\text{--}2}$. 
+This range is in roughly line with the results of Ho \cite{Ho2020}, where it is shown that maximum feasibility in food webs occurs when the diagonals are around ten times larger than the off-diagonals.
+% This is a chicken-and-egg problem, as it is not clear whether players subconsciously adapted to the range of interference strengths given to them, or if the choice was constrained into a good range in the first place.
+
 \subsection{Discussion}
 \label{sec:eco_discussion}
+yes, data is messy as it is public
 
   mention old idea for chess-board and why it didn't work
      chess board not used anymore
