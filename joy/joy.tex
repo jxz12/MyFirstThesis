@@ -245,7 +245,7 @@ A final topological feature that will be considered is the \emph{trophic level} 
 \end{equation}
 where $\mathbf{P}_{ji}$ is the proportion of the diet of $j$ that $i$ contributes to.
 % I sort of regret only taking constant values for p in the game...
-This essentially means that the trophic level of a species is equal to the average trophic level of its prey plus one.
+In other words, the trophic level of a species is exactly equal to the mean trophic level of its prey, plus one.
 The similarity of this definition to Tutte's algorithm back in Chapter~\ref{chap:stress}, Equation~\eqref{eq:tutte} is worth noting, as the matrix to be solved here is also a graph Laplacian, defined as
 \begin{equation}
   \begin{bmatrix}
@@ -267,6 +267,14 @@ where most of the values of $\mathbf{P}_{ji}$ will be zero because the structure
 The matrix also has the nice property of being diagonally dominant, which means that iterative methods such as Jacobi or Gauss-Seidel are guaranteed to converge~\cite{Young2014}. This will be made use of later in Section~\ref{sec:eco_visualisation}.
 
 It is widely accepted that the trophic level of species has a useful meaning within the context of ecosystems~\cite{Post2002, Johnson2014}. This is because species with high trophic levels tend to be more biologically complex, as they are at the top of the food chain, like humans for example. Trophic level will therefore be made use of in Section~\ref{sec:eco_visualisation} within a visualisation context.
+
+A summary statistic based on the trophic levels of all species is known as \emph{trophic coherence}, and is a measure of how homogeneous the layers of trophic levels are. For example, a perfectly coherent topology would have all integer trophic levels. Specifically, coherence is defined as
+\begin{equation}
+  \mathrm{coherence}(\mathbf{y}) = \sqrt{ -1 + \frac{1}{|E|}\sum_{\{i,j\}\in E}(\mathbf{y}_i - \mathbf{y}_j)^2}
+  \label{eq:coherence}
+\end{equation}
+and can be interpreted as the standard deviation of differences in trophic level over each edge. It is strictly larger than zero, where zero indicated perfect coherence, and so the larger it is the more incoherent the web.
+This quantity was studied by Johnson et al. \cite{Johnson2014}, where it was shown that more coherent topologies result in more stable ecosystems. It will be used here to analyse the strategies taken by players to tackle challenges in the game.
 
 \subsection{Citizen science}
 \label{sec:citizen_science}
@@ -322,7 +330,7 @@ The most complex component of the gameplay is the visualisation of the ecosystem
 
 As shown by label~1 in Figure~\ref{fig:eco_gameplay}, a node-link diagram is used for visualising the topology of the food web.
 The nodes of the diagram represent species, where their shape and colour are dependent on the two traits, size and interference (further explained in Section~\ref{sec:HUD}, label~6).
-Node colour depends on both traits simultaneously, to span a 2D plane in the 3D CIELAB colour space to maintain perceptual uniformity \cite{Smart2019}.
+Node colour depends on both traits simultaneously, to span a 2D plane in the 3D CIELAB colour space to maintain perceptual uniformity \cite{Smart2019}, where the planes used for plants and animals can be seen in bottom left of Figures~\ref{fig:101} to~\ref{fig:103}.
 Node shapes were designed to be relatively spherical in order to resemble a classical node-link diagram, and change depending on the choice of plant or animal. The cute faces are procedurally generated using random combinations of eyes and mouths.
 Links are rendered with low opacity, except with moving circles that flow in the direction of biomass transfer. Such animated edges were studied by Holten et al.\ \cite{Holten2011} to be effective at showing link direction, and also recommended in \cite{Bach2017}.
 Coloured outlines around nodes and links are also used to indicate their status, for example in Figure~\ref{fig:eco_gameplay} a blue outline means the component cannot be edited, and a yellow outline means it is the current focus of the panel labelled by the number~6.
@@ -403,7 +411,7 @@ This panel displays the player's score, as well as how many stars they have obta
 
 Many different metrics were tried and tested for use as a score, most of which were unsuitable. For example, the total abundance every species was a good candidate, but this is maximised by having only plants in the food web, as any animals simply lose too much biomass via the efficiency factor $e_0$ in Equation~\eqref{eq:interaction_strength}. The score should instead continuously increase as the food web becomes more complex. Another related option was to take the total \emph{flux} of the food web, defined as the total amount of biomass flow through every interaction. This is defined here as the sum of the positive off-diagonals in Equation~\eqref{eq:jacobian_evaluated}.
 
-One definition of quantitative complexity is $\sigma\sqrt{nC}$, where $\sigma$ is the standard deviation of the off-diagonals of the community matrix in Equation~\ref{eq:jacobian_evaluated}, $n$ is the number of species, and $C$ is the connectance, defined as the proportion of realised to possible interactions such that $0\leq C\leq1$. This quantity was shown by May to negatively correlate with the probability of stability as defined in Equation~\eqref{eq:lambda_stability}, and acted as the springboard for the aforementioned complexity vs.\ stability debate.
+One definition of quantitative complexity is $\sigma\sqrt{nC}$, where $\sigma$ is the standard deviation of the off-diagonals of the community matrix in Equation~\ref{eq:jacobian_evaluated}, $n$ is the number of species, and $C$ is the connectance, defined as the proportion of realised to possible interactions such that $0\leq C\leq1$. Specifically this is $C=|E| / (n(n-1)/2)$. This quantity was shown by May to negatively correlate with the probability of stability as defined in Equation~\eqref{eq:lambda_stability}, and acted as the springboard for the aforementioned complexity vs.\ stability debate.
 This criterion has been taken and updated to more accurately match real ecosystem structure \cite{Allesina2012, Tang2014Correlation}, but all contain the components $\sigma$, $n$, and $C$.
 Unfortunately none of these metrics were able to fit the purposes of a game, because the factor $\sigma$ is not very interpretable, and players found it difficult to work out why it would go up or down.
 % sometimes super suddenly. It was also maxed out at 2 species
@@ -473,10 +481,17 @@ The middle screenshot in Figure~\ref{fig:eco_server} shows the registration page
 Some general demographic information, such as age and education background, is optionally collected at registration.
 The player may also delete their account whenever they wish, as shown by the settings page to the right of Figure~\ref{fig:eco_server}. Here they may also change game settings such as volume or drag direction. They may also view the GDPR privacy policy in full, and a credits page to thank the lab members who kindly gave their time to help playtest the game.
 
+
 \section{Experimental design}
 \label{sec:eco_hypotheses}
 The gameplay of EcoBuilder is split into two sets of levels. The first set is called `Learning World', and the second is `Research World'. 
 When the player first opens the game, they are greeted with two large buttons that lead to the two Worlds. Initially, Research World is locked and may only be entered when they complete all the levels in Learning World, as shown in Figure~\ref{fig:eco_worlds}, left. This gives the player an incentive to complete the Learning levels, and also ensures that all players have received the same introduction before tackling the more difficult problems presented in the Research levels.
+
+\subsection{Learning World}
+\label{sec:learning_world}
+Learning World contains 18 levels in total, all of which contain relatively simple scenarios designed to be instructive. For example, levels 3 and 4 both force the use of a heavy animal that cannot be saved with a single plant, to teach the player that heavier species consume slower (on a mass-specific basis) and so require more abundant food sources. Levels 5 and 6 present the player with a situation known as \emph{competitive exclusion}, a well-known natural phenomenon that states that if two predators share the exact same prey, then the predator with a faster intake rate will almost always drive the slower to extinction.
+The real-world example of this told to the player is the exclusion of red squirrels after the introduction of grey squirrels in Britain, due to their superior foraging ability \cite{Gurnell2004}.
+This principle, although predicted by the mathematical model, is however not as common in nature as one would think. Examples such as the `paradox of the plankton' seemingly ignore the principle entirely, as tens or hundreds of plankton species are able to coexist despite sharing the same resources \cite{Hutchinson1961}; results from the game may help to reveal why this occurs.
 
 \begin{figure}
     \centering
@@ -485,12 +500,6 @@ When the player first opens the game, they are greeted with two large buttons th
     \label{fig:eco_worlds}
 \end{figure}
 
-
-\subsection{Learning World}
-\label{sec:learning_world}
-Learning World contains 18 levels in total, all of which contain relatively simple scenarios designed to be instructive. For example, levels 3 and 4 both force the use of a heavy animal that cannot be saved with a single plant, to teach the player that heavier species consume slower (on a mass-specific basis) and so require more abundant food sources. Levels 5 and 6 present the player with a situation known as \emph{competitive exclusion}, a well-known natural phenomenon that states that if two predators share the exact same prey, then the predator with a faster intake rate will almost always drive the slower to extinction.
-The real-world example of this told to the player is the exclusion of red squirrels after the introduction of grey squirrels in Britain, due to their superior foraging ability \cite{Gurnell2004}.
-This principle, although predicted by the mathematical model, is however not as common in nature as one would think. Examples such as the `paradox of the plankton' seemingly ignore the principle entirely, as tens or hundreds of plankton species are able to coexist despite sharing the same resources \cite{Hutchinson1961}; results from the game may help to reveal why this occurs.
 
 EcoBuilder is a \emph{puzzle} game, in that the player is not tasked with time constraints or tests of dexterity. It is therefore a direct test of the ability of the player to understand the dynamics of the underlying simulation.
 This presents the opportunity to perform a controlled test to measure the extent of this understanding. In this case, two node layout methods will be tested, where is computed by simply minimizing stress, and the other additionally has the y-axis positions of species constrained to their trophic level. The layout with only stress optimised will be referred to as the \emph{standard} layout, and with y-axis constrained as the \emph{trophic} layout.
@@ -504,10 +513,10 @@ Level 3 also gives blocks of a million points, but for each additional max chain
 To incentivise players to reach for high scores, each of these three levels has a leaderboard for skilled players to aim to be the best, as shown in Figure~\ref{fig:eco_worlds}, right.
 The purpose of Research World is to see how players approach these three situations, all of which do not have an immediately obvious solution.
 
-There are a couple of extra details that first must be addressed, however, before letting players loose. The first issue is that there are many trivial solutions if the player is allowed to add many identical species. This is because the main cause of extinctions in the simulation is due to chain reactions such as the aforementioned competitive exclusion, but these do not occur if species are identical \cite{Armstrong1980}. For this reason, no two species are allowed to have the same set of traits. Since there are 9 possible values for body mass and 5 for interference, this results in an upper limit of 45 combinations, plus the binary choice of plant or animal. The number of plants is limited to 3, leaving a total of 48 species per web, more than enough to comfortably fill the screen of a mobile device.
+There are a couple of extra details that first must be addressed, however, before letting players loose. The first issue is that there are many trivial solutions if the player is allowed to add many identical species. This is because the main cause of extinctions in the simulation is due to chain reactions such as the aforementioned competitive exclusion, but these do not occur if species are identical \cite{Armstrong1980}. For this reason, no two species are allowed to have the same set of traits. Since there are 9 possible values for body mass and 5 for interference, this results in an upper limit of 45 combinations, plus the binary choice of plant or animal. The number of plants is limited to 3, leaving a total of 48 species per web: more than enough to comfortably fill the screen of a mobile device.
 
 The final addition to Research world is another tool for navigating the topology of food webs. If a species is tapped twice, the layout transitions into a mode where only the direct connections to that species are visible, where its prey are positioned below it and its predators above. The topology can then be navigated in this mode, by hopping from one node to another by again tapping.
-This extra feature was necessary because as the number of species goes up, layouts may become crowded and difficult such that it is difficult to see fine details. The extra layer of interaction helps to alleviate this.
+This extra feature was necessary because as the number of species goes up, layouts can become crowded and difficult such that it is difficult to see fine details. The extra layer of interaction helps to alleviate this.
 % Unfortunately, minimising stress is not able to prevent the problem of crowded layouts. This situation can happen easily for topologies with many edges, and leads to nodes being bunched up closely together. superfocus was our eventual solution, but we do the learning world controlled test without.
 
 \subsection{Hypotheses}
@@ -518,77 +527,99 @@ With these details in mind, it is possible to state two hypotheses:
     \item \textbf{Hypothesis 2:} Players will be able to successfully find strategies to achieve high scores in Research World, but most will not.
     \end{itemize}
 \end{mdframed}
-The reason for the first hypothesis is because constraining species to their trophic level tends to orient edges upwards, which should help to preserve the player's mental map of the flow of biomass through the system. However this does remove a degree of freedom from the optimisation of stress, and so layouts may become more difficult to read for more dense topologies, thus hindering the player instead.
+The reason behind the first hypothesis is because constraining species to their trophic level tends to orient edges upwards, which should help to preserve the player's mental map of the flow of biomass through the system. However this does remove a degree of freedom from the optimisation of stress, and so layouts may become more difficult to read for more dense topologies, thus hindering the player instead.
 
 The second statement is slightly vague on purpose, because it is not known what is meant by a `high' score, before letting players try it themselves.
 The reason for predicting that most will not find success is because the dynamical systems involved are complex and sometimes counterintuitive, and expecting all players to gain a good intuition for what strategies work well is unrealistic.
-The evaluation of this second hypothesis in general will therefore involve more exploratory analysis than the first.
+The evaluation of this second hypothesis in general will therefore involve more exploratory and speculative analysis than the first.
 
 \section{Results and analysis}
 \label{sec:eco_results}
 
-Here the data collected from the game will be explored to study the validity of the aforementioned hypotheses.
-Data from a total of 842 players were analysed, from demographics of...
+Data from a total of the 842 players who completed at least one level, and over 9000 individual playthroughs were analysed to produce the results presented here. The analysis will begin with examining player performance in Learning World, and then finish with Research World.
 
 \subsection{Hypothesis 1}
 \label{sec:hypothesis1}
-Hypothesis 1 concerns the performance of players as they progressed through Learning World, depending on the type of visualisation they were presented with.
-The visualisation with y-axis positions constrained to trophic level 
-The first question to ask is: how many levels were players able to complete before quitting? This is answered in Figure~\ref{fig:player_progression}.
-100,000 replicates, null hypothesis is no difference in median, permutation tests
+Hypothesis 1 concerns the performance of players as they progressed through Learning World, depending on the type of visualisation they were presented with, as detailed in Section~\ref{sec:learning_world}.
+The first question to ask is: how many levels did players complete before stopping? This is answered in Figure~\ref{fig:player_progression}, where bar charts containing the furthest level reached and number of stars collected can be seen.
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{joy/stars.pdf}
-    \caption[Histograms showing player progressed]{Histograms showing how far players progressed through the game, for both the standard stress layout and trophically constrained groups. On the left is how many levels were completed, and on the right is how many stars were collected. The smooth curves denote a kernel density function over all bins, and the dotted vertical lines mark the median. The p-value of the trophic median being larger than the standard is written above each plot.}
+    \caption[Bar charts showing player progressed]{Bar charts showing how far players progressed through the game, for both the standard stress layout and trophically constrained groups. On the left is how many levels were completed, and on the right is how many stars were collected. The smooth curves denote a kernel density function over all bins, and the dotted vertical lines mark the median. The p-value of the trophic median being larger than the standard is written above each plot.}
     \label{fig:player_progression}
 \end{figure}
+The test statistic studied here for both plots is the \emph{median}, marked by vertical dotted lines for both plots, where it can be seen that progress is slightly further for the trophic group for both measures.
+To validate the significance of this result, a permutation test was performed with the null hypothesis that there is no difference in medians between the two layouts is zero.
+This was done on 100,000 permutations of the test set, and the resulting p-values are written on top of the corresponding charts in Figure~\ref{fig:player_progression}.
 
-There is a big cutoff at levels 8 and 9 - it seems they were likely too difficult.
-The biggest proportion of players persevered and got to the end, which is nice.
-It is clear that players got slightly further with a trophic layout than standard.
-It is therefore not correct to test the total play time of players; in fact the median play time of trophic players was longer.
-Because of this, the time taken will be analysed on a level by level basis
+The p-value of 0.028 for levels completed provides a clear yes to the question of which group made it further through the game. The corresponding result for number of stars achieved is not as convincing, but is still positive nonetheless.
+Looking at the shape of levels completed, there is a big cutoff at levels 8 and 9, which is a sign that those two levels where designed to be a little too difficult. However, almost all players with the perseverance to make it over that hump continued on to complete the remaining levels. This was the biggest group of players in general, coming in at just under 25\% of all players.
+
+However, this difference in progress through levels makes it incorrect to directly test hypothesis 1 by simply looking at the total play time of players, since playing more levels will increase total play time. A look at the data indeed confirms that the median play time of trophic players was longer.
+Because of this, the time element will be analysed on a level-by-level basis. This can be seen in Figure~\ref{fig:level_times}, where a histogram of the time taken by both sets of players is plotted for each of the 18 levels in Learning World, including p-values over the median for each, as in Figure~\ref{fig:player_progression}.
 
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{joy/times.pdf}
-    \caption[Histograms showing the time spent on each level]{Caption}
+    \caption[Histograms showing the time spent on each level]{Histograms of the time taken by both sets of players for every level, with the same conventions as Figure~\ref{fig:player_progression}. The index of each level is written on the top left of every plot, where the upper limit of the x-axis is set to the time at which 95\% of players managed to finish.}
     \label{fig:level_times}
 \end{figure}
 
-Not many of these are statistically significant, as defined by p-values below 5\%. However, almost every level has a better median for trophic than standard.
-The levels that it does do very well on are levels where there more than one trophic level is required.
-Level 7 seems to be an anomaly. It is also the level that players completed fastest, and so should not really be taken seriously
-This does not mean a shining recommendation for trophic, but it does show small and consistent improvement.
+Not many of the resulting medians are statistically significant, if defined by p-values below 5\%. However, almost every level has a better median for trophic than standard, with many of the more difficult later levels falling below a 10\% threshold.
+% The levels that it does do very well on are levels where there more than one trophic level is required.
+Level 7 is the only level where the opposite case occurs, and the standard group performed consistently better. However it is also the level that players had the least trouble with in general, with the fastest completion time over all levels.
+These results do not mean a shining recommendation for trophic in all situations, but it does show small and consistent improvement over the tasks set for the player.
 
-On the flip side, standard players did a little better on research world 101, with a p value of 0.096. This is likely due to the score metric requiring high connectance, and so food webs are especially crowded there, which means that a regular layout should prevail, due to the better spreading out of .
-The remaining research world levels had little to no difference in median scores at all.
+A peek into research world confirms the need for care when picking a visualisation, as the standard group achieved higher median scores than trophic on the first Research Level, with a p-value of 0.096. This first level simply reuses the score metric in Equation~\eqref{eq:score} which takes connectance into account, and so food webs are naturally going to become especially crowded there. In these situations, fixing the y-axis causes nodes to bunch too closely together to differentiate. Standard layouts still become hairballs, but at least nodes are separated enough to not overlap too much.
+Additionally, the remaining research world levels had little to no difference in median scores, which shows that for many tasks there is no value to be gained for adding the trophic constraint to the layout.
+
+These results point towards a small, but clear improvement in performance for the trophic visualisation over the standard one. This is enough to recommend the method for the general application of food webs, but with the condition that care must still be taken to consider the specific use case, as it is not always going to help.
 
 \subsection{Hypothesis 2}
 \label{sec:hypothesis2}
 
-find numbers of small/big and inteference/notinterference. also correlate the two
-find common features of topology
-discuss sampling bias for empirical webs
+After completing Learning World, players unlock the right to compete against each other on three extra levels, as detailed in Section~\ref{sec:research_world}.
+The analysis of these levels will be more qualitative than in Learning World, but nevertheless, all three sets of results reveal interesting patterns of how players approached solving the challenges, and of which strategies were good enough to be the very best.
 
+Each level gets its own page of plots, where levels 1, 2, and 3 can be found in Figures~\ref{fig:101}, \ref{fig:102}, and \ref{fig:103} respectively.
 \begin{figure}
   \centering
   \includegraphics[height=.85\textheight, right]{joy/101.pdf}
-  \caption[Results from Research World level 1]{Caption}
+  \caption[Results from Research World level 1]{An analysis of strategies used for level 1 of Research world. On the left are layouts of the top 3 leaderboard scores, with a colour map to show the colours of trait combinations for plants and animals.
+  To the top-right is an analysis of these three scores with various histograms. Counter-clockwise from the top-left: the number of plants with each possible combination of traits, the same but for animals, the masses and trophic level of each species, the same for intraspecific interference, trophic levels of all species, incoherence (Equation~\eqref{eq:coherence}), and connectance. On the bottom-right are the same plots, but for the top 50 scores.}
   \label{fig:101}
 \end{figure}
 \begin{figure}
   \centering
   \includegraphics[height=.85\textheight, right]{joy/102.pdf}
-  \caption[Results from Research World level 2]{Caption}
+  \caption[Results from Research World level 2]{An analysis of strategies used for level 2 of Research World, with the same conventions as Figure~\ref{fig:101}.}
   \label{fig:102}
 \end{figure}
 \begin{figure}
   \centering
   \includegraphics[height=.85\textheight, right]{joy/103.pdf}
-  \caption[Results from Research World level 3]{Caption}
+  \caption[Results from Research World level 3]{An analysis of strategies used for level 3 of Research World, with the same conventions as Figure~\ref{fig:101}.}
   \label{fig:103}
 \end{figure}
+The food webs of the top three players are drawn on the left of each plots, along with their names. On the right of each plot are histograms plotting some features of these top three webs in the top half, and the same features on the top 50 scores on the bottom. The top half therefore shows the best of the best strategies, and the bottom shows the general patterns of all good strategies to place relatively highly on the leaderboards.
+
+The three levels will be examined in succession, starting with level 1, where a very clear correlation of trophic to body mass is shown in the top 3 scores. This pattern is weaker but still present for the top 50 webs.
+Connectance for level 1 is very high because the score metric (Equation~\eqref{eq:score}) demands it, and webs are in general incoherent. From this, it can be posited that a strong correlation between trophic level and body mass is necessary for webs with high connectance to be feasible.
+% Another feature that is not immediate obvious is that the webs here must contain loops. This is because a high connectance implies that almost every species is eating every other species, and so the only way for trophic levels to get even close to three (and even four in some species here) is that loops are pushing up the trophic levels somewhere in the summation.
+% Could possibly be a clue for omnivory.
+
+Level 2 removes the need for high connectance, and it is clear that players took advantage of this, as the median connectance shot all the way down to below 0.2 for the best webs, and even lower over the top 50. This is strong evidence that high connectance webs are more difficult to build, which is in line with most predictions \cite{May1973,Allesina2012}.
+In fact this is such a strong effect that, as shown by the completely flat histogram of animal traits, that the best players were able to make all 45 possible animals coexist. This is not only impressive, but also shows that building large and diverse ecosystems that are feasible is possible, given the right configurations.
+As a caveat, the drop in connectance may also be a side-effect of high-connectance webs producing more cluttered visualisations, such that players may actively try to avoid them.
+It is also of note that the the best webs in level 2 are very incoherent. This is a signal that there is a lot of omnivory in diverse ecosystems, which may suggest that omnivory plays a part in supporting large ecosystems.
+% The same pattern of high trophic levels being correlated with high body masses exists here, as with level 1, although it is not as pronounced, which may mean that l.
+
+Finally, the webs produced in level 3 are perhaps the least realistic, but are still insightful nonetheless. The best webs here show that for long chain lengths to exist, then coherence is likely to be necessary. The plot of mass and trophic levels shows the same pattern of heavier species at high trophic levels as before, but with more lighter species overall in the web than heavy. This is likely because lighter species are required to sustain high levels of biomass flow up to the next trophic level, and so more are needed to be a powerful `base' for the webs.
+There is also a clear pattern in the trait combination plots, where most species, including animals, are concentrated around low mass and low interference. This is very different from the high connectance webs in level 1, where heavy species were preferred, and high interference is used as often as low. This is again likely because of the need for a large amount of biomass flowing up the lower levels.
+% Therefore, another way of looking at level 3 is to see it as a level that forces maximal flux
+% These results may also shed light upon the omnivory vs.\ coherence debate.
+
+It is also clear from all levels that low mass and low interference is optimal for plants. This is relatively obvious, as it is the combination that results in the highest plant abundance. There is therefore no evidence that players ran into the `paradox of enrichment', that states that sometimes higher abundance of prey can destabilise webs \cite{Rosenzweig1971}.
 
 The food webs built in Research World can also be used to examine the choice of range of interference strengths (diagonals in Equation~\eqref{eq:interaction_matrix}), which was 10$^{\text{--}4}$ to 10$^{\text{--}1}$. Looking at all off-diagonal values in all interaction matrices in the 3 Research levels shows that 95\% of the values lie in between the range 5$\times$10$^{\text{--}6}$ to 7$\times$10$^{\text{--}2}$. 
 This range is in roughly line with the results of Ho \cite{Ho2020}, where it is shown that maximum feasibility in food webs occurs when the diagonals are around ten times larger than the off-diagonals.
@@ -596,17 +627,35 @@ This range is in roughly line with the results of Ho \cite{Ho2020}, where it is 
 
 \subsection{Discussion}
 \label{sec:eco_discussion}
-yes, data is messy as it is public
 
-  mention old idea for chess-board and why it didn't work
-     chess board not used anymore
-        We will use this result by restricting the player to an interface based on a two-dimensional niche space, presented as a board game not unlike chess, where pieces represent species and boxes will be drawn to decide what the species eats.
+The work in this chapter has presented EcoBuilder: a video game for crowdsourcing mathematical ecology. It was publicly promoted from the 31st of July 2020, and the results here were taken from data collected up until the 16th of August, making up a span of one and a half months. Demographics for players of the game can be seen in Figure~\ref{fig:demo}.
 
-        Why real food webs exhibit this low-dimensional structure is still up for debate, as it is unclear whether it is due to mechanistic environmental constraints (bottom-up control) or an emergent property of system stability (top-down control).
-        Either way for us it does not matter, because in the first case it means our restrictions are more realistic, and in the second case we are just helping the user towards stable configurations.
-        Our goal is to model the real world as close as possible, and that is what we are doing by restricting the structure; that it also keeps our interface for designing such structures scalable is a fortunate side-effect.
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth, right]{joy/demo.pdf}
+  \caption[Player demographics]{Player demographics for EcoBuilder. Most players were ages in in the 20s to 30s, but with a good mix of other age groups too. Gender was also slightly more biased towards males, with no players picking a third `other' option.}
+  \label{fig:demo}
+\end{figure}
 
-vertical screens get very crowded
-A sequel should be on desktop, with niche chess board as interface
+There were two research outcomes planed from the game. The first was a quantitative comparison of two different visualisations, where one is a standard layout and another has y-axis positions constrained.  The results of this are outlined in Section~\ref{sec:hypothesis1}, where it was shown that constraining the y-axis does make a small, but significant difference to many of the tasks performed in the game.
+An older version of the game also planned to make use of the 3D capabilities of the Unity game engine, by placing species in three dimensions and having players rotate the resulting node-link diagram. However, early playtests revealed that players could not digest this interface easily, and so the game was converted back to 2D.
 
-All code is open source and publicly available at \url{www.github.com/jxz12/EcoBuilder}.
+The second outcome was to have players tackle ecological puzzles where the solutions are far from clear, in an attempt to crowdsource the intelligence of humans for pattern recognition. It was hoped that a healthy dose of competition would motivate players to find structural patterns to build healthy ecosystems, and the results here show that this faith was well placed. Players exceeded expectations, especially on level two where many were able to make all possible species coexist.
+The qualitative analysis presented in Section~\ref{sec:hypothesis2}, even as an exploratory and early stage study, revealed a number of patterns in player strategies, and a more precise dive into specific topologies of the top scores is sure to show even more.
+It is clear that the general public are a powerful resource, and that they are more than happy to contribute when presented with a challenging but accessible opportunity to do so.
+% With the growing democratisation of technology, it is an avenue that is more available than ever.
+
+%   mention old idea for chess-board and why it didn't work
+%      chess board not used anymore
+%         We will use this result by restricting the player to an interface based on a two-dimensional niche space, presented as a board game not unlike chess, where pieces represent species and boxes will be drawn to decide what the species eats.
+
+%         Why real food webs exhibit this low-dimensional structure is still up for debate, as it is unclear whether it is due to mechanistic environmental constraints (bottom-up control) or an emergent property of system stability (top-down control).
+%         Either way for us it does not matter, because in the first case it means our restrictions are more realistic, and in the second case we are just helping the user towards stable configurations.
+%         Our goal is to model the real world as close as possible, and that is what we are doing by restricting the structure; that it also keeps our interface for designing such structures scalable is a fortunate side-effect.
+
+An important observation for future projects that involve interactive networks is that, on the small vertical screens of mobile devices, layouts can get very crowded with even a couple of dozen nodes.
+Any sequel that would attempt to consider even larger ecosystems, i.e.\ in the order of hundreds of species, would be more suited to a desktop setting, and would likely require a more specialised visualisation than a standard force-directed layout.
+Restricting the player to two-dimensional topologies, as defined in Section~\ref{sec:topology}, could offer a neat solution to the problem, as each species would only require a position, along with two coordinates to specify its feeding range, to fully describe its incoming links.
+Edge bundling techniques like those studied in Chapter~\ref{chap:power} were also deemed as too complex for the context of a mobile game, but a desktop version could open that door as well.
+
+All source code and assets used to produce the game are open source and publicly available at \url{www.github.com/jxz12/EcoBuilder}.
