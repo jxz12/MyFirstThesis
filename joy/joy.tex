@@ -19,9 +19,9 @@ The unique selling point of EcoBuilder is that its ecosystem simulation is based
 \label{sec:predator_prey}
 Ever since Isaac Newton formulated his physical laws of motion, it has become clear that nature speaks in the language of differential equations. From simple mechanical systems such as the oscillating swing of a pendulum \cite{Fulcher1976}, to the cosmic dance of celestial bodies in space \cite{Marchal2012}, and even the electrical action potentials across every neuron in the brain that is deciding which words should go into this sentence \cite{Hodgkin1952}, calculus has time and again been an invaluable tool for describing the natural world. 
 
-The behaviour of species ecosystems is no different, where the most widely used models are function by defining the change in abundance (measured by biomass per unit area) over time.
+The behaviour of ecosystems is no different, where the most widely used models function by defining the change in abundance (measured by biomass per unit area) over time.
 There are many such examples of this, ranging from the simple and linear systems to be studied here, to highly complex data-driven models such as \emph{EcoPath with EcoSim}, which has been used for decades to inform environmental policy for aquatic conservation \cite{Christensen2004}.
-Other models include ones that consider the effects of temperature on metabolic rate \cite{Savage2004, Dell2014}, spatio-temporal dynamics such as turbulance in water \cite{Watteaux2015}, or evolution to produce the correct dynamics as an emergent property \cite{Laird2008}
+Other models include ones that consider the effects of temperature on metabolic rate \cite{Savage2004, Dell2014}, spatio-temporal dynamics such as turbulance in water \cite{Watteaux2015}, or evolution to produce the correct dynamics as an emergent property \cite{Laird2008}. Arguments have also been made for second-order differential equations to describe such dynamics \cite{Colyvan2003}.
 
 But perhaps the oldest and most commonly studied of these models is known as the Lotka-Volterra equations, defined as
 \begin{equation}
@@ -36,18 +36,18 @@ This can be written to include all species simultaneously as
 \end{equation}
 The matrix $\mathbf{A}$ is known as the \emph{interaction matrix}, and is called that because it contains all the information on how each pair of species interact with each other.
 There are five classifications of interaction possible in such a model, designated by the nature of the values in the corresponding pair of values in this matrix. For example, if $\mathbf{A}_{ij}>0$ and $\mathbf{A}_{ji}<0$, then it is a standard example of species $i$ preying on species $j$, where the `sign' of the interaction is $(+,-)$. The remaining types are mutualism $(+,+)$, competition $(-,-)$, commensalism $(+,0)$, and amensalism $(-,0)$.
-Different models include differing amounts of each type of interaction, and the proportion of types can strongly influence the behaviour of the system \cite{Tang2014Correlation}. However the predator--prey type is the most commonly studied and most prevalent in nature, and so will be the only one considered here.
+Different models include differing amounts of each type of interaction, and the proportion of types can strongly influence the behaviour of the system \cite{May1973, Allesina2012, Tang2014Correlation}. However the predator--prey type is the most commonly studied and most prevalent in nature, and so will be the only one considered here.
 
-The purpose of the above equations is to use them to find values of $\mathbf{z}$, and the standard way of doing this for differential equations is to simulate by performing numerical integration at each time step, using methods such as Runge-Kutta \cite{Press2007Runge}.\footnote{This was used in older versions of the game, but brings with it numerical problems such as stiff equations leading to instability \cite{Press2007Runge}, or having to choose a suitable integration time step. It also adds the issue of having to choose an arbitrary abundance threshold for species to go extinct.}
+The purpose of the above equations is to use them to find values of $\mathbf{z}$, and a standard way of doing this for differential equations is to simulate by performing numerical integration at each time step, using methods such as Runge-Kutta \cite{Press2007Runge}.\footnote{This was used in older versions of the game, but brings with it numerical problems such as stiff equations leading to instability \cite{Press2007Runge}, or having to choose a suitable integration time step. It also adds the issue of having to choose an arbitrary abundance threshold for species to go extinct.}
 However the simplicity of the model chosen allows something different: it can be analytically solved for an \emph{equilibrium} point. This is the solution at which the interactions fully balance each other such that the instantaneous change in abundance is zero. Note the similarity of this method to the graph layout algorithm of Tutte shown in Section~\ref{sec:nodes_background}, Equation~\eqref{eq:tutte}.
-This is done by setting the left-hand side of Equation~\eqref{eq:interaction_matrix} to zero, where it is clear that the system contains many trivial solutions with any species $\mathbf{z}_i=0$, which corresponds to the natural case of an extinct species staying extinct.
-Since the solution at which every species has non-zero abundance is one of interest, the $\mathbf{z}^T$ outside bracket is simply cancelled out to reach the solution !!!!!!!!!!!!!!!!
+This is done by setting the left-hand side of Equation~\eqref{eq:interaction_matrix} to zero, where it is clear that the system contains many trivial solutions with any species $\mathbf{z}_i=0$, which corresponds to the natural case of an extinct species staying extinct. This also means that there are an exponential number of solutions, with each species at a zero or non-zero abundance.
+However, the strictly non-zero solution is the one of interest, which occurs at
 \begin{equation}
   \mathbf{z^*} = -\mathbf{A}^{-1}\mathbf{r}.
   \label{eq:equilibrium}
 \end{equation}
-where $\mathbf{z}^*$ is the strictly non-zero abundances of every species at equilibrium.
-This is equivalent to a linear system of equations and so can be solved exactly by numerical methods.
+where $\mathbf{z}^*$ contains the abundances of every species at equilibrium.
+This is equivalent to solving a linear system of equations and so can be solved exactly by numerical methods.
 If the solution $\mathbf{z^*}$ contains any negative numbers the system of equations is said to not be \emph{feasible} i.e.\ it is not possible for all species to coexist.
 
 \subsubsection{Local asymptotic stability}
@@ -90,14 +90,14 @@ The system can then be declared locally stable if the largest real part of any e
 \end{equation}
 % In fact the further away from zero $\Lambda$ is, the quicker the system returns to the equilibrium point $\mathbf{x}^*$ after a perturbation, and therefore the more resilient the ecosystem is.
 An intuitive physical interpretation of this type of stability can be seen by imagining the two ways of holding a chopstick vertically when gripping only a single end. If the chopstick is pointing upwards, even the slightest nudge will make it fall over due to gravity. If it is dangling downwards, gravity will reset its position after a nudge, and it can be called stable.
-In the context of ecosystems, the chopstick is a species, and the nudge is an environmental perturbation such as a natural disaster or invading species.
+In the context of ecosystems, the chopstick is a species, and the nudge is an environmental perturbation such as the loss of individuals of one or more species' populations due to as natural disaster, or the addition of individuals to one or more species' populations due to immigraton.
 
-The behaviour of the community matrix $\mathbb{J}|_\mathbf{z^*}$ is what is usually studied in mathematical ecology, due to the fact that it can be reverse-engineered to apply to almost any system of differential equations. It therefore sidesteps the problem of choosing which model to use, by jumping straight to this matrix.
+The behaviour of the community matrix $\mathbb{J}|_\mathbf{z^*}$ is what is commonly studied in mathematical ecology, due to the fact that it can be reverse-engineered to apply to almost any system of differential equations. It therefore sidesteps the problem of choosing which model to use, by jumping straight to this matrix.
 It is also the source of the long standing `complexity vs.\ stability' debate in the world of ecology, because it can be shown that as the number of species, i.e.\ size of $\mathbf{A}$, grows, the chance of Equation~\eqref{eq:lambda_stability} being satisfied tends to zero, even for small ecosystems of only a few dozen species \cite{May1973}.
 The reason for the debate is that systems exist in the real world with many more species than the math suggests is possible, and many subsequent works have studied what features of ecosystems allow such a contradiction to occur.
 For example, Tang et al.\ \cite{Tang2014Correlation} show that the correlation between pairs of elements in $\mathbf{A}$ can improve stability, Brose et al.\ \cite{Brose2006} study the consequences of body mass, and Johnson et al.\ \cite{Johnson2014} study the layered nature of groups of species.
 
-However a common criticism is that this method assumes the existence of a feasible equilibrium in the first place, and this is far from guaranteed. It has also been showed that in simple systems like the Lotka-Volterra equations studied here, that feasibility almost always leads to stability anyway \cite{Dougoud2018}. For this reason, the work done here will focus solely on feasibility, where nevertheless any results found can also apply to stability.
+However a common criticism is that this method assumes the existence of a feasible equilibrium in the first place, and this is far from guaranteed. It has also been shown that in simple systems like the Lotka-Volterra equations studied here, that feasibility almost always leads to stability anyway \cite{Dougoud2018}. For this reason, the work done here will focus solely on feasibility.
 
 % We plan on using \eqref{eq:lambda_stability} directly within the game as one of the possible metrics for a high-score.
 % Other possible metrics include the total energy flow (flux) of the system, the trophic height (largest trophic level), or the reactivity of the fixed point~\cite{Tang2014Reactivity}.
@@ -106,20 +106,27 @@ However a common criticism is that this method assumes the existence of a feasib
 % As we shall see, this also solves our issue of having to choose a suitable extinction threshold, as well as having to integrate differential equations for a long time after the game ends to make sure that species slowly on their way to extinction do not count towards the player score.
 
 
-\subsubsection{Metabolic scaling}
+\subsection{Metabolic scaling}
+\label{sec:metabolism}
 The steps so far have discussed how to find abundances given the interaction matrix $\mathbf{A}$, but it has not yet been discussed how to find the numerical values to go into the matrix in the first place, i.e.\ its parameterisation.
-To fill this gap, a methodology known as \emph{metabolic scaling} will be used. It leverages the idea that each species has a metabolism rate that can be measured, i.e.\ the speed at which an organism converts a food source into either energy for movement or materials for growth. For plants this involves mainly converting nutrients and sunlight into biomass, and for animals this involves mainly converting biomass into movement to hunt prey.
+To fill this gap, a set of constraints known as \emph{metabolic scaling} will be used.
+It leverages the idea that each species has a metabolism rate that can be measured, i.e.\ the speed at which an organism converts a food source into either energy for movement or materials for growth.
+% For plants this involves mainly converting nutrients and sunlight into biomass, and for animals this involves mainly converting biomass into movement to hunt prey.
 
 \begin{figure}
     \centering
     \includegraphics[width=.8\textwidth]{joy/metabolism.pdf}
-    \caption[A plot of metabolism against individual body mass]{A plot of metabolism against individual body mass for a selection of animals. The slow-moving sloth is a good example showing that the model is imperfect, but still a very good estimate when considering the complexity of life. Data taken from \cite{Nagy1999}, power law slope and intercept from \cite[Fig.~2]{Brown2004}. Images credit: all photos taken from \url{www.pixabay.com} under the Pixabay License.}
+    \caption[A plot of metabolism against individual body mass]{A plot of metabolism against individual body mass for a selection of animals. The slow-moving sloth is a good example showing that the model is imperfect, but still a very good estimate when considering the complexity of life. Data taken from \cite{Nagy1999}, power law slope and intercept from \cite[Fig.~2]{Brown2004}. All photos taken from \url{www.pixabay.com} under the Pixabay License.}
     \label{fig:metabolism}
 \end{figure}
 
-Metabolism is useful for two main reasons. The first is that, as it essentially measures the energy output of a species, it is strongly correlated with other traits such as movement speed \cite{Hirt2017} and therefore has been successfully used for parameterisation of $\mathbf{A}$ \cite{Savage2004, Vucic-Pestic2010, Pawar2015}. The second is that metabolism can be closely estimated through an inverse relationship to individual body mass, a connection that has been empirically measured and verified \cite{Brown2004}. The study of the relationships between mass and other biological traits is known as \emph{allometry}. Some examples of species and their metabolisms can be seen in Figure~\ref{fig:metabolism}.
+Metabolism is useful for two main reasons. The first is that, as it essentially measures the energy output of a species, it is strongly correlated with other traits such as movement speed \cite{Hirt2017} and therefore has been successfully used for parameterisation of $\mathbf{A}$ \cite{Tang2014Correlation, Brose2006, Pawar2015}.
+The second is that whole organism metabolic rate in multi-cellular eukaryotes scales positively with body mass.
+% The second is that metabolism can be closely estimated through a relationship to individual body mass and temperature, a connection that has been empirically measured and verified \cite{Brown2004}.
+The study of the relationships between mass and other biological traits is known as \emph{allometry}. Some examples of species and their metabolisms can be seen in Figure~\ref{fig:metabolism}.
+Note that scaling is isometric to superlinear in unicellular eukaryotes and prokaryotes \cite{DeLong2010}, and that body temperature is also closely related to individual metabolism \cite{Savage2004}. These cases will however be left out of scope for the work done here and left as a possible future direction.
 
-Specifically, the allometric functions used for the reproduction rates $\mathbf{r}$ in Equation~\eqref{eq:lotka_volterra} are
+Specifically, the allometric functions used for the species-wide reproduction rates $\mathbf{r}$ in Equation~\eqref{eq:lotka_volterra} are
 \begin{equation}
   \mathbf{r}_i =
   \begin{cases}
@@ -128,10 +135,11 @@ Specifically, the allometric functions used for the reproduction rates $\mathbf{
   \end{cases}
   \label{eq:metabolism_beta}
 \end{equation}
-where $b_0$ and $d_0$ are constants to normalise birth and death rates, and $\mathbf{m}_i$ is the body mass of species $i$ in kilograms. The exponent $\beta$ is a empirically verified relationship between metabolism and individual body mass \cite{Brown2004}, and it is taken minus one in order to convert it into mass-specific units.
-Remarkably, the same exponent of $\beta=\sfrac{3}{4}$ can be applied to species of all sizes, from the smallest bacteria to the largest blue whale \cite{Kleiber1947}. It is theorised to take a value of $\sfrac{3}{4}$ --- rather than the $\sfrac{2}{3}$ that one would expect from a spherical surface area to volume ratio --- due to the fractal spreading pattern of tubes (such as veins) \cite{West1997}, although not without controversy \cite{Agutter2004}.
+where $b_0$ and $d_0$ are constants to normalise birth and death rates, and $\mathbf{m}_i$ is the body mass of species $i$ in kilograms. The exponent $\beta$ is an empirically verified relationship between metabolism and individual body mass \cite{Brown2004}, and it is taken minus one in order to convert it into mass-specific units.
+Remarkably, the same exponent of $\beta=\sfrac{3}{4}$ can be applied to species at almost all sizes, from the smallest bacteria to the largest blue whale \cite{Kleiber1947}. It is theorised to take a value of $\sfrac{3}{4}$ --- rather than the $\sfrac{2}{3}$ that one would expect from a spherical surface area to volume ratio --- due to the fractal spreading pattern of tubes (such as veins) \cite{West1997}, although not without controversy \cite{Agutter2004}.
+Note that since $\beta=\sfrac{3}{4}$, the exponent as a whole is negative, implying negative scaling of body mass to metabolic rate at the mass-specific level.
 
-The interaction strengths of predator--prey interactions are defined as
+The strengths of predator--prey interactions are defined as
 \begin{equation}
   \mathbf{A}_{ij} =
   \begin{cases}
@@ -140,8 +148,8 @@ The interaction strengths of predator--prey interactions are defined as
   \end{cases}
   \label{eq:interaction_strength}
 \end{equation}
-where $a_0$ is a normalising constant, $e_0$ measures biomass conversion efficiency, and $\mathcal{F}(i,j)$ is a function describing the rate at which an individual predator comes into contact with its prey. The $\mathbf{m}^{\text{--}1}$ factor at the end is to account for individuality and convert it into mass-specific units, just as the minus one in the exponent of Equation~\eqref{eq:metabolism_beta}.
-The function $\mathcal{F}(i,j)$ can be expressed in many ways, and is more difficult to measure than individual metabolism as it involves the interaction between two species. To overcome this, Pawar et al.\ \cite{Pawar2012} constructed an allometric model that simulates species as randomly moving individuals, such that they can be treated as particles colliding under a Brownian motion approximation \cite{Ocubo1980}. Traits such as movement speed and eye strength all also have allometric relationships, and so were carefully combined (and validated against empirical data) to construct a mechanistic model of species interaction.
+where $a_0$ is a normalising constant, $e_0$ measures biomass conversion efficiency, and $\mathcal{F}(i,j)$ is a function that captures the scaling of interaction rate in terms of consumer mass as well as consumer--resource body mass ratio. The $\mathbf{m}^{\text{--}1}$ factor at the end is to convert it into mass-specific units, just as the minus one in the exponent of Equation~\eqref{eq:metabolism_beta}.
+The function $\mathcal{F}(i,j)$ can be expressed in many ways, and is more difficult to measure than individual metabolism as it involves the interaction between two species. To overcome this, Pawar et al.\ \cite{Pawar2012} constructed a mathematical model that simulates species as randomly moving individuals, such that they can be treated as particles colliding under a Brownian motion approximation \cite{Ocubo1980}. Traits such as movement speed and mutual detection distance between consumer and resource have allometric relationships, and so were carefully combined (and validated against empirical data) to construct a mechanistic model of species interaction rate.
 The final resulting formulations for $\mathcal{F}(i,j)$ are
 \begin{equation}
   \mathcal{F}(i,j) =
@@ -180,37 +188,37 @@ The numerical values of the constants used for this model can be seen in Table~\
   \label{tab:lotka_volterra_constants}
 \end{table}
 
-This is still a linear function, as $\mathcal{F}(i,j)$ and therefore $\mathbf{A}_{ij}$ reduce to constants used as factors in Equation~\eqref{eq:lotka_volterra}. Linearity has been criticised in the past for being too simplistic, and more complex models such as Type II or III functional responses \cite{Holling1973} have introduced non-linear functions into $\mathbf{A}$ in order to capture the effects of handling time and predator satiation, respectively.
+The values of $\mathcal{F}(i,j)$ and therefore $\mathbf{A}_{ij}$ reduce to constants, and so the functional behaviour of these interactions is still linear. Linearity has been criticised in the past for being too simplistic, and more complex models such as Type II or III functional responses \cite{Holling1973} have introduced non-linear functions into $\mathbf{A}$ in order to capture the effects of handling time and predator satiation, respectively.
 % Despite their increased realism and accuracy, it was decided to only consider a linear functional response here.
 % However it is possible to endlessly parameterise any model of the natural world, and even though more complex models do lead to more accurate results
 However, due to the added complexity to the model and the fact that the equilibrium calculation in Equation~\eqref{eq:equilibrium} would become much more difficult due to a non-linearity, it was decided that only a linear functional response will be considered here.
 
-The equations outlined above only require a two parameters per species in order to parameterise almost all of Equation~\eqref{eq:lotka_volterra}: if the species is a producer, and its body mass. These are two intuitive and biologically meaningful traits for a player to consider.
-The final set of values that require parameterisation is the diagonal values of $\mathbf{A}$, which will be discussed in the following section.
+The equations outlined above only require two parameters per species in order to parameterise almost all of Equation~\eqref{eq:lotka_volterra}: the choice of whether the species is a producer, and the choice of its body mass. These are two intuitive and biologically meaningful traits for a player to consider.
+The values that require parameterisation are the diagonal values of $\mathbf{A}$, which will be discussed in the following section.
 
 \subsubsection{Intraspecific interference}
 It is well known that no species can grow exponentially forever, as there is always some point at which the abundance of any species reaches its carrying capacity. 
 % This is because exponential growth is almost always logistic growth in disguise
 This applies to almost every example of exponential growth in the real world, from the growth of a business on the stock market, to the spread of a deadly virus.
 
-This is captured by the diagonal elements of the interaction matrix $\mathbf{A}_{ii}$. This can be interpreted as the amount that species interacts with itself, or in other words the \emph{intraspecific interference}. It is always a negative value, because otherwise the abundance of a species would grow even faster than exponentially, and can be interpreted as competition between individuals over space.
+This is captured by the diagonal elements of the interaction matrix $\mathbf{A}_{ii}$. This can be interpreted as the amount that species inhibits itself, or in other words the \emph{intraspecific interference}. It is always a negative value, because otherwise the abundance of a species would grow even faster than exponentially, and can be interpreted as competition between individuals over space.
 
 This value has a strong effect on the dynamics of the model. In fact, it can be shown that any ecosystem can be made stable by simply increasing the magnitude of the diagonal values of the community matrix in Equation~\eqref{eq:jacobian_evaluated}. 
-Barab\'as et al.\ \cite{Barabas2017} further showed the importance of these values, as they proved that it only takes one weak interference value to spoil the stability of an entire ecosystem.
+Barab\'as et al.\ \cite{Barabas2017} further showed the importance of these values, as they proved that it only takes one weak interference value to qualitatively affect the stability of an ecosystem.
 
-Unfortunately, there is no easy way to measure this value in real world ecosystems, as quantifying the amount a species competes with itself is difficult. Previous works have overcome this problem by assuming every species can coexist at an abundance following Damuth's law, which states that the species with larger body masses tend to have smaller populations (in terms of individuals). The values for $\mathbf{A}_{ii}$ are then calculated for these abundances (such that eigenvalues are pushed left and Equation~\eqref{eq:lambda_stability} is satisfied), and used as a proxy for the health of an ecosystem \cite{Tang2014Correlation, Pawar2015}. However this is the opposite order of causation, as the behaviour of $\mathbf{A}$ should be the mechanism underlying Damuth's law in the first place.
+Unfortunately, there is no easy way to measure this value in real world ecosystems, as quantifying the amount a species competes with itself is difficult. Previous works have overcome this problem by assuming every species can coexist at an abundance following Damuth's law, which states that the species with larger body masses tend to have smaller populations (in terms of number of individuals). The minimal constant value for all $\mathbf{A}_{ii}$ is then calculated for these abundances (such that eigenvalues are pushed to the left and Equation~\eqref{eq:lambda_stability} is satisfied), and used as a proxy for the health of an ecosystem \cite{Tang2014Correlation, Pawar2015}. However this is the opposite order of causation, as the behaviour of $\mathbf{A}$ should be the mechanism underlying Damuth's law in the first place.
 
-Without a good way of deriving these diagonal values through a biological trait, the work here will simply leave them as another input parameter. This interference of each species, alongside the body mass to parameterise the off-diagonals as in the previous section, will therefore be free parameters for the work done here. 
+Without a good way of deriving these diagonal values mechanistically, the work here will simply leave them as another input parameter chosen by the player. This interference of each species, alongside the body mass to parameterise the off-diagonals as in the previous section, will therefore be the two degrees of freedom that determine the behaviour of each species. 
 
 % values following Hsi-Cheng were chosen for a\_ii
 % chicken and egg problem: either pick abundances with damuth's law measure a\_ii, or pick a\_ii and then find feasibility. WTF
 
 \subsection{Food web topology}
 \label{sec:topology}
-The final missing piece from the model needed to fully simulate an ecosystem is simple: deciding which species should interact with each other at all.
-This study of this topology of food webs has seen many models being developed to capture the non-randomness that exists in their structure.
+The final missing piece from the model needed to fully simulate an ecosystem to decide which species should interact with each other in the first place.
+The study of the topology of food webs has seen many models being developed to capture the non-randomness that exists in their structure.
 
-One of the main features that such models attempt to capture is the idea that big things generally eat small things. An early version of this is the cascade model by Cohen \cite{Cohen2012}, which gives begins by placing every species along an axis, and then only allows species to prey on other species that are lower than them on this axis. The placement on this axis can, but is not necessarily, interpreted as body mass.
+One of the main features that such models attempt to incorporate is the observation that big things generally eat things smaller than themselves. An early version of this is the cascade model by Cohen \cite{Cohen2012}, which begins by placing every species along an axis, and then only allows species to prey on other species that are lower than them on this axis. The placement on this axis can, but is not necessarily, interpreted as body mass.
 A notable improvement to this is the Niche model of Williams and Martinez \cite{Williams2000}, who leveraged the fact that big things eat small things, but not too small. They therefore constrain species to only prey on other species within a certain range on the axis, as shown in Figure~\ref{fig:niche}, top.
 Other attempts include the nested hierarchy model \cite{Cattin2004} which captures the clustered nature of food webs, the coherence model \cite{Johnson2014} which captures the layered nature of groups of predators, or the speciation \cite{Rossberg2006} and diet breadth \cite{Petchey2008} models, which simulate evolutionary and foraging processes, respectively, to produce structure as an emergent property. 
 
@@ -220,7 +228,8 @@ However, none of these models can capture the topology of food webs fully satisf
 One thing that all the aforementioned models share is \emph{low dimensionality}. This essentially means that there exists a structural pattern that can be largely explained using rules and models without too many parameters.
 % The models described have been shown to recreate ecosystem features well, but is there a way to quantify whether real food webs can even be described with models without too many parameters?
 % The second critical flaw of the game was the fact that the user had no control over the structure of the food webs they were creating.
-It is important that the dimensionality of topologies players are tasked with recreating is low, because humans struggle with understanding high-dimensional information. After all, the algorithms studied in previous chapters all aimed at reducing the dimensionality of graphs down to two dimensions. To gain an idea of just how complicated structures can become, the number of possible edges in a directed graph is $n(n-1)$, which means that there are $2^{n(n-1)}$ possible configurations for the user to try, assuming edges can go in both directions. Even if edges can only in one direction then there are $3^{n(n-1)/2}$, which is still worse than exponential. To illustrate how fast this grows, with just six species this already corresponds to over ten million possible topologies.
+It is important that the dimensionality of topologies players are tasked with recreating is low, because humans struggle with understanding high-dimensional information. After all, the algorithms studied in previous chapters all aimed at reducing the dimensionality of graphs down to two dimensions. To gain an idea of just how complicated structures can become, the number of possible edges in a general directed graph is $n(n-1)$, which means that there are $2^{n(n-1)}$ possible configurations for the user to try, assuming edges can go in both directions. Even if edges can only in one direction then there are $3^{n(n-1)/2}$, which is still worse than exponential. To illustrate how fast this grows, with just six species this already corresponds to over ten million possible topologies. With twenty species, this is more than the estimated number of atoms in the universe \cite{Guth2003}.
+Note that these calculations are for completely general graphs, and that there are extra constraints in food webs such as plants not being predators; the idea of how complex these topologies nevertheless still holds.
 
 \begin{figure}
   \centering
@@ -231,11 +240,13 @@ It is important that the dimensionality of topologies players are tasked with re
 \end{figure}
 
 It may then seem impossible for the player to effectively explore this search space, but low-dimensional topologies should mean that simple strategies and patterns can be used to successfully construct them.
-Fortunately, a study by Eklof et al.\ \cite{Eklof2013} collected a massive amount of data to directly ask the question: what dimensionality do empirical food webs exhibit? Dimensionality in this case is defined as the number of \emph{niche axes} required to capture the topology of a food web, which follows the same definition as the aforementioned niche model. An example of this is shown in Figure~\ref{fig:niche}.
+Fortunately, a study by Eklof et al.\ \cite{Eklof2013} collected a large amount of data to directly ask the question: what dimensionality do empirical food webs exhibit? Dimensionality in this case is defined as the number of \emph{niche axes} required to capture the topology of a food web, which follows the same definition as the aforementioned niche model. An example of this is shown in Figure~\ref{fig:niche}.
 
 The question was answered by searching for the minimum number of niche axes required to describe the topologies present in the data, by applying an algorithm that searches the space by swapping certain species one by one, and then estimating the `best' dimension using the Akaike information criterion \cite{Eklof2013}. This is necessary because there does not exist a polynomial time algorithm for determining the number of axis required.
 Their result was that the number of dimensions needed to describe even the largest webs is surprisingly low. For smaller webs (fewer than 250 interactions) only one dimension was needed, and only four were needed for their best prediction on webs with thousands of species (with a mean of 1.395 over all webs).
-This means that simple strategies and patterns should be able to describe any real food web topology, and therefore that humans can hope to form such strategies.
+
+This definition of dimensionality should not be confused with the widely-used interpretation of physical attributes that lie on an axis, such as body mass as described is Section~\ref{sec:metabolism}. It is a strictly mathematical definition used to describe graph topology.
+This means that dimensionality is not a direct component of of the game itself, but it does mean that relatively simple strategies and patterns should be able to describe any real food web topology, and therefore that humans can hope to form such strategies in order to play the game well.
 
 \subsubsection{Trophic levels}
 A final topological feature that will be considered is the \emph{trophic level} of each species, specifically the prey-averaged trophic level \cite{Williams2004}, defined as
@@ -266,7 +277,8 @@ The similarity of this definition to Tutte's algorithm back in Chapter~\ref{chap
 where most of the values of $\mathbf{P}_{ji}$ will be zero because the structure will be reasonably sparse.
 The matrix also has the nice property of being diagonally dominant, which means that iterative methods such as Jacobi or Gauss-Seidel are guaranteed to converge~\cite{Young2014}. This will be made use of later in Section~\ref{sec:eco_visualisation}.
 
-It is widely accepted that the trophic level of species has a useful meaning within the context of ecosystems~\cite{Post2002, Johnson2014}. This is because species with high trophic levels tend to be more biologically complex, as they are at the top of the food chain, like humans for example. Trophic level will therefore be made use of in Section~\ref{sec:eco_visualisation} within a visualisation context.
+It is widely accepted that the trophic level of species has a useful meaning within the context of ecosystems~\cite{Post2002, Johnson2014}. This is because species with high trophic levels tend to be more biologically `complex', as they are at the top of the food chain, like humans for example.
+Trophic level will therefore be made use of in Section~\ref{sec:eco_visualisation} within a visualisation context.
 
 A summary statistic based on the trophic levels of all species is known as \emph{trophic coherence}, and is a measure of how homogeneous the layers of trophic levels are. For example, a perfectly coherent topology would have all integer trophic levels. Specifically, coherence is defined as
 \begin{equation}
@@ -288,7 +300,7 @@ Even in the digital space, citizen science does not necessarily require a gamifi
 % The common thread for how. In the context of on problems that computers cannot handle.
 The projects most related to the work done here are however the gamified ones. Some of the most successful examples of this include:
 \begin{itemize}[leftmargin=*]
-  \item \emph{Foldit} \cite{Cooper2010}, a game where the player is given the ablity to fold proteins, with the objective being to find folded configurations with the lowest \emph{Rosetta} energy. This is important because real proteins fold into low energy configurations, and knowing the topology of such states is important to understanding their chemistry. The search space of topologies is too large for computers to currently handle, and so they turn to the spacial reasoning of humans (although Google have recently made attempts at solving this with machine learning \cite{Senior2020}
+  \item \emph{Foldit} \cite{Cooper2010}, a game where the player is given the ablity to fold proteins, with the objective being to find folded configurations with the lowest \emph{Rosetta} energy. This is important because real proteins fold into low energy configurations, and knowing the topology of such states is important to understanding their chemistry. The search space of topologies is too large for computers to currently handle, and so they turn to the spacial reasoning of humans (although Google have recently made attempts at solving this with machine learning \cite{Senior2020}).
   \item \emph{Eyewire} \cite{Bae2018}, where players are tasked with analysing pictures of 3D images of brains, collected using an electron microscope. The game aims to leverage the pattern recognition abilities of humans in order to map the exact locations of huge numbers of neurons.
   \item \emph{EteRNA} \cite{Lee2014}, a game conceptually very similar to Foldit, except that it is applied to RNA sequences instead. It is also presented as a 2D interface instead of 3D, which presents a slightly different type of reasoning required to solve its puzzles.
 %   \item \emph{BioBlox} 
@@ -309,7 +321,7 @@ Thankfully, the operation was a success due to the ensuing \emph{trophic cascade
 EcoBuilder aims to give ordinary people the ability to make similar decisions in their own simulated ecosystems. These simulations will be performed using the equations in Section~\ref{sec:predator_prey}, and so phenomena like the chain reactions seen in Yellowstone can be recreated, as emergent properties of the underlying dynamical system.
 
 The goal, in terms of citizen science, is to create a symbiotic relationship between players and researchers within the context of the game.
-Players will learn about how ecosystems function, and why they may fall apart given the wrong structural decisions. In return, players will be tasked with building ecosystems that offer potential solutions to the stability vs.\ complexity debate. A further visualisation experiment will also be performed, with the aim of exploring different types of node layout for food webs. These research outcomes of the game are further discussed in Section~\ref{sec:eco_hypotheses}.
+Players will learn about how ecosystems function, and why they may fall apart given the wrong structural decisions. In return, players will be tasked with building ecosystems that offer potential solutions to the stability vs.\ complexity debate. A further visualisation experiment is also embedded within the game, with the aim of exploring different types of node layout for food webs. These research outcomes of the game are further discussed in Section~\ref{sec:eco_hypotheses}.
 The following section will first study the process behind the design and development of the apparatus where this is made possible.
 
 \section{User interface}
@@ -527,19 +539,21 @@ The final addition to Research world is another tool for navigating the topology
 This extra feature was necessary because as the number of species goes up, layouts can become crowded and difficult such that it is difficult to see fine details. The extra layer of interaction helps to alleviate this.
 % Unfortunately, minimising stress is not able to prevent the problem of crowded layouts. This situation can happen easily for topologies with many edges, and leads to nodes being bunched up closely together. superfocus was our eventual solution, but we do the learning world controlled test without.
 
-\subsection{Hypotheses}
-With these details in mind, it is possible to state two hypotheses:
+\subsection{Objectives}
+With these details in mind, it is possible to state two objectives:
 \begin{mdframed}[backgroundcolor=WhiteSmoke]
   \begin{itemize}[leftmargin=*]
-    \item \textbf{Hypothesis 1:} Trophic level layout constraints will help players to complete Learning World faster.
-    \item \textbf{Hypothesis 2:} Players will be able to successfully find strategies to achieve high scores in Research World, but most will not.
+    \item \textbf{Objective 1:} To determine whether trophic level layout constraints will help players to complete Learning World faster.
+    \item \textbf{Objective 2:} To task players with finding strategies to achieve high scores in Research World, and to explore whether these strategies reflect patterns found in reality.
     \end{itemize}
 \end{mdframed}
-The reason behind the first hypothesis is because constraining species to their trophic level tends to orient edges upwards, which should help to preserve the player's mental map of the flow of biomass through the system. However this does remove a degree of freedom from the optimisation of stress, and so layouts may become more difficult to read for more dense topologies, thus hindering the player instead.
+The reasoning behind the first objective is because constraining species to their trophic level tends to orient edges upwards, as illustrated in Figure~\ref{fig:trophic}, which should help to preserve the player's mental map of the flow of biomass through the system. However this does remove a degree of freedom from the optimisation of stress, and so layouts may become more difficult to read for more dense topologies, thus hindering the player instead.
 
-The second statement is slightly vague on purpose, because it is not known what is meant by a `high' score, before letting players try it themselves.
-The reason for predicting that most will not find success is because the dynamical systems involved are complex and sometimes counterintuitive, and expecting all players to gain a good intuition for what strategies work well is unrealistic.
-The evaluation of this second hypothesis in general will therefore involve more exploratory and speculative analysis than the first.
+% The second statement is slightly vague on purpose, because it is not known what is meant by a `high' score, before letting players try it themselves.
+% The reason for predicting that most will not find success is because the dynamical systems involved are complex and sometimes counterintuitive, and expecting all players to gain a good intuition for what strategies work well is unrealistic.
+The second objective is the citizen science component of the game, where it is hoped that players will learn enough about the dynamical behaviour of ecosystems, through their experience in Learning world, to solve the extra problems where the solutions are both unknown and involve many more species.
+The strategies taken by the top players will be analysed to see if real-world features materialise as emergent properties of the constructed ecosystems.
+% The evaluation of this second hypothesis in general will therefore involve more exploratory and speculative analysis than the first.
 
 \section{Results and analysis}
 \label{sec:eco_results}
@@ -560,7 +574,7 @@ The test statistic studied here for both plots is the \emph{median}, marked by v
 To validate the significance of this result, a permutation test was performed with the null hypothesis that there is no difference in medians between the two layouts is zero.
 This was done on 100,000 permutations of the test set, and the resulting p-values are written on top of the corresponding charts in Figure~\ref{fig:player_progression}.
 
-The p-value of 0.028 for levels completed provides a clear yes to the question of which group made it further through the game. The corresponding result for number of stars achieved is not as convincing, but is still positive nonetheless.
+The p-value of 0.028 for levels completed shows a statistically significant result for which group made it further through the game. The corresponding result for number of stars achieved is not as convincing, but is still positive nonetheless.
 Looking at the shape of levels completed, there is a big cutoff at levels 8 and 9, which is a sign that those two levels where designed to be a little too difficult. However, almost all players with the perseverance to make it over that hump continued on to complete the remaining levels. This was the biggest group of players in general, coming in at just under 25\% of all players.
 
 However, this difference in progress through levels makes it incorrect to directly test hypothesis 1 by simply looking at the total play time of players, since playing more levels will increase total play time. A look at the data indeed confirms that the median play time of trophic players was longer.
@@ -576,7 +590,6 @@ Because of this, the time element will be analysed on a level-by-level basis. Th
 Not many of the resulting medians are statistically significant, if defined by p-values below 5\%. However, almost every level has a better median for trophic than standard, with many of the more difficult later levels falling below a 10\% threshold.
 % The levels that it does do very well on are levels where there more than one trophic level is required.
 Level~7 is the only level where the opposite case occurs, and the standard group performed consistently better. However it is also the level that players had the least trouble with in general, with the fastest completion time over all levels.
-These results do not mean a shining recommendation for trophic in all situations, but it does show small and consistent improvement over the tasks set for the player.
 
 A peek into research world confirms the need for care when picking a visualisation, as the standard group achieved higher median scores than trophic on the first Research Level, with a p-value of 0.096. This first level simply reuses the score metric in Equation~\eqref{eq:score} which takes connectance into account, and so food webs are naturally going to become especially crowded there. In these situations, fixing the y-axis causes nodes to bunch too closely together to differentiate. Standard layouts still become hairballs, but at least nodes are separated enough to not overlap too much.
 The remaining research world levels had little to no difference in median scores, which shows that for many tasks there is no value to be gained for adding the trophic constraint to the layout.
@@ -646,12 +659,16 @@ The work in this chapter has presented EcoBuilder: a video game for crowdsourcin
 \end{figure}
 
 There were two research outcomes planned from the game. The first was a quantitative comparison of two different visualisations, where one is a standard layout and another has y-axis positions constrained.  The results of this are outlined in Section~\ref{sec:hypothesis1}, where it was shown that constraining the y-axis does make a small, but significant difference to many of the tasks performed in the game.
+TODO:These results do not mean a shining recommendation for trophic in all situations, but it does show small and consistent improvement over the tasks set for the player.
+
 An older version of the game also planned to make use of the 3D capabilities of the Unity game engine, by placing species in three dimensions and having players rotate the resulting node-link diagram. However, early playtests revealed that players could not digest this interface easily, and so the game was converted back to 2D.
 
 The second outcome was to have players tackle ecological puzzles where the solutions are far from clear, in an attempt to crowdsource the intelligence of humans for pattern recognition. It was hoped that a healthy dose of competition would motivate players to find structural patterns to build healthy ecosystems, and the results here show that this faith was well placed. Players exceeded expectations, especially on level two where many were able to make all possible species coexist.
 The qualitative analysis presented in Section~\ref{sec:hypothesis2}, even as an exploratory and early stage study, revealed a number of patterns in player strategies, and a more precise dive into specific topologies of the top scores is sure to show even more.
 It is clear that the general public are a powerful resource, and that they are more than happy to contribute when presented with a challenging but accessible opportunity to do so.
 % With the growing democratisation of technology, it is an avenue that is more available than ever.
+
+TODO: super-exponential number of topologies is why computers suk
 
 %   mention old idea for chess-board and why it didn't work
 %      chess board not used anymore
