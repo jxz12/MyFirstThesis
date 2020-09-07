@@ -1,14 +1,14 @@
-\chapter{Edges}
-\label{chap:power}
+\chapter{Hierarchical edge bundling}
+\label{chap:heb}
 \begin{figure}
   \centering
   \includegraphics[width=\textwidth]{power/unity.png}
-  \caption[The Unity game engine, visualised using the Unity game engine]{A visualisation of the Unity game engine, rendered using the Unity game engine. 
+  \caption[The Unity game engine, visualised using the Unity game engine]{A visualisation of the Unity game engine, rendered using the Unity game engine.
   Edges are bundled using hierarchical edge bundling as described in Section~\ref{sec:heb_background}. The graph has a total of 5,025 vertices and 20,177 edges, reduced to 8,380 included in the final render to reduce clutter. The colour applied to each edge highlights the class being referenced by transitioning from light to dark, in order to emphasise the pattern of certain important nodes that many others depend on. For example, the thickest bundle in the top right comes from a folder called \texttt{Math/}, which is used in calculations all over the source code. The thick bundle coming from the top left is a folder called \texttt{IMGUI/}, which is used for debugging with developer tools.
-  Using \texttt{MAX\_EXT} blending as suggested by Holten \cite{Holten2006} allows links flowing in opposite directions to be salient, and anti-aliasing is crucial for smoothing the output.}
+  Using \texttt{MAX\_EXT} blending as suggested by Holten \cite{Holten2006} allows links flowing in opposite directions to be salient, and anti-aliasing is crucial for smoothing the output. Source code for generating this figure can be found at \url{www.github.com/jxz12/HierarchicalEdgeBundles}.}
   \label{fig:metaunity}
 \end{figure}
-The previous chapter was an exploration of how to position the vertices of a graph, and the natural question to then ask is how to deal with the only remaining component: the edges. However this question is seemingly redundant at first, as the obvious answer is to simply draw straight lines between adjacent nodes. While this by no means a poor choice, and is exactly how all node-link diagrams have been drawn thus far, this chapter will explore the possibility of drawing links using curves instead.
+The previous chapter was an exploration of how to position the vertices of a graph, and the natural question to then ask is how to deal with the only remaining component: the edges. However this question is seemingly redundant at first, as the obvious answer is to simply draw straight lines between adjacent nodes. While this is by no means a poor choice, and is exactly how all node-link diagrams have been drawn thus far, this chapter and the next will explore the possibility of drawing links using curves instead.
 
 \section{Background}
 \label{sec:edges_background}
@@ -25,7 +25,7 @@ The same premise behind force-directed node layout is also used in force-directe
 Another effective approach is \emph{kernel density estimation} by Hurter et al.\ \cite{Hurter2012}, who iteratively apply a convolutional filter over a density map of links in an already rendered diagram. This method belongs to the subfield of image-based bundling methods \cite{Lhuillier2017,Telea2018}. A diverse gallery of edge bundling algorithms applied to the same dataset can be see in the review of Lhuilier et al.\ \cite[Fig.~4]{Lhuillier2017}.
 However all of the aforementioned methods share a key similarity: they apply bundling upon the assumption that node positions are predetermined and will not be moved. This is perfectly fine and even desirable in many common use cases where nodes have a predefined location, such as geographical maps. However when there is no predefined positioning, the usual methods such as force-directed layouts were never designed to lend themselves towards bundling. A layout that can be bundled must place similar links in parallel, and this is not guaranteed or even desired for most force layouts. Maximising the angular resolution of links sharing nodes is sometimes even directly optimised as part of the cost function \cite{Argyriou2010} and so common layout methods usually do not help, if not worsen, the bundling quality of their visualisations.
 
-\subsection{Hierarchical edge bundling}
+\subsection{Hierarchical bundling}
 \label{sec:heb_background}
 Avoiding the common issue of dealing with a node layout that cannot be bundled well is why one of the most powerful bundling techniques is method known as \emph{hierarchical edge bundling}, published by Holten in 2006 \cite{Holten2006}\footnote{Its effectiveness was recognised by a \emph{Test of Time} award at the IEEE VIS conference in 2016.}, as the layout of vertices is directly connected to the structure of the bundles.
 An example of this in action can be seen in Figure \ref{fig:metaunity}, which illustrates the method applied to the source code of the Unity game engine. The graph being visualised is a call graph, where each class is a vertex, and is connected by an edge to any other class it depends on. 
@@ -42,7 +42,7 @@ This idea of using an auxiliary hierarchy to inform bundling is the basis of the
 
 \subsection{Clustering}
 \label{sec:clustering_background}
-What is needed is a way of grouping similar datapoints together. This is known as \textit{clustering}, and is a vast field of study, not least as one of the primary objectives of the fast-growing discipline of machine learning. The subfield of clustering just within the context of networks is large in its own right, due to its utility in common datasets such as protein--protein interaction or social networks.
+To generate a hierarchy, what is needed is a way of grouping similar datapoints together. This is known as \textit{clustering}, and is a vast field of study, not least as one of the primary objectives of the fast-growing discipline of machine learning. The subfield of clustering just within the context of networks is large in its own right, due to its utility in common datasets such as protein--protein interaction or social networks.
 
 There exist a wide variety of powerful and creative methods that have been developed to perform clustering on networks. A widely used method is to define an equation that can be used to numerically measure the quality of a given clustering, and to attempt to maximise this quality. This is reminiscent of the optimisation-based methods described in Section~\ref{sec:force_background}.
 A popular version of this is known as \emph{modularity}, defined as
@@ -182,7 +182,7 @@ The distance is defined as
 where $t>0$ is an input parameter that determines how many times $\mathbf{P}$ should be multiplied by itself.
 Notice that this is very close to being simply the Euclidean distance between columns in $\mathbf{P}$, except with a factor consisting of $\mathbf{D}_{kk}^{\text{--}\sfrac{1}{2}}$. This was done presumably in order to undercompensate for high-degree vertices, although they state that their distance \textit{``can also be seen as the $L^2$ distance between the two probability distributions"} \cite{Pons2006} without mentioning this factor. However a look into their provided source code confirms the use of the factor.
 Since this measure can also be written as the Euclidean distance between columns in the matrix $\mathbf{D}^{\text{--}\sfrac{1}{2}}\mathbf{P}^t$, it automatically also qualifies as a distance metric.
-\cite{Pons2006} did not study whether the inclusion of this factor performs better quantitatively, and the performance on the benchmark used in Section~\ref{sec:clustering_experiment} is in fact always higher when this factor is left out. Equation~\eqref{eq:walktrap} will therefore be used without including it, i.e.\ simply $\sqrt{\sum_{k}(\mathbf{P}_{ik}^t - \mathbf{P}_{jk}^t)^2}$. This will be referred to as the \emph{snapshot} embedding, as it captures the random walker state after a fixed number of steps $t$.
+Pons and Latapy \cite{Pons2006} did not study whether the inclusion of this factor performs better quantitatively, and the performance on the benchmark used in Section~\ref{sec:clustering_experiment} is in fact always higher when this factor is left out. Equation~\eqref{eq:walktrap} will therefore be used without including it, i.e.\ simply $\sqrt{\sum_{k}(\mathbf{P}_{ik}^t - \mathbf{P}_{jk}^t)^2}$. This will be referred to as the \emph{snapshot} embedding, as it captures the random walker state after a fixed number of steps $t$.
 
 The algorithm then proceeds by applying agglomerative clustering using the Ward method, but with one difference: it only merges clusters connected by an edge. This reduces computation time and likely improves the modularity of the resulting clusters, but since the end goal is to produce bundles, edges between clusters are acceptable as they will be bundled. The results here will therefore use the more general algorithm that is unaware of edges between clusters.
 
@@ -329,7 +329,7 @@ Code used to generate all figures can be found at \url{www.github.com/jxz12/Hier
 \end{figure}
 
 
-\subsection{Discussion}
+\section{Discussion}
 \label{sec:heb_discussion}
 The results presented here largely agree with the design choices made by Pons and Latapy \cite{Pons2006} for the use of agglomerative dissimilarity clustering on graphs. That is except for leaving out the extra $\mathbf{D}_{kk}^{\text{--}\sfrac{1}{2}}$ weighting in Equation~\ref{eq:walktrap} as it did not improve performance at all in the benchmark explored here.
 
@@ -352,18 +352,19 @@ A possible study to quantify the effectiveness of bundles could be to ask partic
 % Applying hierarchical edge bundles to the test set leads to smaller edges being within clusters and larger ones being across the 
 Future work could also include testing on a larger benchmark, especially with graphs with more biclique than clique structure.
 The current benchmark also measures the quality of clustering, but not bundling directly. A dissimilarity measure or energy function that quantifies bundling quality could be directly optimised to produce high-quality bundles.
+% The dissimilarities already considered here may also be useful in other applications that require them, such as multidimensional scaling
 
 % Another benefit to agglomerative methods is that it is easy to interpret and understand what the algorithm is doing, even if the answer is suboptimal. I would always pick an algorithm that I fully understand for a visualisation over a black-box algorithm that produces slightly better results. But this is just opinion.
 
-\section{Power-confluent drawing}
-\label{sec:power_confluent_drawing}
-Edge bundling can be likened to data compression on graphs, as the goal is to describe a given network without having to know the source and target for every individual edge. 
+\chapter{Power-confluent drawing}
+\label{chap:power}
+Edge bundling can be likened to data compression on graphs, as the goal is to describe a given network without having to know the source and target for every individual edge.
 Such compression would be impossible in a random network, but because real-world data does have structure, underlying patterns can be leveraged to group together similar components within the data.
 % However, even knowing that this is the goal does not make the problem easier, because these underlying patterns are not known to us. The real world is complex, and so any data collected from it is not likely to be straightforward to understand. Much of the data collected may not even contain any order in the first place.
 % In fact, if you will allow me to go meta for a moment, the very act of collecting data itself into the form of a network is already technically a form of compression, as 
 
-The hierarchical edge bundling of the previous section can be interpreted as \emph{lossy} compression, because the bundling of edges can obscure the exact endpoints of each edge. In the same vein as, say, JPEG image compression, there exists a tradeoff between the amount of data used against the amount of information displayed.
-But just as there exist lossless compression formats for images, such as PNG compression, there also exists a lossless counterpart for edge bundling, known as \emph{confluent drawing}. An example of such a drawing can be seen on the right-hand side of Figure~\ref{fig:power_teaser}, where the bundles are interpreted as follows: every possible smooth path from one vertex to another indicates that they are connected by an edge in the original graph.
+The hierarchical edge bundling of the previous chapter can be interpreted as \emph{lossy} compression, because the grouping of edges can obscure the exact endpoints of each edge. In the same vein as, say, JPEG image compression, there exists a tradeoff between the amount of data used against the amount of information displayed.
+But just as there exist \emph{lossless} compression formats for images, such as PNG compression, there also exists such a counterpart for edge bundling, known as \emph{confluent drawing}. An example of such a drawing can be seen on the right-hand side of Figure~\ref{fig:power_teaser}, where the bundles are interpreted as follows: every possible smooth path from one vertex to another indicates that they are connected by an edge in the original graph.
 
 This eliminates crossings by allowing edges to overlap, and is analogous to junctions on a train track that allow carriages to switch directions without stopping.
 
@@ -382,7 +383,7 @@ The remaining work in this chapter will study a subset of confluent drawing know
 The process of producing a power-confluent drawing consists of three steps: finding the \emph{power graph decomposition;} converting this decomposition into an equivalent auxiliary routing graph (ARG), similarly to hierarchical edge bundling in Section~\ref{sec:pruning}; and finally drawing curves back on top to render a confluent drawing. Each step is illustrated in Figure~\ref{fig:power_teaser}. This was an idea originally explored by Bach et al.\ \cite{Bach2017}, and the work presented here will aim to further develop and formalise the methods there.
 Specifically, the speed and quality of the power decomposition algorithm will be improved, and two theoretical issues will be resolved for the conversion to a confluent drawing.
 
-\subsection{Power graph decomposition}
+\section{Power graph decomposition}
 \label{sec:power_graph}
 A power graph is an extension to the conventional node-link diagram, that allows vertices to be grouped together into \emph{power groups}, in order to merge edges that share endpoints into individual \emph{power edges} (see the leftmost two drawings in Fig.~\ref{fig:power_teaser}). Power groups may also be nested in a hierarchical structure, allowing power edges to cross group boundaries.
 
@@ -390,7 +391,7 @@ This idea was originally developed for use in biological protein--protein intera
 
 This is also the method chosen by Bach et al.\ \cite{Bach2017}, to construct their initial power graphs, and so is the one studied here. Note that the following description is specific to undirected graphs; the changes required for directed graphs are described in Section~\ref{sec:power_directed}.
 
-\subsubsection{Greedy agglomeration, again}
+\subsection{Greedy agglomeration, again}
 The algorithm works taking advantage of the fact that the hierarchy of power groups can also be represented as a tree, with vertices as the leaves, similarly to the hierarchical clustering of Section~\ref{sec:dissimilarities}. It first initializes every vertex as the sole member of a power group, henceforth referred to as a \emph{module}, and initializes a set of neighbours for each trivial module based on the edges of the graph.
 It then greedily merges pairs of top-level modules at a time, picking the merge that eliminates the most edges at each step, until no more edges can be eliminated.
 The number of eliminated edges for any given merge is given by
@@ -542,7 +543,7 @@ A further exploration of this extended algorithm is out of scope for this paper,
 The final change involves bringing down the complexity of neighbour set intersection to $O(E)$ using hash sets, which reduces the complexity of the algorithm down slightly to $O(|V|^3|E|)$.
 Pseudocode for the above described algorithm can be seen in Fig.~\ref{fig:pseudo_pgd}.
 
-\subsection{Confluent drawing}
+\section{Confluent drawing}
 \label{sec:confluent_definition}
 The original definition of a confluent drawing~$A$ for a graph~$G$ is:
 \begin{mdframed}[backgroundcolor=WhiteSmoke]
@@ -815,7 +816,7 @@ Power-confluent is therefore a strictly stronger condition than strict confluent
   \label{fig:strict}
 \end{figure}
 
-\subsection{Discussion}
+\section{Discussion}
 \label{sec:power_discussion}
 The work presented here has developed the ideas presented by Bach et al.\ \cite{Bach2017} by both improving the power graph decomposition step (Section~\ref{sec:power_graph}) and fixing some practical issues with the conversion to a confluent drawing (Section~\ref{sec:confluent_definition}). Source code for all the algorithms discussed can be found at \url{www.github.com/jxz12/pconfluent}.
 

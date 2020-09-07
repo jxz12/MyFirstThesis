@@ -1,4 +1,4 @@
-\chapter{Nodes}
+\chapter{Node layout}
 \label{chap:stress}
 \begin{figure}
   \centering
@@ -46,8 +46,18 @@ Note that a necessary initial step is to fix the position of a selection of node
 The powerful insight that Tutte revealed with his algorithm was a remarkable mathematical theorem attached to it. He proved that this barycentre algorithm will always produce a planar drawing, in the specific case that the graph is planar and tri-connected (i.e.\ the graph cannot be disconnected by removing two vertices, no matter which two are removed).
 
 This algorithm has served as the springboard for two main branches of network layout algorithms. Since planarity has been shown to be one of, if not the most important markers for readability in node-link diagrams \cite{Purchase1997}, the first branch is a line of planarity-based algorithms which can guarantee planar node layouts. Examples include the algorithm of Read \cite{Read1987} which recursively removes nodes and adds dummy edges to maintain a triangulated graph at each step.  A problem with this method and Tutte's is \emph{node resolution}, which means that nodes may be placed exponentially close to each other, rendering the graph impossible to read in certain areas.
-A breakthrough for this problem came in 1990 by de Fraysseix et al.\ \cite{DeFraysseix1990} who described the first layout algorithm to achieve an asymptotically optimal node resolution of an $\mathcal{O}(|V|\times |V|)$ grid, and in linear time \cite{Chrobak1995}. This was done by constructing a \emph{canonical ordering} of the graph \cite{Zhang2005} which is used to order nodes on the x-axis, and from there y-axis positions can be chosen such to avoid crossings.
+A breakthrough for this problem came in 1990 by de Fraysseix et al.\ \cite{DeFraysseix1990} who described the first layout algorithm to achieve an asymptotically optimal node resolution of an $\mathcal{O}(|V|\times |V|)$ grid, and in linear time \cite{Chrobak1995}.
+An example output of this algorithm can be seen in Figure~\ref{fig:dFPP}, which works by constructing a \emph{canonical ordering} of the graph \cite{Zhang2005} to order nodes on the x-axis, and from there y-axis positions can be chosen such to avoid crossings.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{stress/dFPP.pdf}
+    \caption[An example output of a planarity-based algorithm]{A graph with nodes positioned symmetrically (left) and without crossings (right) from using the de Fraysseix, Pach, Pollack algorithm \cite{DeFraysseix1990}. Despite the planarity of the output, the poor angular resolution makes the drawing more difficult to read.}
+    \label{fig:dFPP}
+\end{figure}
+
 Improvements and refinements have been made with this algorithm in mind \cite{Zhang2005}, but such methods suffer from poor \emph{angular resolution}, which means that adjacent edges form small angles between each other, another property that has been shown to negatively impact the readability of layouts \cite{Purchase1997}.
+Such an example of poor angular resolution is illustrated in Figure~\ref{fig:dFPP}.
 This issue exists until this day \cite{Eades2012}, and is a primary reason why most network visualisation software uses algorithms based on a second, less mathematically rigorous branch of algorithms also inspired by Tutte.
 
 This second branch comes from an intuitive interpretation of Tutte's algorithm: that each edge is analogous to a spring of zero natural length, where the solution to Tutte's system of linear equations can be seen as the point at which the elastic energy of these springs, according to Hooke's law \cite{Hooke1678}, is minimised. This energy is defined as
@@ -77,7 +87,7 @@ A gallery of the algorithms to be described here is presented in Figure~\ref{fig
   \includegraphics[width=1.03\textwidth]{stress/force.pdf}
   \caption[A gallery of node layout methods]{
   Three graphs visualised with four different force-directed algorithms from Section~\ref{sec:force_background}. Graphs are, from left to right, a grid of width seven, a binary tree of depth seven, and a Sierpi\'nski triangle \cite{Sierpinski1915} with five sub-triangle recursions.
-  The algorithms used are, from top to bottom, Tutte~\eqref{eq:tutte}, Eades~\eqref{eq:eades}, spectral~\eqref{eq:spectral}, and stress~\eqref{eq:stress}.
+  The algorithms used are, from top to bottom, Tutte~\eqref{eq:tutte}, spectral~\eqref{eq:spectral}, Eades~\eqref{eq:eades}, and stress~\eqref{eq:stress}.
   The nodes pinned to the edge of the layout for Tutte are the four corners of the grid, all leaf nodes in the binary tree, and the three corners of the biggest Sierpi\'nski triangle.}
   \label{fig:misc_force_layouts}
 \end{figure}
@@ -191,18 +201,18 @@ and then another Laplacian matrix $\mathbf{L^X}$, defined as
 \end{equation}
 It can be shown that the equation
 \begin{equation}
-  \mathbf{L}^w\mathbf{x}' = \mathbf{L^Xx}
+  \mathbf{L}^w\mathbf{x}^\prime = \mathbf{L^Xx}
   \label{eq:major_linear}
 \end{equation}
-where $\mathbf{x}$ and $\mathbf{x}'$ are column vectors that represent single dimensions of the full layouts $\mathbf{X}$ and $\mathbf{X}'$ respectively, guarantees that $\text{stress}(\mathbf{X}') \leq \text{stress}(\mathbf{X})$ \cite{Gansner2004}.
-The optimisation process is then performed simply by solving Equation~\eqref{eq:major_linear} as a system of linear equations, with $\mathbf{x}'$ as the column of unknowns being solved for. This is repeated in an iterative manner, where $\mathbf{x}'$ is computed in one iteration and then used as $\mathbf{x}$ in the next, until the algorithm can no longer improve the value of stress by more than a certain threshold. Note that $\mathbf{L}^w$ only needs to be computed once, but $\mathbf{L}^\mathbf{X}$ must be recalculated on every iteration.
+where $\mathbf{x}$ and $\mathbf{x}^\prime$ are column vectors that represent single dimensions of the full layouts $\mathbf{X}$ and $\mathbf{X}^\prime$ respectively, guarantees that $\text{stress}(\mathbf{X}^\prime) \leq \text{stress}(\mathbf{X})$ \cite{Gansner2004}.
+The optimisation process is then performed simply by solving Equation~\eqref{eq:major_linear} as a system of linear equations, with $\mathbf{x}^\prime$ as the column of unknowns being solved for. This is repeated in an iterative manner, where $\mathbf{x}^\prime$ is computed in one iteration and then used as $\mathbf{x}$ in the next, until the algorithm can no longer improve the value of stress by more than a certain threshold. Note that $\mathbf{L}^w$ only needs to be computed once, but $\mathbf{L}^\mathbf{X}$ must be recalculated on every iteration.
 
 Additionally in practice, the position of the first vertex is fixed to the origin, and the first row and column of $\mathbf{L}^w$ are removed, as well as the first row of the vector $\mathbf{L^Xx}$. This is in order to remove translational invariance from the solution, which allows for fast linear equation solving methods to be applied to solve Equation~\ref{eq:major_linear}.
 In particular, Gansner et al.\ \cite{Gansner2004} recommend \emph{Cholesky factorization} \cite{Press2007Cholesky} or the \emph{conjugate gradient} method \cite{Press2007Conjugate}, both of which will be tested later in Section~\ref{sec:sgd_experiment}. 
 
 Ganser et al.\ \cite{Gansner2004} also described another \emph{local} method for solving Equation~\ref{eq:major_linear}, where the system of equations is solved for just one vertex at a time. This is done by setting the position of vertex $i$ to
 \begin{equation}
-  \mathbf{x}_i' = \frac{\sum_{j\neq i}w_{ij}(\mathbf{x}_j + d_{ij}(\mathbf{x}_i - \mathbf{x}_j)||\mathbf{X}_i - \mathbf{X}_j||^{-1})}{\sum_{j\neq i}w_{ij}}
+  \mathbf{x}_i^\prime = \frac{\sum_{j\neq i}w_{ij}(\mathbf{x}_j + d_{ij}(\mathbf{x}_i - \mathbf{x}_j)||\mathbf{X}_i - \mathbf{X}_j||^{-1})}{\sum_{j\neq i}w_{ij}}
   \label{eq:major_local}
 \end{equation}
 and is also guaranteed to monotonically decrease stress \cite{Gansner2004}. This local method will also be tested in Section~\ref{sec:sgd_experiment}, and will furthermore be important when considering large graphs in Section~\ref{sec:large_graphs}.
@@ -317,9 +327,10 @@ Since this will always eventually be the case because $\eta$ tends to zero, it h
   A more detailed timing analysis on a wide variety of other examples can be seen in Section~\ref{sec:sgd_experiment}.
   }
   \label{fig:stress_plots}
-\end{figure}
-
-\begin{figure}
+% \end{figure}
+  \vspace*{\floatsep}
+  \vspace*{\floatsep}
+% \begin{figure}
   \removeAlgorithmFigureError
   \begin{algorithm}[H]
     \SetKwProg{SGD}{SGD}{}{}
@@ -372,7 +383,7 @@ Since this will always eventually be the case because $\eta$ tends to zero, it h
   \label{fig:pseudo_sgd}
 \end{figure}
 
-Introducing this upper limit on $\mu$ allows for much larger initial step sizes than standard SGD, yielding much faster convergence without needing to worry about divergence due to \emph{exploding gradients} \cite{Goodfellow2016}. It will be shown by experiment that this results in state-of-the-art performance for a wide range of graphs (except for a single specific case, see Section~\ref{sec:sgd_experiment}).
+Introducing this upper limit on $\mu$ allows for much larger initial step sizes than standard SGD, yielding much faster convergence without needing to worry about divergence due to \emph{exploding gradients} \cite{Goodfellow2016}. It will be shown     by experiment that this results in state-of-the-art performance for a wide range of graphs (except for a single specific case, see Section~\ref{sec:sgd_experiment}).
 In addition, \emph{random reshuffling} of terms is used unless otherwise stated; see Section~\ref{sec:randomisation} for further elaboration. A full pass through all the terms $Q_{ij}$ will be referred to as an \emph{iteration}, while a single application of Equation~\eqref{eq:SGD_step} will be referred to as a \emph{step}.
 From now on, the modified SGD algorithm simply as SGD.
 
@@ -407,9 +418,10 @@ This choice of $\eta_{\max}$ ensures that all $\mu = 1$ for the first iteration,
   To approximate behavior given unlimited time, schedules were run for 500 iterations.
   }
   \label{fig:annealing}
-\end{figure}
-
-\begin{figure}
+% \end{figure}
+  \vspace*{\floatsep}
+  \vspace*{\floatsep}
+% \begin{figure}
   \centering
   \includegraphics[width=.95\textwidth]{stress/parameters.pdf}
   \caption[A comparison of annealing schedule parameterisations]{Plots of mean stress over 25 runs on all graphs in Section~\ref{sec:sgd_experiment} when varying the parameters $t_{\max}$ or $\varepsilon$ on Equation~\eqref{eq:expodecay}, normalized to the best values over all runs from Figure~\ref{fig:systematic}.
@@ -570,7 +582,7 @@ On the other hand, \texttt{dwt\_307} is the one graph (of the 243 investigated) 
 \begin{figure}
   \centering
   \includegraphics[width=1\textwidth]{stress/dwt_307.png}
-  \caption[The one graph in the test set where majorization performs better]{Layouts from \texttt{dwt\_307}, the only one of the 243 graphs considered where majorization (left) yields lower stress than SGD (middle). The cylindrical shape of the graph is illustrated in a view of a 3D layout and projection on the right, which looks similar to if the middle layout were to be rotated slightly clockwise.
+  \caption[The one graph in the test set where majorization performs better]{Layouts from \texttt{dwt\_307}, the only one of the 243 graphs considered where majorization (left) yields lower stress than SGD (middle). The cylindrical shape of the graph is illustrated in a view of a 3D layout and projection on the right, which looks similar to if the middle layout were to be rotated slightly to the left.
   }
   \label{fig:cylinder}
 \end{figure}
@@ -583,7 +595,7 @@ And finally, \texttt{S10PI\_n1} is a long graph that does not get twisted and so
 
 \subsubsection{Speed}
 SGD converges to low stress levels in far fewer iterations than majorization. Graphs are laid out in only 15 iterations in the top plot in Figure~\ref{fig:systematic}, and there is not much improvement to be gained from using the convergent schedule to let the algorithm run for longer. This indicates that most global minima can be found in very few iterations, making SGD especially suited for real-time applications such as interactive layout.
-The stopping criterion used for majorization was for relative decrease in stress to be less than $10^{-5}$, which is ten times more forgiving than originally suggested by Gansner et al.\ \cite{Gansner2004}, as $10^{-4}$ was not lenient enough to be confident that it had settled completely. Given enough time, majorization does almost always eventually find good minima, but can still settle in unoptimal minima and in some cases never finds the best configuration regardless of initialization.
+The stopping criterion used for majorization was for relative decrease in stress to be less than $10^{\text{-}5}$, which is ten times more forgiving than originally suggested by Gansner et al.\ \cite{Gansner2004}, as $10^{\text{-}4}$ was not lenient enough to be confident that it had settled completely. Given enough time, majorization does almost always eventually find good minima, but can still settle in unoptimal minima and in some cases never finds the best configuration regardless of initialization.
 Majorization also takes many more iterations to converge than SGD, with means of 237 and 106 iterations respectively.
 
 \begin{figure}
@@ -657,6 +669,25 @@ It is important to note that if both vertices $p$ and $q$ are pivots then $w_{pq
 This leaves far fewer terms in the summation, and so the complexity per iteration for SGD is now $\mathcal{O}(|E| + |P||V|)$, as any terms that have been cut are simply ignored. In the context of majorization this new model must be used with the local method described at the end of Section~\ref{sec:majorization}, resulting in the same complexity.
 
 \begin{figure}
+  \centering
+  \makebox[\textwidth][c]{\includegraphics[width=1.06\textwidth]{stress/ortmann.pdf}}
+  \caption[Results against majorization using sparse stress]{Examples of sparse SGD on the graphs \texttt{USPowerGrid}, \texttt{EVA}, and \texttt{3elt}. From left to right: best layouts using 10 pivots, 50, 200, full stress, and plots showing stress over 25 runs for each number of pivots.
+  The 15 iteration annealing schedule from Section~\ref{sec:annealing} is used for SGD, and majorization is allowed to run for 100 iterations.
+  }
+  \label{fig:pivots}
+% \end{figure}
+  \vspace*{\floatsep}
+% \begin{figure}
+  \centering
+  \makebox[\textwidth][c]{\includegraphics[width=1.02\textwidth]{stress/showcase.png}}
+  \caption[A gallery of large graphs layed out using sparse stress]{Some larger graphs, each approximated with 200 pivots.
+  %, also using the 15 iteration schedule from Section~\ref{sec:annealing}.
+  From left to right, top row then bottom: \texttt{pesa} (11,738 vertices), \texttt{bcsstk31} (35,588), \texttt{commanche\_dual} (7,920) and its original (3D) layout, \texttt{finance256} (37,376), \texttt{bcsstk32} (44,609), \texttt{luxembourg\_osm} (114,599) and its original layout. The right-hand graphs have edge weights calculated from distances in their original layouts.
+  }
+  \label{fig:showcase}
+\end{figure}
+
+\begin{figure}
   \removeAlgorithmFigureError
   \begin{algorithm}[H]
     \SetKwProg{SGD}{SparseSGD}{}{} \SetKwInOut{Input}{inputs}
@@ -719,25 +750,6 @@ This leaves far fewer terms in the summation, and so the complexity per iteratio
 Resulting layouts are presented in Figures~\ref{fig:pivots}, where the graph \texttt{EVA} is the least well approximated by the sparse model, likely due to its low diameter and high degree distribution. \texttt{3elt} is very well approximated by the model itself, but the performance of majorization declines as the number of pivots exceeds ${\sim}100$, likely due to the increased number of terms in the summation that introduce more local minima to jump over.
 Note that the results here do not use PivotMDS \cite{Brandes2007Eigensolver} to initialize as done by Ortmann et al.\ \cite{Ortmann2017}, and instead initialize randomly within a 1$\times$1 square as before.
 A gallery of larger graphs is presented in and~\ref{fig:showcase}, and pseudocode for the entire algorithm can be seen in Algorithm~\ref{alg:sparse}, Figure~\ref{fig:pseudo_sparse}.
-
-\begin{figure}
-  \centering
-  \makebox[\textwidth][c]{\includegraphics[width=1.06\textwidth]{stress/ortmann.pdf}}
-  \caption[Results against majorization using sparse stress]{Examples of sparse SGD on the graphs \texttt{USPowerGrid}, \texttt{EVA}, and \texttt{3elt}. From left to right: best layouts using 10 pivots, 50, 200, full stress, and plots showing stress over 25 runs for each number of pivots.
-  The 15 iteration annealing schedule from Section~\ref{sec:annealing} is used for SGD, and majorization is allowed to run for 100 iterations.
-  }
-  \label{fig:pivots}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \makebox[\textwidth][c]{\includegraphics[width=1.02\textwidth]{stress/showcase.png}}
-  \caption[A gallery of large graphs layed out using sparse stress]{Some larger graphs, each approximated with 200 pivots.
-  %, also using the 15 iteration schedule from Section~\ref{sec:annealing}.
-  From left to right, top row then bottom: \texttt{pesa} (11,738 vertices), \texttt{bcsstk31} (35,588), \texttt{commanche\_dual} (7,920) and its original layout, \texttt{finance256} (37,376), \texttt{bcsstk32} (44,609), \texttt{luxembourg\_osm} (114,599) and its original layout. The right-hand graphs have edge weights calculated from distances in their original layouts.
-  }
-  \label{fig:showcase}
-\end{figure}
 
 
 \section{Applications}

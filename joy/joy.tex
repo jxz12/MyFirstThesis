@@ -28,20 +28,20 @@ But perhaps the oldest and most commonly studied of these models is known as the
   \frac{d\mathbf{z}_i}{dt} = \mathbf{z}_i(\mathbf{r}_i + \sum_j\mathbf{A}_{ij}\mathbf{z}_j)
   \label{eq:lotka_volterra}
 \end{equation}
-where $\mathbf{d}_i$ is the abundance of species $i$, $\mathbf{r}_i$ is its growth rate (or death rate if it is negative), and $\mathbf{A}_{ij}$ is the strength of the interaction between two species, which is positive if $i$ eats $j$ and negative if $j$ eats $i$. 
+where $\mathbf{z}_i$ is the abundance of species $i$, $\mathbf{r}_i$ is its growth rate (or death rate if it is negative), and $\mathbf{A}_{ij}$ is the strength of the interaction between two species, which is positive if $i$ eats $j$ and negative if $j$ eats $i$. 
 This can be written to include all species simultaneously as
 \begin{equation}
-    \frac{d\mathbf{z}}{dt} = \mathbf{z}(\mathbf{r} + \mathbf{Az}).
+    \frac{d\mathbf{z}}{dt} = (\mathbf{r} + \mathbf{Az})\mathbf{z}^T.
     \label{eq:interaction_matrix}
 \end{equation}
 The matrix $\mathbf{A}$ is known as the \emph{interaction matrix}, and is called that because it contains all the information on how each pair of species interact with each other.
 There are five classifications of interaction possible in such a model, designated by the nature of the values in the corresponding pair of values in this matrix. For example, if $\mathbf{A}_{ij}>0$ and $\mathbf{A}_{ji}<0$, then it is a standard example of species $i$ preying on species $j$, where the `sign' of the interaction is $(+,-)$. The remaining types are mutualism $(+,+)$, competition $(-,-)$, commensalism $(+,0)$, and amensalism $(-,0)$.
 Different models include differing amounts of each type of interaction, and the proportion of types can strongly influence the behaviour of the system \cite{Tang2014Correlation}. However the predator--prey type is the most commonly studied and most prevalent in nature, and so will be the only one considered here.
 
-The purpose of the above equations is to use them to find values of $\mathbf{x}$, and the standard way of doing this for differential equations is to simulate by performing numerical integration at each time step, using methods such as Runge-Kutta \cite{Press2007Runge}.\footnote{This was used in older versions of the game, but brings with it numerical problems such as stiff equations leading to instability \cite{Press2007Runge}, or having to choose a suitable integration time step. It also adds the issue of having to choose an arbitrary abundance threshold for species to go extinct.}
+The purpose of the above equations is to use them to find values of $\mathbf{z}$, and the standard way of doing this for differential equations is to simulate by performing numerical integration at each time step, using methods such as Runge-Kutta \cite{Press2007Runge}.\footnote{This was used in older versions of the game, but brings with it numerical problems such as stiff equations leading to instability \cite{Press2007Runge}, or having to choose a suitable integration time step. It also adds the issue of having to choose an arbitrary abundance threshold for species to go extinct.}
 However the simplicity of the model chosen allows something different: it can be analytically solved for an \emph{equilibrium} point. This is the solution at which the interactions fully balance each other such that the instantaneous change in abundance is zero. Note the similarity of this method to the graph layout algorithm of Tutte shown in Section~\ref{sec:nodes_background}, Equation~\eqref{eq:tutte}.
-This is done by setting the left-hand side of Equation~\eqref{eq:interaction_matrix} to zero, where it is clear that the system contains many trivial solutions with any species $x=0$, which corresponds to the natural case of an extinct species staying extinct.
-Since the solution at which every species has non-zero abundance is one of interest, the $\mathbf{x}$ outside bracket is simply cancelled out to reach the solution
+This is done by setting the left-hand side of Equation~\eqref{eq:interaction_matrix} to zero, where it is clear that the system contains many trivial solutions with any species $\mathbf{z}_i=0$, which corresponds to the natural case of an extinct species staying extinct.
+Since the solution at which every species has non-zero abundance is one of interest, the $\mathbf{z}^T$ outside bracket is simply cancelled out to reach the solution !!!!!!!!!!!!!!!!
 \begin{equation}
   \mathbf{z^*} = -\mathbf{A}^{-1}\mathbf{r}.
   \label{eq:equilibrium}
@@ -113,7 +113,7 @@ To fill this gap, a methodology known as \emph{metabolic scaling} will be used. 
 \begin{figure}
     \centering
     \includegraphics[width=.8\textwidth]{joy/metabolism.pdf}
-    \caption[A plot of metabolism against individual body mass]{A plot of metabolism against individual body mass for a selection of animals. Note the outlier position of the sloth, showing that the model is imperfect, but still a very good estimate when considering the complexity of life. Data taken from \cite{Nagy1999}, power law slope and intercept from \cite[Fig.~2]{Brown2004}.}
+    \caption[A plot of metabolism against individual body mass]{A plot of metabolism against individual body mass for a selection of animals. The slow-moving sloth is a good example showing that the model is imperfect, but still a very good estimate when considering the complexity of life. Data taken from \cite{Nagy1999}, power law slope and intercept from \cite[Fig.~2]{Brown2004}. Images credit: all photos taken from \url{www.pixabay.com} under the Pixabay License.}
     \label{fig:metabolism}
 \end{figure}
 
@@ -214,7 +214,7 @@ One of the main features that such models attempt to capture is the idea that bi
 A notable improvement to this is the Niche model of Williams and Martinez \cite{Williams2000}, who leveraged the fact that big things eat small things, but not too small. They therefore constrain species to only prey on other species within a certain range on the axis, as shown in Figure~\ref{fig:niche}, top.
 Other attempts include the nested hierarchy model \cite{Cattin2004} which captures the clustered nature of food webs, the coherence model \cite{Johnson2014} which captures the layered nature of groups of predators, or the speciation \cite{Rossberg2006} and diet breadth \cite{Petchey2008} models, which simulate evolutionary and foraging processes, respectively, to produce structure as an emergent property. 
 
-However, none of these models can capture the topology of food webs fully satisfactorily. Furthermore, thinking about the options to give a player who is building a food web, it would be much more interesting to have full control over what interactions exist. That is the choice used from this point on, but a good question to ask at this point is whether it is possible for humans to comprehend the topology of real world webs in the first place.
+However, none of these models can capture the topology of food webs fully satisfactorily. Furthermore, thinking about the options to give a player who is building a food web, it would be much more interesting to have full control over which interactions are realised. That is the choice used from this point on, but a good question to ask at this point is whether it is possible for humans to comprehend the topology of real world webs in the first place.
 
 \subsubsection{Dimensionality}
 One thing that all the aforementioned models share is \emph{low dimensionality}. This essentially means that there exists a structural pattern that can be largely explained using rules and models without too many parameters.
@@ -363,7 +363,7 @@ This is simply defined by the sum of squared distances between two layouts
 \end{equation}
 and can be exactly minimised using linear transformations.
 % The square root of the right-hand side is usually taken as the final value
-Removing the translational component is performed by simply placing the barycenter of both layouts at the origin. Traditionally $\mathbf{X}'$ is then dilated, but stress is not invariant to scaling so this step is skipped here. The rotational component is then removed by differentiating the right-hand side of Equation~\eqref{eq:procrustes} with respect to a rotation $\theta$ and solving for the derivative equalling zero, resulting in
+Removing the translational component is performed by simply placing the barycenter of both layouts at the origin. Traditionally $\mathbf{X}^\prime$ is then dilated, but stress is not invariant to scaling so this step is skipped here. The rotational component is then removed by differentiating the right-hand side of Equation~\eqref{eq:procrustes} with respect to a rotation $\theta$ and solving for the derivative equalling zero, resulting in
 \begin{equation}
   \theta(\mathbf{x},\mathbf{y}, \mathbf{x^\prime}, \mathbf{y^\prime}) = 
   \tan^{\text{--}1}\left(\frac{\sum_i(\mathbf{y}_i\mathbf{x}^\prime_i-\mathbf{x}_i\mathbf{y}^\prime_i)}{\sum_i(\mathbf{x}_i\mathbf{x}^\prime_i-\mathbf{y}_i\mathbf{y}^\prime_i)}\right)
@@ -392,6 +392,14 @@ Equation~\eqref{eq:trophic_laplacian} does not have a solution if any component 
 % 3D vs 2D: originally used 3D, but we found that players could not quickly pick up the rotational interface. Nodes would also often become obscured in the center of the layout, so we switched to 2D instead. 
 A problem here is that stress is more difficult to optimise, because there is now only one degree of freedom for vertices to move around in. The solution found was to increase the maximum value of $\mu$ in Equation~\eqref{eq:mu} to $1.1$, as well as adding five extra initialisation iterations at the beginning of the optimisation. This is however an ad hoc solution and future work should involve testing variations of this systematically.
 The aforementioned Procrustes statistic also skips the rotation step in this case, as any rotation would break the orientation of these constraints.
+An example of the same food web visualised with and without this constraint is shown in Figure~\ref{fig:trophic}, where it can be seen that the constrained version tends to point edges upwards.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{joy/trophic.png}
+    \caption[A side-by-side comparison of trophic level constraints]{A side-by-side comparison of the same food web with and without trophic level constraints. The unconstrained layout is on the left, and the constrained is on the right. In the game itself, the little circles along links move to show the direction of biomass flow.}
+    \label{fig:trophic}
+\end{figure}
 
 An important question is whether constraining the y-axis is helpful to the user in the first place. Intuition says the constraint will largely make edges point upwards, which should help to preserve the player's mental map of the flow of biomass throughout the system. The opposing argument is that layouts will have higher stress, and so may become more crowded.
 This question will be systematically tested by the game. Half of the players will be given an standard layout and the other half a constrained layout, and data collected from the game will be used to study which is more effective. More detail on this experiment is outlined in Section~\ref{sec:eco_hypotheses}.
@@ -508,8 +516,8 @@ Other experiments in the literature generally give participants topological task
 \subsection{Research World}
 \label{sec:research_world}
 Research world contains 3 further levels for the player to play, each with a different scoring metric. These levels act more like a \emph{sandbox}, where players may add up to 48 species (limited due to the uniqueness constraint explained below) in whatever topology they wish.
-They are given a single task: get as high a score as possible. This score in level 1 is simple the same as in Learning World, i.e.\ Equation~\ref{eq:score}. Level 2 adds an extra one million points per each additional animal, which is so large that it effectively means that Equation~\ref{eq:score} is only included as a tie-breaker. 
-Level 3 also gives blocks of a million points, but for each additional max chain length instead of each animal.
+They are given a single task: get as high a score as possible. This score in Level~1 is simple the same as in Learning World, i.e.\ Equation~\ref{eq:score}. Level~2 adds an extra one million points per each additional animal, which is so large that it effectively means that Equation~\ref{eq:score} is only included as a tie-breaker. 
+Level~3 also gives blocks of a million points, but for each additional max chain length instead of each animal.
 To incentivise players to reach for high scores, each of these three levels has a leaderboard for skilled players to aim to be the best, as shown in Figure~\ref{fig:eco_worlds}, right.
 The purpose of Research World is to see how players approach these three situations, all of which do not have an immediately obvious solution.
 
@@ -567,11 +575,11 @@ Because of this, the time element will be analysed on a level-by-level basis. Th
 
 Not many of the resulting medians are statistically significant, if defined by p-values below 5\%. However, almost every level has a better median for trophic than standard, with many of the more difficult later levels falling below a 10\% threshold.
 % The levels that it does do very well on are levels where there more than one trophic level is required.
-Level 7 is the only level where the opposite case occurs, and the standard group performed consistently better. However it is also the level that players had the least trouble with in general, with the fastest completion time over all levels.
+Level~7 is the only level where the opposite case occurs, and the standard group performed consistently better. However it is also the level that players had the least trouble with in general, with the fastest completion time over all levels.
 These results do not mean a shining recommendation for trophic in all situations, but it does show small and consistent improvement over the tasks set for the player.
 
 A peek into research world confirms the need for care when picking a visualisation, as the standard group achieved higher median scores than trophic on the first Research Level, with a p-value of 0.096. This first level simply reuses the score metric in Equation~\eqref{eq:score} which takes connectance into account, and so food webs are naturally going to become especially crowded there. In these situations, fixing the y-axis causes nodes to bunch too closely together to differentiate. Standard layouts still become hairballs, but at least nodes are separated enough to not overlap too much.
-Additionally, the remaining research world levels had little to no difference in median scores, which shows that for many tasks there is no value to be gained for adding the trophic constraint to the layout.
+The remaining research world levels had little to no difference in median scores, which shows that for many tasks there is no value to be gained for adding the trophic constraint to the layout.
 
 These results point towards a small, but clear improvement in performance for the trophic visualisation over the standard one. This is enough to recommend the method for the general application of food webs, but with the condition that care must still be taken to consider the specific use case, as it is not always going to help.
 
@@ -585,38 +593,38 @@ Each level gets its own page of plots, where levels 1, 2, and 3 can be found in 
 \begin{figure}
   \centering
   \includegraphics[height=.85\textheight, right]{joy/101.pdf}
-  \caption[Results from Research World level 1]{An analysis of strategies used for level 1 of Research world. On the left are layouts of the top 3 leaderboard scores, with a colour map to show the colours of trait combinations for plants and animals.
+  \caption[Results from Research World Level~1]{An analysis of strategies used for Level~1 of Research world. On the left are layouts of the top 3 leaderboard scores, with a colour map to show the colours of trait combinations for plants and animals.
   To the top-right is an analysis of these three scores with various histograms. Counter-clockwise from the top-left: the number of plants with each possible combination of traits, the same but for animals, the masses and trophic level of each species, the same for intraspecific interference, trophic levels of all species, incoherence (Equation~\eqref{eq:coherence}), and connectance. On the bottom-right are the same plots, but for the top 50 scores.}
   \label{fig:101}
 \end{figure}
 \begin{figure}
   \centering
   \includegraphics[height=.85\textheight, right]{joy/102.pdf}
-  \caption[Results from Research World level 2]{An analysis of strategies used for level 2 of Research World, with the same conventions as Figure~\ref{fig:101}.}
+  \caption[Results from Research World Level~2]{An analysis of strategies used for Level~2 of Research World, with the same conventions as Figure~\ref{fig:101}.}
   \label{fig:102}
 \end{figure}
 \begin{figure}
   \centering
   \includegraphics[height=.85\textheight, right]{joy/103.pdf}
-  \caption[Results from Research World level 3]{An analysis of strategies used for level 3 of Research World, with the same conventions as Figure~\ref{fig:101}.}
+  \caption[Results from Research World Level~3]{An analysis of strategies used for Level~3 of Research World, with the same conventions as Figure~\ref{fig:101}.}
   \label{fig:103}
 \end{figure}
 The food webs of the top three players are drawn on the left of each plots, along with their names. On the right of each plot are histograms plotting some features of these top three webs in the top half, and the same features on the top 50 scores on the bottom. The top half therefore shows the best of the best strategies, and the bottom shows the general patterns of all good strategies to place relatively highly on the leaderboards.
 
-The three levels will be examined in succession, starting with level 1, where a very clear correlation of trophic to body mass is shown in the top 3 scores. This pattern is weaker but still present for the top 50 webs.
-Connectance for level 1 is very high because the score metric (Equation~\eqref{eq:score}) demands it, and webs are in general incoherent. From this, it can be posited that a strong correlation between trophic level and body mass is necessary for webs with high connectance to be feasible.
+The three levels will be examined in succession, starting with Level~1, where a very clear correlation of trophic to body mass is shown in the top 3 scores. This pattern is weaker but still present for the top 50 webs.
+Connectance for Level~1 is very high because the score metric (Equation~\eqref{eq:score}) demands it, and webs are in general incoherent. From this, it can be posited that a strong correlation between trophic level and body mass is necessary for webs with high connectance to be feasible.
 % Another feature that is not immediate obvious is that the webs here must contain loops. This is because a high connectance implies that almost every species is eating every other species, and so the only way for trophic levels to get even close to three (and even four in some species here) is that loops are pushing up the trophic levels somewhere in the summation.
 % Could possibly be a clue for omnivory.
 
-Level 2 removes the need for high connectance, and it is clear that players took advantage of this, as the median connectance shot all the way down to below 0.2 for the best webs, and even lower over the top 50. This is strong evidence that high connectance webs are more difficult to build, which is in line with most predictions \cite{May1973,Allesina2012}.
+Level~2 removes the need for high connectance, and it is clear that players took advantage of this, as the median connectance shot all the way down to below 0.2 for the best webs, and even lower over the top 50. This is strong evidence that high connectance webs are more difficult to build, which is in line with most predictions \cite{May1973,Allesina2012}.
 In fact this is such a strong effect that, as shown by the completely flat histogram of animal traits, that the best players were able to make all 45 possible animals coexist. This is not only impressive, but also shows that building large and diverse ecosystems that are feasible is possible, given the right configurations.
 As a caveat, the drop in connectance may also be a side-effect of high-connectance webs producing more cluttered visualisations, such that players may actively try to avoid them.
-It is also of note that the the best webs in level 2 are very incoherent. This is a signal that there is a lot of omnivory in diverse ecosystems, which may suggest that omnivory plays a part in supporting large ecosystems.
-% The same pattern of high trophic levels being correlated with high body masses exists here, as with level 1, although it is not as pronounced, which may mean that l.
+It is also of note that the the best webs in Level~2 are very incoherent. This is a signal that there is a lot of omnivory in diverse ecosystems, which may suggest that omnivory plays a part in supporting large ecosystems.
+% The same pattern of high trophic levels being correlated with high body masses exists here, as with Level~1, although it is not as pronounced, which may mean that l.
 
-Finally, the webs produced in level 3 are perhaps the least realistic, but are still insightful nonetheless. The best webs here show that for long chain lengths to exist, then coherence is likely to be necessary. The plot of mass and trophic levels shows the same pattern of heavier species at high trophic levels as before, but with more lighter species overall in the web than heavy. This is likely because lighter species are required to sustain high levels of biomass flow up to the next trophic level, and so more are needed to be a powerful `base' for the webs.
-There is also a clear pattern in the trait combination plots, where most species, including animals, are concentrated around low mass and low interference. This is very different from the high connectance webs in level 1, where heavy species were preferred, and high interference is used as often as low. This is again likely because of the need for a large amount of biomass flowing up the lower levels.
-% Therefore, another way of looking at level 3 is to see it as a level that forces maximal flux
+Finally, the webs produced in Level~3 are perhaps the least realistic, but are still insightful nonetheless. The best webs here show that for long chain lengths to exist, then coherence is likely to be necessary. The plot of mass and trophic levels shows the same pattern of heavier species at high trophic levels as before, but with more lighter species overall in the web than heavy. This is likely because lighter species are required to sustain high levels of biomass flow up to the next trophic level, and so more are needed to be a powerful `base' for the webs.
+There is also a clear pattern in the trait combination plots, where most species, including animals, are concentrated around low mass and low interference. This is very different from the high connectance webs in Level~1, where heavy species were preferred, and high interference is used as often as low. This is again likely because of the need for a large amount of biomass flowing up the lower levels.
+% Therefore, another way of looking at Level~3 is to see it as a level that forces maximal flux
 % These results may also shed light upon the omnivory vs.\ coherence debate.
 
 It is also clear from all levels that low mass and low interference is optimal for plants. This is relatively obvious, as it is the combination that results in the highest plant abundance. There is therefore no evidence that players ran into the `paradox of enrichment', that states that sometimes higher abundance of prey can destabilise webs \cite{Rosenzweig1971}.
@@ -637,7 +645,7 @@ The work in this chapter has presented EcoBuilder: a video game for crowdsourcin
   \label{fig:demo}
 \end{figure}
 
-There were two research outcomes planed from the game. The first was a quantitative comparison of two different visualisations, where one is a standard layout and another has y-axis positions constrained.  The results of this are outlined in Section~\ref{sec:hypothesis1}, where it was shown that constraining the y-axis does make a small, but significant difference to many of the tasks performed in the game.
+There were two research outcomes planned from the game. The first was a quantitative comparison of two different visualisations, where one is a standard layout and another has y-axis positions constrained.  The results of this are outlined in Section~\ref{sec:hypothesis1}, where it was shown that constraining the y-axis does make a small, but significant difference to many of the tasks performed in the game.
 An older version of the game also planned to make use of the 3D capabilities of the Unity game engine, by placing species in three dimensions and having players rotate the resulting node-link diagram. However, early playtests revealed that players could not digest this interface easily, and so the game was converted back to 2D.
 
 The second outcome was to have players tackle ecological puzzles where the solutions are far from clear, in an attempt to crowdsource the intelligence of humans for pattern recognition. It was hoped that a healthy dose of competition would motivate players to find structural patterns to build healthy ecosystems, and the results here show that this faith was well placed. Players exceeded expectations, especially on level two where many were able to make all possible species coexist.
@@ -655,7 +663,7 @@ It is clear that the general public are a powerful resource, and that they are m
 
 An important observation for future projects that involve interactive networks is that, on the small vertical screens of mobile devices, layouts can get very crowded with even a couple of dozen nodes.
 Any sequel that would attempt to consider even larger ecosystems, i.e.\ in the order of hundreds of species, would be more suited to a desktop setting, and would likely require a more specialised visualisation than a standard force-directed layout.
-Restricting the player to two-dimensional topologies, as defined in Section~\ref{sec:topology}, could offer a neat solution to the problem, as each species would only require a position, along with two coordinates to specify its feeding range, to fully describe its incoming links.
+The idea of restricting the player to two-dimensional topologies, as defined in Section~\ref{sec:topology}, could offer a neat solution to the problem, as each species would only require a position, along with two coordinates to specify its feeding range, to fully describe its incoming links.
 Edge bundling techniques like those studied in Chapter~\ref{chap:power} were also deemed as too complex for the context of a mobile game, but a desktop version could open that door as well.
 
 All source code and assets used to produce the game are open source and publicly available at \url{www.github.com/jxz12/EcoBuilder}.

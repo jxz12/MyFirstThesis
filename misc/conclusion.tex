@@ -1,11 +1,38 @@
 \chapter{Conclusion}
 \label{chap:conclusion}
 
-Stuff was done by me
+This thesis has explored the topic of network visualisation using the 'join-the-dots' representation known as the node-link diagram.
+Three chapters studied three distinct subjects within the context of this representation.
+Chapter~\ref{chap:stress} considered the problem of node layout, where the idea of force-directed algorithms was framed in the general context of optimisation, which brings a variety of algorithms into a shared perspective.
+The scope was then focused on the popular energy function known as stress, where an algorithm known as stochastic gradient descent was applied to optimise stress more efficiently than the previous state-of-the-art algorithm, as shown through an experimental study.
+It was also applied to an approximation of the stress summation that allows the method to scale to large graphs.
+Constrained layout and general multidimensional scaling were also briefly explored as further capabilities.
+
+Chapter~\ref{chap:power} dealt with the concept of allowing links to be curved, in order to untangle the hairballs that often result from using force-directed algorithms on real-world data. The method known as hierarchical edge bundling was the main focus, which classically uses hierarchical metadata to inform bundling; the work here studied the situation where this metadata must be inferred. Many options for this inference were compared through an experimental study on datasets with a ground truth included, and recommendations were made for application in practice.
+The method is then compared to a topologically lossless version of edge bundling, known as power-confluent drawing. The hierarchical nature of the lossless method is leveraged to solve some technical issues with a past implementation, and some small improvements are presented to improve the greedy agglomeration preprocessing step.
+
+The thesis is rounded out by Chapter~\ref{chap:joy}, which presents the design and development of EcoBuilder, a research-oriented video game that allows the player to build their own simulated ecosystem.
+The node-link diagram representation was used to visualise both the structural topology and dynamical behaviour of the constructed food webs. This choice of representation was studied by performing a controlled test between two randomly allocated groups of players, where one group was presented a layout with the y-axis of nodes constrained to the trophic level of its corresponding species. The effect of this extra constraint was shown to be statistically significant on player performance, but not in all scenarios and so caution was recommended.
+A secondary research outcome was to crowdsource good strategies from players to build diverse and healthy ecosystems, by providing a global leaderboards for players to compete with each other on. An exploratory analysis of the configurations assembled by top players revealed strong patterns of species bodysizes correlating with trophic level, with various other features also shown to be of interest.
+
+Visualisation is a rich topic filled with interesting problems, and network visualisation is no exception. From algorithmic challenges all the way up to questions of human psychology, there exists a wide variety of research opportunities to explore at all levels of abstraction.
+The overarching purpose of visualisation is also to provide tools for practitioners to analyse real-world data, and so the leap from theory to practice is tangible, and the impact of work done immediate.
+A perfect example of this is EcoBuilder itself, where the applied domain is food webs. Without research into the underlying algorithms that drive visualisation, such a use case would not be possible. Without such use cases, the dynamics of the systems within these domains would remain opaque.
+
+If nothing else, visualisation can also be beautiful.
+It is difficult to define beauty, but something something understanding, something something nature all around us.
+It is the hope that the work in this thesis goes at least a small way towards making this beauty visible for more people.
 
 \section{Summary of thesis achievements}
 
-I am cool
+developed 3 algorithms
+SGD, SGD for large graphs
+Hierarchical edge bundling
+Power-confluent drawing
+
+developed a game
+showed that trophic level is a useful constraint to have 
+showed that players are good
 
 \section{Future work}
 If the reader wishes to build on the work presented in this thesis...
