@@ -1,4 +1,5 @@
-\chapter{Conclusion}
+\chapter*{Conclusion}
+\addcontentsline{toc}{chapter}{Conclusion}
 \label{chap:conclusion}
 
 This thesis has explored the topic of network visualisation using the 'join-the-dots' representation known as the node-link diagram.
@@ -8,8 +9,8 @@ The scope was then focused on the popular energy function known as stress, where
 It was also applied to an approximation of the stress summation that allows the method to scale to large graphs.
 Constrained layout and general multidimensional scaling were also briefly explored as further capabilities.
 
-Chapter~\ref{chap:power} dealt with the concept of allowing links to be curved, in order to untangle the hairballs that often result from using force-directed algorithms on real-world data. The method known as hierarchical edge bundling was the main focus, which classically uses hierarchical metadata to inform bundling; the work here studied the situation where this metadata must be inferred. Many options for this inference were compared through an experimental study on datasets with a ground truth included, and recommendations were made for application in practice.
-The method is then compared to a topologically lossless version of edge bundling, known as power-confluent drawing. The hierarchical nature of the lossless method is leveraged to solve some technical issues with a past implementation, and some small improvements are presented to improve the greedy agglomeration preprocessing step.
+Chapter~\ref{chap:heb} dealt with the concept of allowing links to be curved, in order to untangle the hairballs that often result from using force-directed algorithms on real-world data. The method known as hierarchical edge bundling was the main focus, which classically uses hierarchical metadata to inform bundling; the work here studied the situation where this metadata must be inferred. Many options for this inference were compared through an experimental study on datasets with a ground truth included, and recommendations were made for application in practice.
+Chapter~\ref{chap:power} compared this method to a topologically lossless version of edge bundling, known as power-confluent drawing. The hierarchical nature of the lossless method is leveraged to solve some technical issues with a past implementation, and some small improvements are presented to improve the greedy agglomeration preprocessing step.
 
 The thesis is rounded out by Chapter~\ref{chap:joy}, which presents the design and development of EcoBuilder, a research-oriented video game that allows the player to build their own simulated ecosystem.
 The node-link diagram representation was used to visualise both the structural topology and dynamical behaviour of the constructed food webs. This choice of representation was studied by performing a controlled test between two randomly allocated groups of players, where one group was presented a layout with the y-axis of nodes constrained to the trophic level of its corresponding species. The effect of this extra constraint was shown to be statistically significant on player performance, but not in all scenarios and so caution was recommended.
@@ -20,27 +21,28 @@ The overarching purpose of visualisation is also to provide tools for practition
 A perfect example of this is EcoBuilder itself, where the applied domain is food webs. Without research into the underlying algorithms that drive visualisation, such a use case would not be possible. Without such use cases, the dynamics of the systems within these domains would remain opaque.
 
 If nothing else, visualisation can also be beautiful.
-It is difficult to define beauty, but something something understanding, something something nature all around us.
-It is the hope that the work in this thesis goes at least a small way towards making this beauty visible for more people.
+% The practice of visualisation may sometimes even be considered to be just as much of an art as it is a science.
+% It is difficult to define what art is, but one possible definition is the elucidation of meaning. A striking painting is sometimes needed to ask the question of what it means to be human. A moving song is sometimes the only avenue through which human emotions can be expressed and shared with others. A well-formed diagram is more than sometimes needed to understand the workings of the natural world. 
+It is the hope that the work in this thesis goes at least a small way towards making this beauty visible for more people than before.
 
-\section{Summary of thesis achievements}
+% \section{Summary of thesis achievements}
+% The first three main chapters of this thesis each presented work on the foundational algorithms behind visualisation pipelines.
+% Chapter~\ref{chap:stress}  
+% SGD, SGD for large graphs
+% Hierarchical edge bundling
+% Power-confluent drawing
 
-developed 3 algorithms
-SGD, SGD for large graphs
-Hierarchical edge bundling
-Power-confluent drawing
+% developed a game
+% showed that trophic level is a useful constraint to have 
+% showed that players are good
 
-developed a game
-showed that trophic level is a useful constraint to have 
-showed that players are good
+% \section{Future work}
+% If the reader wishes to build on the work presented in this thesis, there are multiple avenues through which 
 
-\section{Future work}
-If the reader wishes to build on the work presented in this thesis...
+% SGD should be expanded to normal MDS
+% Different $\mu$ caps should be tested
 
-SGD should be expanded to normal MDS
-Different $\mu$ caps should be tested
+% Hierarchical clustering should be done on a bigger benchmark and with
+% PGD should be made fuzzy
 
-Hierarchical clustering should be done on a bigger benchmark and with
-PGD should be made fuzzy
-
-EcoBuilder sequel should have different interface
+% EcoBuilder sequel should have different interface
