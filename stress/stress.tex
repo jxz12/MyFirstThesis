@@ -11,14 +11,15 @@
 If one were to ask a random group of people to draw a network on a piece of paper, it is likely that most would draw dots to represent the nodes, and lines joining the dots to represent the edges. This is a representation so intuitive that it is often synonymous with the abstract concept of a network entirely.
 This is the reason why this `join-the-dots' representation, known as the node-link diagram, is the most commonly studied and applied \citep{Ghoniem2004}, and is also why it has been chosen for the purposes of this thesis.
 
-However it is useful to have an idea of the other possible graph representations in order to gain a broader view of what network visualisation can be. A classical example of this includes the \emph{matrix plot}, which is a grid where each vertex is represented by a row and a column, and each edge is a dot filled in at the intersection of a row and column \citep{Liiv2010}.
+The contribution of this first chapter is entirely focused on algorithms for positioning the nodes in a node-link representation, specifically through the numerical optimisation of a popular objective function known as \emph{stress} \citep{Zheng2019Stochastic}.
+However, it is useful to have an idea of the other possible graph representations in order to gain a broader view of what network visualisation can be. A classical example of this includes the \emph{matrix plot}, which is a grid where each vertex is represented by a row and a column, and each edge is a dot filled in at the intersection of a row and column \citep{Liiv2010}.
 Specialised types of networks can also have similarly specialised representations. Trees, for example, can be depicted as packed rectangles \citep{Johnson1991} or circles \citep{Wang2006}, in what are known as \emph{treemaps}.
 Graphs with low \emph{boxicity}, such as food webs \citep{Eklof2013}, can be drawn as \emph{intersection graphs} of overlapping lines or rectangles or cuboids.\footnote{Or hypercuboids, although the usefulness of that for visualisation is likely limited.}
 A related and more common example is the \emph{disc graph}, where nodes are represented by circles and edges exist if the circles overlap. This sees widespread use as a Venn diagram, but usually without the connotation of network structure.
 A more obscure example is \emph{string graphs}, where each vertex is represented by a (possibly curved) line, and edges exist between vertices whose lines intersect.
 
 A gallery of such examples can be seen in Figure~\ref{fig:graph_representations}.
-Each of these each of these representations has its unique benefits and downsides: matrix plots can show a very dense amount of data in a small space, but are very dependent on the ordering of rows and columns \citep{Liiv2010}, as it can be seen in Figure~\ref{fig:graph_representations} that shuffling the order of rows and column can completely hide the underlying structure.
+Each of these each of these representations has its unique benefits and downsides: matrix plots can show a very dense amount of data in a small space, but are very dependent on the ordering of rows and columns \citep{Liiv2010}, as it can be seen in Figure~\ref{fig:graph_representations} that shuffling the order of rows and column can completely hide the underlying structure. A survey of algorithms that can be used to find insightful orderings can be found in \citet{Bach2016}.
 The intersection-style graphs are intuitive and do not require edges to be explicitly drawn, thus saving on visual clutter. However they cannot be drawn for all graphs for either the circle \citep{McDiarmid2014} or string \citep{Schaefer2003} representations.
 Treemaps effectively convey the idea of a hierarchy, where the root node completely envelops each of its children in a recursive manner. On their own they can only visualise trees, but have been effectively used in conjuction with clustering algorithms to apply them to general graphs; examples of this include \emph{graph thumbnails} \citep{Yoghourdjian2018}, or \emph{power graph decomposition} \citep{Dwyer2014} which will be studied later in Chapter~\ref{chap:power}, Section~\ref{sec:power_graph}.
   
@@ -29,11 +30,12 @@ Examples include \emph{arc} or \emph{chord diagrams}, where nodes are placed on 
 A method that has recently gained popularity is the \emph{hive plot}, a simple but effective variant of parallel coordinate plots \citep{Krzywinski2012}, which places nodes on radial lines to draw curves between them, in a similar fashion to radar charts \citep{Porter2018}. An important subtlety is that each node may or may not be placed on more than one line, and the order in which the nodes are spread across the line is also a conscious choice. This customisability is where the power of such a method lies.
 
 Hopefully the above examples give a taste of how varied the representation of a graph can be, even if the work in this thesis focuses its attention solely on the node-link diagram. The remainder of this chapter will specifically concern the \emph{layout} of nodes in such a visualisation.
+And while there will be a focus on automatic node layout, it is worth noting that how humans tackle the problem has also been studied empirically \cite{Purchase2010, Purchase2014}.
 
 \section{Background}
 \label{sec:nodes_background}
 The formal study of node-link diagrams dates back to least the 1920s. For example, F\'ary's theorem is a famous proof that any planar graph, defined as a graph that can be drawn without any intersecting links, can always be drawn in a planar way without needing links to be curved. This proof is attributed to \citet{Fary1948}, and was independently discovered by a host of other authors in the same era \citep{Steinitz1922, Wagner1936, Koebe1936, Stein1951}.
-The ensuing development of actual \emph{algorithms} for network layout emerged around the 1960s, with its seminal work widely attributed to the barycentre algorithm of \citet{Tutte1963}. 
+The ensuing development of actual \emph{algorithms} for network layout emerged around the 1960s, with its seminal work widely attributed to the barycentre algorithm of \citet{Tutte1963}.
 
 Tutte's algorithm is very simple, and boils down to solving a system of linear equations, each of which strives to set a single node to the barycentre (i.e.\ mean position) of its neighbours. This is defined as 
 \begin{equation}
@@ -77,7 +79,7 @@ This is done by using human intuition to formulate variations on Equation~\eqref
 
 \subsection{\texorpdfstring{\st{Force-directed}{ Optimisation algorithms}}{}}
 \label{sec:force_background}
-This section will present an overview of the various methods that have sprouted from this second branch of algorithms, around which the work in this chapter is based. All such algorithms will also be framed within the wider context of \emph{optimisation}, a framework which will tie together otherwise loosely-connected threads in a logical taxonomy.
+This section will present an overview of the various methods that have sprouted from this second branch of algorithms, around which the work in this chapter is based. All such algorithms will also be framed within the wider context of \emph{optimisation}, a framework which will tie together otherwise loosely-connected threads in a logical taxonomy.\footnote{This interpretation of framing the layout problem as optimisation is far from new, for example a technique known as simulated annealing has been applied to graph drawing since the 90s \citep{Davidson1996} which is strongly rooted within the field of optimisation. However it is important to acknowledge the word `force' as a slight misnomer, as physical simulations are not used in their implementation, a fact also emphasised by \citet{Fruchterman1991} in their description of their popular layout method. `Force-inspired' may have made for better terminology.}
 It will also lead more cogently into the novel contributions described in Section~\ref{sec:sgd}.
 A gallery of the algorithms to be described here is presented in Figure~\ref{fig:misc_force_layouts}.
 
@@ -159,7 +161,7 @@ Stress avoids this by forgoing repulsive forces entirely in Equation~\eqref{eq:s
 
 Stress also does not require extra input parameters such as those in Equation~\eqref{eq:eades} because $d_{ij}$ and $w_{ij}$ are both derived from the structure of the graph itself.
 However, it is known to be difficult to optimise due to an abundance of local minima \citep{DeLeeuw1988, Gansner2004}, and also does not scale well to larger graphs due to the quadratic number of terms in the summation \citep{Brandes2008, Hu2005}.
-The subsequent content of this chapter will aim at addressing these issues through the application of an algorithm known as \emph{stochastic gradient descent} to minimise Equation~\eqref{eq:stress}. Before describing the algorithm itself however, a history of other methods used to minimise stress will first be outlined.
+The subsequent content of this chapter will aim at addressing these issues through the application of an algorithm known as \emph{stochastic gradient descent} (SGD) to minimise Equation~\eqref{eq:stress}. Before describing the algorithm itself however, a history of other methods used to minimise stress will first be outlined.
 
 \subsection{Multidimensional scaling}
 \label{sec:stress_background}
@@ -216,28 +218,16 @@ In particular, \citet{Gansner2004} recommend \emph{Cholesky factorization} \cite
   \mathbf{x}_i^\prime = \frac{\sum_{j\neq i}w_{ij}(\mathbf{x}_j + d_{ij}(\mathbf{x}_i - \mathbf{x}_j)||\mathbf{X}_i - \mathbf{X}_j||^{-1})}{\sum_{j\neq i}w_{ij}}
   \label{eq:major_local}
 \end{equation}
-and is also guaranteed to monotonically decrease stress \citep{Gansner2004}. This local method will also be tested in Section~\ref{sec:sgd_experiment}, and will furthermore be important when considering large graphs in Section~\ref{sec:large_graphs}.
-
-\section{Stochastic gradient descent}
-\label{sec:sgd}
-The remaining content of this chapter will describe the application of stochastic gradient descent (SGD) to minimise stress. SGD is a method widely used in other fields, most notably in machine learning \citep{Bottou2012}, but not previously applied to minimise Equation~\ref{eq:stress}. 
-SGD approximates the gradient of a sum of functions using the gradient of its individual terms. For stress in particular, this has an intuitive geometric interpretation of moving a single pair of vertices at a time; this interpretation allows for a simple modification to the optimisation step which help to avoid local minima and speed up convergence (described in Section~\ref{sec:sgd_description}). The benefits of SGD over majorization will be shown through experiment.
+and is also guaranteed to monotonically decrease stress \citep{Gansner2004}. This local method will also be tested later in Section~\ref{sec:sgd_experiment}, and will furthermore be important when considering large graphs in Section~\ref{sec:large_graphs}.
 
 \subsection{Constraint relaxation}
 \label{sec:wcr_story}
-The origin of the work in this chapter is rooted in constrained graph layout, where a relaxation algorithm, here referred to as \emph{constraint relaxation} has gained popularity due to its simplicity and versatility \citep{Dwyer2009,Bostock2011}. This algorithm will provide the context to the geometric interpretation of SGD that will be leveraged to make the modifications in Section~\ref{sec:sgd_description}.
+The origin of the novel contributions in this chapter is rooted in constrained graph layout, where a relaxation algorithm, here referred to as \emph{constraint relaxation}, has gained popularity due to its simplicity and versatility \citep{Dwyer2009,Bostock2011}. This algorithm will provide the context to the geometric interpretation of SGD that will be leveraged to make the modifications in Section~\ref{sec:sgd}.
 
 Constraint relaxation was first introduced in video game engines as a technique to quickly approximate the behavior of cloth, which is modeled as a planar mesh of vertices that maintains its edges at a fixed length.
 A full physics simulation would represent each edge as a stiff spring, summing up and integrating over the resulting forces, but a realistic piece of cloth contains too many edges for this to be feasible.
 To avoid this bottleneck, \citet{Jakobsen2001} introduced the idea of considering each edge independently, moving a single pair of vertices at a time.
 While this is a rather simple and perhaps naive idea, in practice the solution converges in very few iterations.
-
-\begin{figure}
-  \centering
-  \includegraphics[width=.5\textwidth]{stress/satisfaction.pdf}
-  \caption[Illustration of the distance constraint in Equation~\ref{eq:constraint}]{Satisfaction of the distance constraint described by Equation~\eqref{eq:constraint}.}
-  \label{fig:satisfaction}
-\end{figure}
 
 This was utilized by \citet{Dwyer2009}, who used the method in conjunction with any standard force-directed layout to achieve effects such as making edges point downwards, or fixing cycles around the edge of a wheel. To define it properly in the case of maintaining a distance $d_{ij}$ between the coordinates of two nodes $\mathbf{X}_i$ and $\mathbf{X}_j$, this \emph{constraint} can be written as
 \begin{equation}
@@ -251,6 +241,13 @@ and is \emph{satisfied} by moving $\mathbf{X}_i$ and $\mathbf{X}_j$ in opposite 
 \end{equation}
 This can be seen as a diagram in Figure~\ref{fig:satisfaction}, and is analogous to decompressing an infinitely stiff spring of length $d_{ij}$.
 
+\begin{figure}
+  \centering
+  \includegraphics[width=.5\textwidth]{stress/satisfaction.pdf}
+  \caption[Illustration of the distance constraint in Equation~\ref{eq:constraint}]{Satisfaction of the distance constraint described by Equation~\eqref{eq:constraint}.}
+  \label{fig:satisfaction}
+\end{figure}
+
 Rewriting Equation~\eqref{eq:stress} as
 \begin{gather}
 \label{stress-terms}
@@ -261,10 +258,14 @@ Q_{ij}(\mathbf{X}) = w_{ij}(||\mathbf{X}_i - \mathbf{X}_j|| - d_{ij})^2,
 it can be seen that if every term $Q_{ij}$ in the summation is satisfied as a constraint~\eqref{eq:constraint}, then the total stress is zero, corresponding to an ideal layout. 
 This is exactly the idea behind the method that will be studied here --- a constraint is placed on every possible pair of vertices, and then satisfied one by one as above.
 
-However zero stress is almost always impossible, for the same reasons that the aforementioned tetrahedron cannot be embedded in 2D. In such situations, simply satisfying constraints does not lead to convergence, but a simple extension will now be described that not only converges but, remarkably, also minimises stress.
+However zero stress is almost always impossible, for the same reasons that the aforementioned tetrahedron cannot be embedded in 2D. In such situations, simply satisfying constraints does not lead to convergence, but the rest of this chapter will be dedicated to describing a simple extension that not only converges but, remarkably, also minimises stress.
 
-\subsection{Capped stochastic gradient descent}
-\label{sec:sgd_description}
+\newpage
+\section{Stochastic gradient descent}
+\label{sec:sgd}
+The remaining content of this chapter will describe the novel application of stochastic gradient descent (SGD) to minimise stress. SGD is a method widely used in other fields, most notably in machine learning \citep{Bottou2012}, but not previously applied to minimise Equation~\ref{eq:stress}. 
+SGD approximates the gradient of a sum of functions using the gradient of its individual terms. For stress in particular, this has an intuitive geometric interpretation of moving a single pair of vertices at a time; this interpretation allows for a simple modification to the optimisation step which help to avoid local minima and speed up convergence. The benefits of SGD over majorization will be shown through experiment.
+
 The modifications required to the constraint relaxation described above can be understood by first noticing that satisfying a constraint is equivalent to moving both vertices in the direction of the gradient of a stress term $Q_{ij}$
 \begin{equation}
   \label{gradient}
@@ -296,7 +297,7 @@ Note that since this gradient is zero with respect to all $\mathbf{X}_k$ other t
   \label{eq:SGD_step}
 \end{equation}
 
-The constraint relaxation of the previous section is therefore equivalent to a special case of SGD where $w_{ij}=1$ and $\eta=1/4$.\footnote{This equivalence to stochastic gradient descent was not known for a long time, as neither \citet{Jakobsen2001} nor \citet{Dwyer2009} classified the algorithm correctly. In fact, not even my supervisors and I knew that this was SGD in the first version of this paper we submitted to a journal, where it was called \emph{weighted constraint relaxation}.}
+The constraint relaxation of the previous section is therefore equivalent to a special case of SGD where $w_{ij}=1$ and $\eta=1/4$.\footnote{This equivalence to stochastic gradient descent was not known for a long time, as neither \citet{Jakobsen2001} nor \citet{Dwyer2009} classified the algorithm correctly. In fact, not even my supervisors and I knew that this was SGD in the first version of this paper we submitted to a journal, where we chose the name \emph{weighted constraint relaxation}.}
 Additionally in this case, a gradual reduction in the step size $\eta$ is necessary to make the process converge, since not all terms can be simultaneously minimised. This will be further elaborated in Section~\ref{sec:annealing}, and the problem can be interpreted in the context of stress as each edge of the aforementioned tetrahedron satisfying its constraint one by one as in Figure~\ref{fig:satisfaction}, but never finding a configuration where all are satisfied at the same time.
 
 Writing $\mu=4w_{ij}\eta$ as the coefficient of $\mathbf{r}$, it can be seen that $Q_{ij}\leftarrow 0$ when $\mu=1$ and decreases monotonically from $\mu=0$ to $\mu=1$.
@@ -377,7 +378,7 @@ Since this will always eventually be the case because $\eta$ tends to zero, it h
   \end{algorithm}
 
   \caption[Pseudocode for stochastic gradient descent]{
-  Pseudocode for the algorithm described in Section~\ref{sec:sgd_description}.
+  Pseudocode for the algorithm described in Section~\ref{sec:sgd}.
   The results in this paper initialize positions randomly within a 1$\times$1 square on line~\ref{code:sgd:init}.
   The annealing schedule on line~\ref{code:sgd:annealing} is explained in Section~\ref{sec:annealing}.
   }
@@ -588,7 +589,7 @@ On the other hand, \texttt{dwt\_307} is the one graph (of the 243 investigated) 
   \label{fig:cylinder}
 \end{figure}
 
-% \texttt{494\_bus} is an example of a very nice network to draw and is the type of graph where Equation~(\ref{stress}) shines. Its symmetry is clear here, whereas other force-directed algorithms can fail to show this due to the \textit{peripheral effect}~\citep{hu2005efficient}.
+% \texttt{494\_bus} is an example of a very nice network to draw and is the type of graph where Equation~(\ref{stress}) shines. Its symmetry is clear here, whereas other force-directed algorithms can fail to show this due to the \emph{peripheral effect}~\citep{hu2005efficient}.
 \texttt{494\_bus} is an example of the type of graph where stress as an energy function produces better layouts than other popular models. Its symmetry is clear here, whereas other force-directed algorithms can fail to show this due to the \emph{peripheral effect} \citep{Hu2005}.
 \texttt{dwt\_361} is an example of the type of graph that both SGD and majorization struggle with: long graphs that can twist. A twist in a graph constitutes a deep local minimum that iterative methods struggle with in general, and SGD is still susceptible to this issue.
 \texttt{Sandi\_authors} is a small graph, but with some densely packed sections that can become stuck behind each other, something that majorization often struggles with.
@@ -647,8 +648,10 @@ Within the normal MDS community, there have been multiple attempts to approximat
 Fortunately, \citet{Ortmann2017} developed an approach designed around graphs. They pick a set of `pivot' vertices whose shortest paths are used as an approximation for the shortest paths of vertices close to them.
 Since this approach reduces the number of terms in the summation, using it in the context of SGD also reduces the amount of work per iteration.
 
-To approximate the full model well it is important to choose pivots that are well distributed over the graph, and in their original paper \citet{Ortmann2017} present an experimental evaluation of various methods for doing so. The implementation here uses \textit{max/min random sp} to select pivots.
-Non-random \textit{max/min sp} starts by picking one or more pivots and computing their shortest paths to all other vertices, with subsequent pivots chosen by picking the vertex with the maximum shortest path to any pivot chosen so far \citep{DeSilva2004}. The random extension instead samples for subsequent pivots with a probability proportional to this shortest path to any pivot, rather than simply always picking the maximum.
+To approximate the full model well it is important to choose pivots that are well distributed over the graph, and so \citet{Ortmann2017} presented an experimental evaluation of various methods for doing so. The implementation here uses \emph{max/min random sp} to select pivots. This was chosen because it gives good performance (second-best of all methods evaluated in terms of average reduction in stress) and the only method that performed slightly better, \emph{k-means sp}, is more complicated to implement and has a worse asymptotic complexity \citep{Ortmann2017}.
+To further elaborate, ordinary (non-random) \emph{max/min sp} starts by picking one pivot randomly and computing its shortest paths to all other vertices, with subsequent pivots chosen by picking the vertex with the maximum shortest path to any pivot chosen so far \citep{DeSilva2004}. The random extension \emph{max/min random sp} instead samples for subsequent pivots with a probability proportional to shortest paths to any pivot, rather than simply always picking the maximum.
+\emph{k-means sp} is also built upon \emph{max/min sp}, as it uses the calculated shortest paths as a high-dimensional embedding, exactly following the same first step as the layout method of \citet{Harel2004}. A standard $k$-means clustering algorithm is then applied to this embedding \citep{Friedman2001Nearest}, and pivots are chosen as the vertices closest the centroids of these clusters.
+This extra clustering step is what pushes up the resulting asymptotic complexity \citep{Ortmann2017} which, in combination with the extra implementation work required, was why it was not chosen here.
 
 These pivots $p\in P$ are then each assigned a region $R(p)$, which is the set of vertices closer to that pivot than any other. The relevant weights $w_{ip}$ are then adapted depending on the composition of the region, resulting in a new decomposed second half of the summation
 \begin{equation}
@@ -668,25 +671,6 @@ The reason the weight on vertex $i$ is increased like this is because its contri
 It is important to note that if both vertices $p$ and $q$ are pivots then $w_{pq}'$ may not equal $w_{qp}'$ and if only $p$ is a pivot then $w_{pq}'=0$ as $q$ should not contribute to the position of $p$.
 
 This leaves far fewer terms in the summation, and so the complexity per iteration for SGD is now $\mathcal{O}(|E| + |P||V|)$, as any terms that have been cut are simply ignored. In the context of majorization this new model must be used with the local method described at the end of Section~\ref{sec:majorization}, resulting in the same complexity.
-
-\begin{figure}
-  \centering
-  \makebox[\textwidth][c]{\includegraphics[width=1.06\textwidth]{stress/ortmann.pdf}}
-  \caption[Results against majorization using sparse stress]{Examples of sparse SGD on the graphs \texttt{USPowerGrid}, \texttt{EVA}, and \texttt{3elt}. From left to right: best layouts using 10 pivots, 50, 200, full stress, and plots showing stress over 25 runs for each number of pivots.
-  The 15 iteration annealing schedule from Section~\ref{sec:annealing} is used for SGD, and majorization is allowed to run for 100 iterations.
-  }
-  \label{fig:pivots}
-% \end{figure}
-  \vspace*{\floatsep}
-% \begin{figure}
-  \centering
-  \makebox[\textwidth][c]{\includegraphics[width=1.02\textwidth]{stress/showcase.png}}
-  \caption[A gallery of large graphs layed out using sparse stress]{Some larger graphs, each approximated with 200 pivots.
-  %, also using the 15 iteration schedule from Section~\ref{sec:annealing}.
-  From left to right, top row then bottom: \texttt{pesa} (11,738 vertices), \texttt{bcsstk31} (35,588), \texttt{commanche\_dual} (7,920) and its original (3D) layout, \texttt{finance256} (37,376), \texttt{bcsstk32} (44,609), \texttt{luxembourg\_osm} (114,599) and its original layout. The right-hand graphs have edge weights calculated from distances in their original layouts.
-  }
-  \label{fig:showcase}
-\end{figure}
 
 \begin{figure}
   \removeAlgorithmFigureError
@@ -746,6 +730,25 @@ This leaves far fewer terms in the summation, and so the complexity per iteratio
   Note that all $R(p)$ and $w_{ip}'$ can be constructed over the course of shortest path calculations without increasing the asymptotic complexity \citep{Ortmann2017} by using a multi-source shortest paths algorithm.
   \label{fig:pseudo_sparse}
   }
+\end{figure}
+
+\begin{figure}
+  \centering
+  \makebox[\textwidth][c]{\includegraphics[width=1.06\textwidth]{stress/ortmann.pdf}}
+  \caption[Results against majorization using sparse stress]{Examples of sparse SGD on the graphs \texttt{USPowerGrid}, \texttt{EVA}, and \texttt{3elt}. From left to right: best layouts using 10 pivots, 50, 200, full stress, and plots showing stress over 25 runs for each number of pivots.
+  The 15 iteration annealing schedule from Section~\ref{sec:annealing} is used for SGD, and majorization is allowed to run for 100 iterations.
+  }
+  \label{fig:pivots}
+% \end{figure}
+  \vspace*{\floatsep}
+% \begin{figure}
+  \centering
+  \makebox[\textwidth][c]{\includegraphics[width=1.02\textwidth]{stress/showcase.png}}
+  \caption[A gallery of large graphs layed out using sparse stress]{Some larger graphs, each approximated with 200 pivots.
+  %, also using the 15 iteration schedule from Section~\ref{sec:annealing}.
+  From left to right, top row then bottom: \texttt{pesa} (11,738 vertices), \texttt{bcsstk31} (35,588), \texttt{commanche\_dual} (7,920) and its original (3D) layout, \texttt{finance256} (37,376), \texttt{bcsstk32} (44,609), \texttt{luxembourg\_osm} (114,599) and its original layout. The right-hand graphs have edge weights calculated from distances in their original layouts.
+  }
+  \label{fig:showcase}
 \end{figure}
 
 Resulting layouts are presented in Figures~\ref{fig:pivots}, where the graph \texttt{EVA} is the least well approximated by the sparse model, likely due to its low diameter and high degree distribution. \texttt{3elt} is very well approximated by the model itself, but the performance of majorization declines as the number of pivots exceeds ${\sim}100$, likely due to the increased number of terms in the summation that introduce more local minima to jump over.

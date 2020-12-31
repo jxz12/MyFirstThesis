@@ -8,7 +8,7 @@
   Using \texttt{MAX\_EXT} blending as suggested by \citet{Holten2006} allows links flowing in opposite directions to be salient, and anti-aliasing is crucial for smoothing the output. Source code for generating this figure can be found at \url{www.github.com/jxz12/HierarchicalEdgeBundles}.}
   \label{fig:metaunity}
 \end{figure}
-The previous chapter was an exploration of how to position the vertices of a graph, and the natural question to then ask is how to deal with the only remaining component: the edges. However this question is seemingly redundant at first, as the obvious answer is to simply draw straight lines between adjacent nodes. While this is by no means a poor choice, and is exactly how all node-link diagrams have been drawn thus far, this chapter and the next will explore the possibility of drawing links using curves instead.
+The previous chapter was an exploration of how to position the vertices of a graph, and the natural question to then ask is how to deal with the only remaining component: the edges. However this question is seemingly redundant at first, as the obvious answer is to simply draw straight lines between adjacent nodes. While this is by no means a poor choice, and is exactly how all node-link diagrams have been drawn thus far in this thesis, this chapter and the next will explore the possibility of drawing links using curves instead.
 
 \section{Background}
 \label{sec:edges_background}
@@ -79,32 +79,32 @@ This can either be done from the bottom up, i.e.\ each node starts in its own cl
 The output fits well here, since the goal is to construct a hierarchical edge bundling visualisation like the one in Figure~\ref{fig:metaunity}, but without a prior hierarchy included with the data; the dendrogram produced from such a clustering algorithm can be used as this missing hierarchy.
 
 This idea of using the output dendrogram of a clustering algorithm to produce hierarchical edge bundling has been previously explored by \citet{Jia2011} who produce a hierarchy using the algorithm of \citet{Girvan2002}. This method removes one edge from the network at a time, specifically the one with the most \emph{betweenness centrality} i.e.\ the edge traversed the most often when mapping the shortest paths between all pairs of vertices. This naturally splits clusters when an edge is removed that is the final bridge between two clusters.
-Unfortunately Jia et al.\ did not perform any quantitative analysis to evaluate the performance of their clustering algorithm, and only present results when using one clustering method. The work in the following section will aim to extend their work by evaluating the performance of a number of hierarchical clustering methods, against a benchmark of graphs where the ground truth cluster configuration is known.
+Unfortunately Jia et al.\ did not perform any quantitative analysis to evaluate the performance of their clustering algorithm, and only present results when using one clustering method. The contribution in this chapter extends their work by evaluating the performance of a number of hierarchical clustering methods, against a benchmark of graphs where the ground truth cluster configuration is known.
 
-\section{Hierarchical clustering}
-\label{sec:hierarchical_clustering}
+\subsection{Hierarchical clustering}
+\label{sec:dissimilarities}
 \begin{figure}
   \centering
   \includegraphics[width=\textwidth]{power/lesmis.pdf}
-  \caption[A hierarchical edge bundling pipeline]{An example of the hierarchical edge bundling pipeline presented here, on the graph \texttt{lesmis} which describes co-appearances of characters in the musical les Mis\'erables \citep{Knuth1993}. The top-left is a layout from stress optimisation; top-right is a dendrogram computed from agglomerative dissimilarity clustering (see Section~\ref{sec:dissimilarities}); bottom-left is the tidied up hierarchical tree after pruning (see Section~\ref{sec:pruning}); bottom-right is the final hierarchical edge bundling diagram when original edges are rendered using splines (see Section~\ref{sec:heb_background}).
+  \caption[A hierarchical edge bundling pipeline]{An example of the hierarchical edge bundling pipeline explored here, on the graph \texttt{lesmis} which describes co-appearances of characters in the musical les Mis\'erables \citep{Knuth1993}. The top-left is a layout from stress optimisation; top-right is a dendrogram computed from agglomerative dissimilarity clustering (see Section~\ref{sec:dissimilarities}); bottom-left is the tidied up hierarchical tree after pruning (see Section~\ref{sec:pruning}); bottom-right is the final hierarchical edge bundling diagram when original edges are rendered using splines (see Section~\ref{sec:heb_background}).
   The characters Jean Valjean and Javert are the main protagonist and antagonist respectively, and they are placed next to each other for both the stress and bundled layouts. Those two are highlighted, as well as a third main character, Marius, whose role in the network is much clearer in the bundled layout.}
   \label{fig:lesmis}
 \end{figure}
-To assess the quality of the divisive Girvan-Newman (GN) algorithm used by \citet{Jia2011}, it will be compared with \emph{agglomerative dissimilarity clustering}.
-This is a family of algorithms where the input is a matrix of \emph{dissimilarities} between individual datapoints, in this case the vertices of a graph, and the output is a dendrogram as required. Similarly to the stress-based layout explored in the previous chapter, it is a more general algorithm that can be applied to any numerical datasets and not just graphs, unlike the methods previously outlined in Section~\ref{sec:clustering_background}. It is also closely related to the class of multidimensional scaling methods that stress minimisation belongs to, as both procedures take a matrix of dissimilarities as input.
+
+To assess the quality of the divisive Girvan-Newman (GN) algorithm used by \citet{Jia2011}, its performance will be compared with \emph{agglomerative dissimilarity clustering}. This comparison will be done via experiment in Section~\ref{sec:clustering_experiment}, and the rest of this background section will outline the different methods it will be compared to.
+
+Dissimilarity clustering is a family of algorithms where the input is a matrix of \emph{dissimilarities} between individual datapoints, in this case the vertices of a graph, and the output is a dendrogram as required. Similarly to the stress-based layout explored in the previous chapter, it is a more general algorithm that can be applied to any numerical dataset and not just graphs, unlike the methods previously outlined in Section~\ref{sec:clustering_background}. It is also closely related to the class of multidimensional scaling methods that stress minimisation belongs to, as both procedures take a matrix of dissimilarities as input.
 
 Not only does this fit thematically with the topics explored in previous chapters, but a key benefit to using dissimilarity clustering is that the output dendrogram contains extra information to describe the `quality' of the merge at that point. This information is vital as it can be used to `prune' the hierarchical tree in order to make the resulting edge bundles more salient. This will be elaborated upon in Section~\ref{sec:pruning}, and an example of the method pipeline from start to finish is illustrated in Figure~\ref{fig:lesmis}.
-Two other questions must first be answered before one can proceed with performing this clustering: what exactly are the dissimilarities to be used as input, and how will the algorithm proceed to process these dissimilarities to merge clusters? These will both be answered in the following section.
+Two other questions must first be answered before one can proceed with performing this clustering: what exactly are the dissimilarities to be used as input, and how will the algorithm proceed to process these dissimilarities to merge clusters? There are many choices for answering these questions, and outlining these will cover the remainder of the background for this chapter.
 
-\subsection{Dissimiliarity clustering}
-\label{sec:dissimilarities}
+\subsubsection{Greedy agglomeration}
 General hierarchical clustering based on dissimilarities can be done in both an agglomerative and divisive way, but the work here will focus on agglomerative methods. Agglomerative methods are more popular among practitioners \citep{Roux2018} due largely to the divisive version having $\mathcal{O}(2^{|V|})$ possible splits for a cluster of size $|V|$, as each datapoint can be placed in either one half or the other. This results in an exponential runtime complexity per split, whereas the agglomerative method has only to chose from pairs of datapoints, giving an $\mathcal{O}(|V|^2)$ complexity per merge.
 
 There do exist heuristics to speed up the divisive method to bring the complexity down to polynomial, such as using algorithms like k-means to decide the split instead \citep{Lamrous2006}.
 % It can also be argued that a divisive method can take a more global approach.
-However, since there already exists a graph-specific divisive method in the GN algorithm to compare to, the work on this chapter will focus on comparing it to its agglomerative counterparts.
+However, since there already exists a graph-specific divisive method in the GN algorithm to compare to, this chapter will focus on comparing it to its agglomerative counterparts.
 
-\subsubsection{Greedy agglomeration}
 The agglomerative process is as follows:
 \begin{mdframed}[backgroundcolor=WhiteSmoke]
 \begin{enumerate}[leftmargin=*]
@@ -219,9 +219,17 @@ where $\mathbf{L}^+$ is the pseudoinverse of $\mathbf{L}$ \citep{Albano2012}.
 % say laplacian is kirchoff for commute distance
 The distances derived from Equations~\eqref{eq:jaccard}--\eqref{eq:commute} will all be used in the following section as part of an experimental study to determine which is most effective.
 
-\subsection{Experimental study}
+\newpage
+\section{Experimental study}
 \label{sec:clustering_experiment}
 Since clustering is an undefined problem, the quality of clusters will be measured by using a benchmark set of graphs where a ground truth clustering configuration is known.
+
+TODO: make it clear that we are reducing the problem of bundling down to a clustering problem. The contribution is not a new bundling technique, but a comparison of clustering algorithms...
+% The problem in chapter two should be described precisely. The computation of a hierarchical clustering is
+% being used to draw and compute the bundling. There are many hierarchies that can be computed. I would
+% write a paragraph saying that there are multiple hierarchies that can be computed for this bundling. In essence,
+% the variability in the hierarchy computation replaces the variability for edge bundling without hierarchies.
+% Papers that perform bundling without hierarchies need to be cited
 
 Table~\ref{tab:bundle_graphs} contains the four graphs used in this study.
 The graph \texttt{karate} is a classic dataset that has been extensively studied in the network research literature \citep{Fortunato2016}, originally compiled by \citet{Zachary1977}. It is a social network containing relationships between members of a karate club, in which a rift between two club leaders caused the club to split into two new clubs, where the resulting members of the two clubs form the ground truth clustering of the data.
@@ -358,6 +366,7 @@ The current benchmark also measures the quality of clustering, but not bundling 
 
 % Another benefit to agglomerative methods is that it is easy to interpret and understand what the algorithm is doing, even if the answer is suboptimal. I would always pick an algorithm that I fully understand for a visualisation over a black-box algorithm that produces slightly better results. But this is just opinion.
 
+
 \chapter{Power-confluent drawing}
 \label{chap:power}
 Edge bundling can be likened to data compression on graphs, as the goal is to describe a given network without having to know the source and target for every individual edge.
@@ -381,15 +390,17 @@ This eliminates crossings by allowing edges to overlap, and is analogous to junc
 Confluent drawing has its roots in the more theoretical side of graph drawing, and was originally developed by \citet{Dickerson2005} as a novel method for drawing planar graphs. In Figure~\ref{fig:power_teaser} for example, the drawing of the original graph on the left contains many crossings and in fact can not be drawn in a planar way. Allowing edges to overlap, but requiring all smooth curves to denote an edge between endpoints, means that all connectivity is preserved, thus adhering to the analogy of lossless compression.
 The precise definition of what defines a confluent drawing will be studied later in Section~\ref{sec:confluent_definition}.
 
-The remaining work in this chapter will study a subset of confluent drawing known as \emph{power-confluent} drawing.
+The work in this chapter will study a subset of confluent drawing known as \emph{power-confluent} drawing.
 The process of producing a power-confluent drawing consists of three steps: finding the \emph{power graph decomposition;} converting this decomposition into an equivalent auxiliary routing graph (ARG), similarly to hierarchical edge bundling in Section~\ref{sec:pruning}; and finally drawing curves back on top to render a confluent drawing. Each step is illustrated in Figure~\ref{fig:power_teaser}. This was an idea originally explored by \citet{Bach2017}, and the work presented here will aim to further develop and formalise the methods there.
+
 Specifically, the speed and quality of the power decomposition algorithm will be improved, and two theoretical issues will be resolved for the conversion to a confluent drawing.
+Note that there will be no dedicated section on background literature in this chapter, as the broader 
 
 \section{Power graph decomposition}
 \label{sec:power_graph}
 A power graph is an extension to the conventional node-link diagram, that allows vertices to be grouped together into \emph{power groups}, in order to merge edges that share endpoints into individual \emph{power edges} (see the leftmost two drawings in Fig.~\ref{fig:power_teaser}). Power groups may also be nested in a hierarchical structure, allowing power edges to cross group boundaries.
 
-This idea was originally developed for use in biological protein--protein interaction network analysis by \citet{Royer2008}, who originally computed a decomposition by using heuristics based on the Jaccard index, defined here in Equation~\ref{eq:jaccard}. This was later improved by \citet{Dwyer2014} who presented multiple methods of finding both optimal and sub-optimal decompositions, while also proving that the problem in general is likely to be $\mathcal{NP}$-hard. The method they recommended for practical use is a greedy agglomeration technique, not unlike the ones studied in Section~\ref{sec:dissimilarities}, except without the benefit of the Lance-Williams property shown in Equation~\eqref{eq:lancewilliams}. Its complexity is $\mathcal{O}(|V|^3|E|\log|E|)$, because it must search through $\mathcal{O}(|V|^2)$ merges $\mathcal{O}(|V|)$ times, and each merge takes $\mathcal{O}(|E|\log|E|)$ time to assess its quality. Here this assessment step will be improved slightly to $\mathcal{O}(|E|)$, and in practice the number of edges to be considered diminishes quickly anyway \citep{Dwyer2014}.
+This idea was originally developed for use in biological protein--protein interaction network analysis by \citet{Royer2008}, who originally computed a decomposition by using heuristics based on the Jaccard index, defined here in Equation~\ref{eq:jaccard}. This was later improved by \citet{Dwyer2014} who presented multiple methods of finding both optimal and sub-optimal decompositions, while also proving that the problem in general is likely to be $\mathcal{NP}$-hard. The method they recommended for practical use is a greedy agglomeration technique, not unlike the ones studied in Section~\ref{sec:dissimilarities}, except without the benefit of the Lance-Williams property shown in Equation~\eqref{eq:lancewilliams}. Its complexity is $\mathcal{O}(|V|^3|E|\log|E|)$, as it must search through $\mathcal{O}(|V|^2)$ merges $\mathcal{O}(|V|)$ times, and each merge takes $\mathcal{O}(|E|\log|E|)$ time to assess its quality. Here this assessment step will be improved slightly to $\mathcal{O}(|E|)$, and in practice the number of edges to be considered diminishes quickly anyway \citep{Dwyer2014}.
 
 This is also the method chosen by \citet{Bach2017}, to construct their initial power graphs, and so is the one studied here. Note that the following description is specific to undirected graphs; the changes required for directed graphs are described in Section~\ref{sec:power_directed}.
 
@@ -402,7 +413,7 @@ The number of eliminated edges for any given merge is given by
   \label{eq:kappa_cap}
 \end{equation}
 where $m$ and $n$ are modules and $N$ are their neighbour sets.
-This is almost the same as $\mathrm{nedges}(m,n)$ in \citep{Dwyer2014}, except as a positive score rather than a negative penalty.
+This is almost the same as $\mathrm{nedges}(m,n)$ in \citet{Dwyer2014}, except as a positive score rather than a negative penalty.
 % See Dwyer et al. \citep{Dwyer2014} for detailed background and definitions.
 
 This is the stage where the difference between this power decomposition and hierarchical clustering becomes clear: since power decomposition must preserve connectivity information, in line with the lossless compression analogy, care must be taken when performing the merging step in order to keep edges and power edges pointing at the correct endpoints. 
@@ -733,7 +744,7 @@ This entire process is illustrated in Figure~\ref{fig:radial}, and pseudocode fo
 
 \subsection{B-splines}
 \label{sec:bspline_details}
-The choice of spline has not yet been discussed, for either confluent drawing or the hierarchical bundling of Section~\ref{sec:hierarchical_clustering}. 
+The choice of spline has not yet been discussed, for either confluent drawing or the hierarchical bundling of Section~\ref{sec:clustering_experiment}. 
 The usually chosen spline in the literature is the \emph{B-spline}, which is a generalisation of B\'ezier curves that offers the two nice properties of convex hull and local control, previously mentioned in Section~\ref{sec:node_split}.
 A more thorough explanation into why these properties are beneficial to bundling is, however, something generally missing from the literature, and so this section will attempt to elucidate some theory behind why they are commonly used for bundling purposes.
 The importance of choosing the correct spline is illustrated in \citet{Jia2011}, in which the diagrams contain poorly implemented B-splines that do not satisfy these two properties.
