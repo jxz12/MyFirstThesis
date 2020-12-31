@@ -20,7 +20,10 @@ This is analogous to organising the wires in a computer system by tying groups o
 
 The literature is rich with various different methods for performing this bundling, dating all the way back to the 1800s with the flow maps of \citet{Minard1862} or Sankey diagrams \citep{Sankey1896}.
 More modern algorithms for performing bundling automatically include multilevel agglomerative edge bundling by \citet{Gansner2011} which greedily merges pairs of links at a time by selecting the pairs that minimise a cost function based on the amount of `ink' used to draw links. A more complex cost function is used in metro-style bundling by \citet{Pupyrev2016}, which is based on multiple criteria including ink, individual edge lengths and node separations. 
+The winding roads method of \citet{Lambert2010} first draws a supplementary grid around the nodes in the graph, and routes edges through this grid such that they naturally bundle on shared grid coordinates.
+
 The same premise behind force-directed node layout is also used in force-directed edge bundling by \citet{Holten2009}, which bundles links by defining forces between adjacent links instead of nodes. As shown previously in Section~\ref{sec:force_background}, force-directed methods are in fact gradient descent optimisation methods where the gradient is defined before the cost function itself, and this edge bundling technique is no different.
+A similar method by \citet{Cui2008} also uses geometry to group edges, but instead discretely clusters them first. 
 
 Another effective approach is \emph{kernel density estimation} by \citet{Hurter2012}, who iteratively apply a convolutional filter over a density map of links in an already rendered diagram. This method belongs to the subfield of image-based bundling methods \citep{Lhuillier2017,Telea2018}. A diverse gallery of edge bundling algorithms applied to the same dataset can be seen in the review of \citet{Lhuillier2017}.
 However all of the aforementioned methods share a key similarity: they apply bundling upon the assumption that node positions are predetermined and will not be moved. This is perfectly fine and even desirable in many common use cases where nodes have a predefined location, such as geographical maps. However when there is no predefined positioning, the usual methods such as force-directed layouts were never designed to lend themselves towards bundling. A layout that can be bundled must place similar links in parallel, and this is not guaranteed or even desired for most force layouts. Maximising the angular resolution of links sharing nodes is sometimes even directly optimised as part of the cost function \citep{Argyriou2010} and so common layout methods usually do not help, and may even worsen, the bundling quality of their visualisations.
@@ -33,7 +36,6 @@ An example of this in action can be seen in Figure \ref{fig:metaunity}, which il
 The trick to the bundling comes from the fact that there is extra metadata available: the hierarchy of folders and source files that hold the code.
 This hierarchy, not the call graph itself, is first layed out as a tree. Then, since this tree includes extra nodes to represent the folders and source files, these extra nodes are erased from the final visualisation. However their coordinates are instead used as an auxiliary routing graph (ARG) to route the original edges through.
 More precisely, this process of routing involves taking every edge in the original call graph (the vertices of which map to leaves of the hierarchical tree) and rendering each one using a spline curve, whose control points consist of the path from leaf to leaf through the ARG. There is only one such path through the ARG because it is a tree, although this may not necessarily be the case; this possibility of a non-tree-shaped ARG will be studied in the following chapter, Section~\ref{sec:short_circuits}. The precise definition of the spline curve is also important, and will be further elaborated upon in Section~\ref{sec:bspline_details}, but for now the important thing to note is that this produces bundling behaviour because vertices close to each other in the hierarchy will share control points for their splines, thus curving their rendered links towards each other.
-% The hierarchical tree extracted from the Unity game engine can be seen on the TODO hand side, to illustrate its influence on the final visualisation.
 An example of a hierarchical tree with its resulting bundles side by side can be seen later in Figure~\ref{fig:lesmis}.
 
 This technique is so effective because the structure of the bundles is supervised by human judgement. To continue within the call graph example, the hierarchy of folders and source files is literally designed by the programmers for organisational purposes, and so it is very likely to admit some utility for also organising, say, a visualisation.
@@ -224,7 +226,9 @@ The distances derived from Equations~\eqref{eq:jaccard}--\eqref{eq:commute} will
 \label{sec:clustering_experiment}
 Since clustering is an undefined problem, the quality of clusters will be measured by using a benchmark set of graphs where a ground truth clustering configuration is known.
 
-TODO: make it clear that we are reducing the problem of bundling down to a clustering problem. The contribution is not a new bundling technique, but a comparison of clustering algorithms...
+It is important to note that the contributions in this chapter are solely in comparing different hierarchical clustering methods by quantifying the choice between them. This means that the edge bundling problem has been reduced to the task of hierarchical clustering in a network context.
+This means that a comparison to other edge bundling methods is out of scope, but also means that the results presented have potential significance in the general field of network clustering as well as for bundling.
+
 % The problem in chapter two should be described precisely. The computation of a hierarchical clustering is
 % being used to draw and compute the bundling. There are many hierarchies that can be computed. I would
 % write a paragraph saying that there are multiple hierarchies that can be computed for this bundling. In essence,
@@ -285,12 +289,12 @@ Results are presented in Figures~\ref{fig:ARI1} and~\ref{fig:ARI2}, where all di
   \label{fig:ARI2}
 \end{figure}
 
-\subsubsection{Results}
+\subsection{Results}
 The aim of this study is to answer two questions: which dissimilarity measure is best, and which linkage method is best for clustering this dissimilarity?
 Unfortunately there is no clear-cut answer to either question, but the results can be interpreted to give some recommendations. Looking at the bottom right panels for each graph, it is immediately clear that single linkage is the least effective and should be avoided. The best scores for the remaining linkage methods generally hover around the same value, and so it is clear that the remaining four linkage methods all \emph{can} result in high quality results. Looking at the mean ARI scores, however, it becomes apparent that Ward's method produces the best results on average. This is consistent with the choice made by \citet{Pons2006} for their clustering method, now with quantitative results to verify the decision.
 
 % A more qualitative observation is that Ward also tends to give the best hierarchical structure in terms of neat trees without branches that, which is difficult to measure but results in the best bundles.
-The best dissimilarity for Ward over all graphs is Euclidean on snapshot embedding with $t=5$ in Equation~\eqref{eq:walktrap}, and it seems the original authors in \citep{Pons2006} agree with this choice too, as they performed their analysis using either $t=2$ or $t=5$.
+The best dissimilarity for Ward over all graphs is Euclidean on snapshot embedding with $t=5$ in Equation~\eqref{eq:walktrap}, and it seems the original authors in \citet{Pons2006} agree with this choice too, as they performed their analysis using either $t=2$ or $t=5$.
 Using Equation~\ref{eq:damped} to take a weighted average of step lengths also does not improve the clustering performance, further confirming their design choices.
 Despite being a distance metric, the performance of Wasserstein is consistently poorer than both Euclidean and KL. It is however worth noting that it consistently improves as the value of $t$ rises for both snapshot and damped embeddings. Both sets of parameters converge to the same embedding (the stationary distribution of the Markov chain) for $t\rightarrow \infty$ and $t\rightarrow 1$, respectively, so it seems that Wasserstein is effective on this stationary distribution, at least on this benchmark.
 
@@ -348,6 +352,7 @@ Calculating the betweenness-centrality for each edge is $\mathcal{O}(|V||E|)$ \c
 Ward's method also consistently outperforms other linkage methods, and a qualitative observation of note is that it also tends to give dendrograms that lend themselves more to the pruning process in Section~\ref{sec:pruning}. Branches in Ward dendrograms more clearly delineate separately groups of clusters, leading to easier simplification into a streamlined hierarchy for bundling.
 % more systematic study into different methods for pruning 
 When the opposite situation occurs, i.e.\ if differences in branch height are homogenous, the pruning process may merge every single branch into one, since child branches are recursively merged into their parents. However this also usually corresponds to a poor quality clustering in general, because the algorithm could not find large groups of datapoints all close to each other.
+
 In a real-world visualisation pipeline, this pruning process would ideally be human driven, with methods such as MLCut of \citet{Vogogias2016} allowing dendrograms to be interactively explored and cut to form flat clusters. Such a tool could be easily applied to perform multiple cuts in order to form a hierarchy for bundling.
 % trees can be interactively explored using \citet{Archambault2008}
 Pruning is also not the only way to solve the dendrogram issues of Figure~\ref{fig:lesmis}. For example, different types of splines may not result in the same issues. A more thorough examination into the use of B-splines can be found in Section~\ref{sec:bspline_details}.
@@ -361,7 +366,8 @@ A possible study to quantify the effectiveness of bundles could be to ask partic
 
 % Applying hierarchical edge bundles to the test set leads to smaller edges being within clusters and larger ones being across the 
 Future work could also include testing on a larger benchmark, especially with graphs with more biclique than clique structure.
-The current benchmark also measures the quality of clustering, but not bundling directly. A dissimilarity measure or energy function that quantifies bundling quality could be directly optimised to produce high-quality bundles.
+The current benchmark also measures the quality of clustering, but not bundling directly. Such a benchmark could be used to compare the hierarchical bundling method here directly with other (non-hierarchical) methods.
+In a similar vein, a dissimilarity measure or objective function that quantifies bundling quality could be directly optimised to produce high-quality bundles.
 % The dissimilarities already considered here may also be useful in other applications that require them, such as multidimensional scaling
 
 % Another benefit to agglomerative methods is that it is easy to interpret and understand what the algorithm is doing, even if the answer is suboptimal. I would always pick an algorithm that I fully understand for a visualisation over a black-box algorithm that produces slightly better results. But this is just opinion.
@@ -377,7 +383,6 @@ Such compression would be impossible in a random network, but because real-world
 The hierarchical edge bundling of the previous chapter can be interpreted as \emph{lossy} compression, because the grouping of edges can obscure the exact endpoints of each edge. In the same vein as, say, JPEG image compression, there exists a tradeoff between the amount of data used against the amount of information displayed.
 But just as there exist \emph{lossless} compression formats for images, such as PNG compression, there also exists such a counterpart for edge bundling, known as \emph{confluent drawing}. An example of such a drawing can be seen on the right-hand side of Figure~\ref{fig:power_teaser}, where the bundles are interpreted as follows: every possible smooth path from one vertex to another indicates that they are connected by an edge in the original graph.
 
-This eliminates crossings by allowing edges to overlap, and is analogous to junctions on a train track that allow carriages to switch directions without stopping.
 
 \begin{figure}
   \centering
@@ -387,24 +392,25 @@ This eliminates crossings by allowing edges to overlap, and is analogous to junc
   \label{fig:power_teaser}
 \end{figure}
 
+\section{Background}
+\label{sec:power_background}
 Confluent drawing has its roots in the more theoretical side of graph drawing, and was originally developed by \citet{Dickerson2005} as a novel method for drawing planar graphs. In Figure~\ref{fig:power_teaser} for example, the drawing of the original graph on the left contains many crossings and in fact can not be drawn in a planar way. Allowing edges to overlap, but requiring all smooth curves to denote an edge between endpoints, means that all connectivity is preserved, thus adhering to the analogy of lossless compression.
-The precise definition of what defines a confluent drawing will be studied later in Section~\ref{sec:confluent_definition}.
+This eliminates crossings by allowing edges to overlap, and is analogous to junctions on a train track that allow carriages to switch directions without stopping.
+The precise definition of a confluent drawing will be outlined later in Section~\ref{sec:confluent_definition}.
 
 The work in this chapter will study a subset of confluent drawing known as \emph{power-confluent} drawing.
-The process of producing a power-confluent drawing consists of three steps: finding the \emph{power graph decomposition;} converting this decomposition into an equivalent auxiliary routing graph (ARG), similarly to hierarchical edge bundling in Section~\ref{sec:pruning}; and finally drawing curves back on top to render a confluent drawing. Each step is illustrated in Figure~\ref{fig:power_teaser}. This was an idea originally explored by \citet{Bach2017}, and the work presented here will aim to further develop and formalise the methods there.
+While a standard confluent drawing needs only to follow the definition in Section~\ref{sec:confluent_definition}, with no restrictions on its creation process, producing a power-confluent drawing consists of three steps: finding the \emph{power graph decomposition;} converting this decomposition into an equivalent auxiliary routing graph (ARG), similarly to hierarchical edge bundling in Section~\ref{sec:pruning}; and finally drawing curves back on top to render a confluent drawing. Each step is illustrated in Figure~\ref{fig:power_teaser}. This was an idea originally explored by \citet{Bach2017}, and the work presented here will aim to further develop and formalise the implementation of this idea. Furthermore, it will be proved in Section~\ref{sec:power_planarity} that this specific process can only ever result in a subset of all confluent drawings, thus earning the terminology of power-confluent.
 
-Specifically, the speed and quality of the power decomposition algorithm will be improved, and two theoretical issues will be resolved for the conversion to a confluent drawing.
-Note that there will be no dedicated section on background literature in this chapter, as the broader 
-
-\section{Power graph decomposition}
+\subsection{Power graph decomposition}
 \label{sec:power_graph}
-A power graph is an extension to the conventional node-link diagram, that allows vertices to be grouped together into \emph{power groups}, in order to merge edges that share endpoints into individual \emph{power edges} (see the leftmost two drawings in Fig.~\ref{fig:power_teaser}). Power groups may also be nested in a hierarchical structure, allowing power edges to cross group boundaries.
+The first step to producing a power-confluent drawing is to construct a power graph, and so this step will be outlined first. A power graph is an extension to the conventional node-link diagram, that allows vertices to be grouped together into \emph{power groups}, in order to merge edges that share endpoints into individual \emph{power edges} (see the leftmost two drawings in Figure~\ref{fig:power_teaser}). Power groups may also be nested in a hierarchical structure, allowing power edges to cross group boundaries.
 
-This idea was originally developed for use in biological protein--protein interaction network analysis by \citet{Royer2008}, who originally computed a decomposition by using heuristics based on the Jaccard index, defined here in Equation~\ref{eq:jaccard}. This was later improved by \citet{Dwyer2014} who presented multiple methods of finding both optimal and sub-optimal decompositions, while also proving that the problem in general is likely to be $\mathcal{NP}$-hard. The method they recommended for practical use is a greedy agglomeration technique, not unlike the ones studied in Section~\ref{sec:dissimilarities}, except without the benefit of the Lance-Williams property shown in Equation~\eqref{eq:lancewilliams}. Its complexity is $\mathcal{O}(|V|^3|E|\log|E|)$, as it must search through $\mathcal{O}(|V|^2)$ merges $\mathcal{O}(|V|)$ times, and each merge takes $\mathcal{O}(|E|\log|E|)$ time to assess its quality. Here this assessment step will be improved slightly to $\mathcal{O}(|E|)$, and in practice the number of edges to be considered diminishes quickly anyway \citep{Dwyer2014}.
+This idea was originally developed for use in biological protein--protein interaction network analysis by \citet{Royer2008}, who originally computed a decomposition by using heuristics based on the Jaccard index, defined here in Equation~\ref{eq:jaccard}. This was later improved by \citet{Dwyer2014} who presented multiple methods of finding both optimal and sub-optimal decompositions, while also proving that the problem in general is likely to be $\mathcal{NP}$-hard. The method they recommended for practical use is a greedy agglomeration technique, not unlike the ones studied in Section~\ref{sec:dissimilarities}, except without the benefit of the Lance-Williams property shown in Equation~\eqref{eq:lancewilliams}. Its complexity is $\mathcal{O}(|V|^3|E|\log|E|)$, as it must search through $\mathcal{O}(|V|^2)$ merges $\mathcal{O}(|V|)$ times, and each merge takes $\mathcal{O}(|E|\log|E|)$ time to assess its quality. In Section~\ref{sec:greedy_heuristics} this assessment step will be improved slightly to $\mathcal{O}(|E|)$, and in practice the number of edges to be considered diminishes quickly anyway \citep{Dwyer2014}.
 
 This is also the method chosen by \citet{Bach2017}, to construct their initial power graphs, and so is the one studied here. Note that the following description is specific to undirected graphs; the changes required for directed graphs are described in Section~\ref{sec:power_directed}.
 
-\subsection{Greedy agglomeration, again}
+\subsection{Greedy agglomeration}
+\label{sec:greedy_power}
 The algorithm works taking advantage of the fact that the hierarchy of power groups can also be represented as a tree, with vertices as the leaves, similarly to the hierarchical clustering of Section~\ref{sec:dissimilarities}. It first initializes every vertex as the sole member of a power group, henceforth referred to as a \emph{module}, and initializes a set of neighbours for each trivial module based on the edges of the graph.
 It then greedily merges pairs of top-level modules at a time, picking the merge that eliminates the most edges at each step, until no more edges can be eliminated.
 The number of eliminated edges for any given merge is given by
@@ -422,10 +428,39 @@ The simplest case is when two modules $m$ and $n$ share the exact same neighbour
 A trickier case is if only one of the modules contains edges that cannot be merged. For example, $m$ cannot fully absorb $n$ if $N(m)\supset N(n)$. Leaf modules of the hierarchical tree, i.e.\ individual vertices, also cannot be absorbed, and so the same situation occurs when $m$ is a leaf and $n$ is a module. In both cases $m$ adopts $n$, and $N(m)\cap N(n)$ is removed from $N(n)$.
 If both contain edges that cannot be absorbed, i.e.\ $N(m)\not\subset N(n)$ and $N(m)\not\supset N(n)$, then a new module is created that adopts $m$ and $n$ as children and steals $N(m)\cap N(n)$ as its neighbour set. This also happens if $m$ and $n$ are both leaf modules.
 Note that this is done equivalently in the original description by always generating a new parent module, and removing either child if their neighbour sets become empty \citep{Dwyer2014}.
+The greedy process above will be the subject of contributions in Section~\ref{sec:greedy_heuristics}.
 
-However, measuring the reduction in edges as in Equation~\eqref{eq:kappa_cap} is not the only metric that a greedy algorithm can use to judge the quality of any given merge.
+\subsection{Confluent drawing}
+\label{sec:confluent_definition}
+The original definition of a confluent drawing~$A$ for a graph~$G$ is:
+\begin{mdframed}[backgroundcolor=WhiteSmoke]
+\begin{itemize}[leftmargin=*]
+  \item There is a one-to-one mapping between the vertices in $G$ and $A$, so that, for each vertex $v\in V(G)$, there is a corresponding vertex $v'\in A$, which has a unique point placement in the plane.
+  % \item There is an edge $(v_i,v_j)$ in $E(G)$ if and only if there is a locally-monotone curve $e'$ connecting $v_i'$ and $v_j'$ in A.
+  \item There is an edge $(v_i,v_j) \in E(G)$ iff there is a locally-monotone curve [defined as having no self intersections or sharp turns] $e'$, connecting $v_i'$ and $v_j'$ in $A$. 
+  \item $A$ is planar. That is, while locally-monotone curves in $A$ can share overlapping portions, no two can cross.
+\end{itemize}
+\end{mdframed}
+This was proposed by \citet{Dickerson2005}, where the second condition is the key part of the definition that lets links overlap in the final drawing.
+It is not immediately obvious how to convert a power graph into such a drawing. Fortunately, \citet{Bach2017} proposed the idea of first converting a power graph decomposition into an ARG. Then, for each adjacency, the graph-theoretic shortest path through the ARG is used as the sequence of control points for a B-spline \citep{Sederberg2005}.
+
+This process is illustrated in Figure~\ref{fig:power_teaser}, and the ARG used is almost exactly the one in hierarchical clustering (Section~\ref{sec:heb_background}), where each layer of the hierarchy is mapped to a branch vertex in a hierarchical tree.
+The only differences are the removal of the root of the tree, and the addition of extra edges between tree vertices to represent power edges, as shown in Figure~\ref{fig:power_teaser}, second from right. Note that in the original algorithm edges in the ARG are undirected \citep{Bach2017}, unlike those shown in Figure~\ref{fig:power_teaser}.
+The addition of directed edges to the ARG will be used to solve various theoretical issues in Section~\ref{sec:hierarchical_routing}.
+
+It will be shown in Section~\ref{sec:node_split} that the combination of B-splines and shortest paths introduces problems not fully explored by \citet{Bach2017}, causing the resulting drawings to violate the second and third conditions in the above definition. These problems will be solved, and the subclass of confluent drawings the algorithm can produce will be identified as a new classification known as \emph{power-confluent}. The corrected solution guarantees that the second condition is always satisfied, but still cannot guarantee the third, as discussed in Section~\ref{sec:power_planarity}.
+
+\newpage
+\section{Improvements}
+This section will describe multiple improvements to the methods described in the previous section, which encapsulate the novel contributions from this chapter. Specifically, the speed and quality of the power decomposition algorithm will be improved in Section~\ref{sec:greedy_heuristics}, and two theoretical issues will be resolved for the conversion to a confluent drawing in Sections~\ref{sec:node_split} and~\ref{sec:short_circuits}.
+
+It is important to note that these theoretical issues are rare in practical use cases of \citet{Bach2017}, and that the solutions proposed here will not often change the resulting drawings. When the issue does occur however, it changes the implied connectivity of the graph which is a serious error. Ensuring correctness is also necessary for the theoretical side of the method to further progress.
+
+\subsection{Greedy heuristics}
+\label{sec:greedy_heuristics}
+The algorithm outlined in Section~\ref{sec:greedy_power} greedily selects the next merge based on the reduction in edges as in Equation~\eqref{eq:kappa_cap}. However this is not the only metric that the greedy algorithm can use to judge the quality of any given merge.
 Only using one heuristic often results in many merges with the same score, and so the choice of merge may be arbitrarily chosen from many candidates, some of which may lead directly to local optima. In such situations it can be useful to include additional heuristics to further discriminate between choices.
-This is not explicitly mentioned in \citep{Dwyer2014}, but is implemented in their provided source code, where they include two other metrics: minimising the total number of modules after the merge, and minimising the number of times power group boundaries are crossed by power edges.
+This is not explicitly mentioned in \citet{Dwyer2014}, but is implemented in their provided source code, where they include two other metrics: minimising the total number of groups/modules after the merge, and minimising the number of times power group boundaries are crossed by power edges.
 
 Here a new heuristic will be introduced that can roughly capture the effects of both, and is simpler to calculate: a penalty for the number of edges that could not be merged. This is defined by
 \begin{equation}
@@ -508,8 +543,8 @@ Setting $w_\cap=10$ and $w_{\Triangle}=1$ works well in practice; these are the 
 Adding the new heuristic produces the best or joint best results in all graphs, and also improves the consistency of the output, with a better worst result in all cases.
 % The improvements are small, but are consistently better and with less variance.
 Note that the variation between runs in the implementation used is due to a pseudorandom order of iteration through
-candidate merges (Figure.~\ref{fig:pseudo_pgd}, line~\ref{code:pgd:top}).
-% \texttt{std::unordered\_set} in \Cpp, which may vary between implementations of the standard library.
+candidate merges\footnote{Due to the use of \texttt{std::unordered\_set} in C++, which may vary between implementations of the standard library \citep{Josuttis2012}.}, (Figure.~\ref{fig:pseudo_pgd}, line~\ref{code:pgd:top}) and so when multiple merges have the same score, the choice becomes nondeterministic.
+% 
 The networks are, from top to bottom, Italian families linked by marriage \citep{Breiger1986}, members of a karate club \citep{Zachary1977}, women meeting at social events \citep{Davis2009}, interactions between bottlenose dolphins \citep{Lusseau2003}, co-occurrence of characters in the musical Les Mis\'erables \citep{Knuth1993}, American football games between US colleges \citep{Girvan2002}, and coauthorships of scientists working on network theory \citep{Newman2006Eigenvectors}.
  
 \begin{figure}
@@ -554,31 +589,11 @@ The original method by \citet{Dwyer2014} gives the option to somewhat alleviate 
 A further exploration of this extended algorithm is out of scope for this paper, and \citet{Dwyer2014} additionally note that the qualitative improvement that results from including this priority queue is minimal.
 
 The final change involves bringing down the complexity of neighbour set intersection to $O(E)$ using hash sets, which reduces the complexity of the algorithm down slightly to $O(|V|^3|E|)$.
-Pseudocode for the above described algorithm can be seen in Fig.~\ref{fig:pseudo_pgd}.
+Pseudocode for the above described algorithm can be seen in Figure~\ref{fig:pseudo_pgd}.
 
-\section{Confluent drawing}
-\label{sec:confluent_definition}
-The original definition of a confluent drawing~$A$ for a graph~$G$ is:
-\begin{mdframed}[backgroundcolor=WhiteSmoke]
-\begin{itemize}[leftmargin=*]
-  \item There is a one-to-one mapping between the vertices in $G$ and $A$, so that, for each vertex $v\in V(G)$, there is a corresponding vertex $v'\in A$, which has a unique point placement in the plane.
-  % \item There is an edge $(v_i,v_j)$ in $E(G)$ if and only if there is a locally-monotone curve $e'$ connecting $v_i'$ and $v_j'$ in A.
-  \item There is an edge $(v_i,v_j) \in E(G)$ iff there is a locally-monotone curve [defined as having no self intersections or sharp turns] $e'$, connecting $v_i'$ and $v_j'$ in $A$. 
-  \item $A$ is planar. That is, while locally-monotone curves in $A$ can share overlapping portions, no two can cross.
-\end{itemize}
-\end{mdframed}
-This was proposed by \citet{Dickerson2005}, where the second condition is the key part of the definition that lets links overlap in the final drawing.
-It is not immediately obvious how to convert a power graph into such a drawing. Fortunately, \citet{Bach2017} proposed the idea of first converting a power graph decomposition into an ARG. Then, for each adjacency, the graph-theoretic shortest path through the ARG is used as the sequence of control points for a B-spline \citep{Sederberg2005}.
-
-This process is illustrated in Fig.~\ref{fig:power_teaser}, and the ARG used is almost exactly the one in hierarchical clustering (Section~\ref{sec:heb_background}), where each layer of the hierarchy is mapped to a branch vertex in a hierarchical tree.
-The only differences are the removal of the root of the tree, and the addition of extra edges between tree vertices to represent power edges, as shown in Figure~\ref{fig:power_teaser}, second from right. Note that in the original algorithm edges in the ARG are undirected \citep{Bach2017}, unlike those shown in Figure~\ref{fig:power_teaser}.
-The addition of directed edges to the ARG will be used to solve the theoretical issues outlined below, in Section~\ref{sec:hierarchical_routing}.
-
-It will be shown here that the original combination of B-splines and shortest paths introduces problems not fully explored by the original authors, causing the resulting drawings to violate the second and third conditions in the above definition. These problems will be solved, and the subclass of confluent drawings the algorithm can produce will be identified as a new classification known as \emph{power-confluent}. The fixed solution guarantees that the second condition is always satisfied, but still cannot guarantee the third, as discussed in Section~\ref{sec:power_planarity}.
-
-\subsubsection{Problem 1: Node splitting}
+\subsection{Node splitting}
 \label{sec:node_split}
-Issues regarding the use of B-splines are first identified (of degree $p=3$ in the source code of \citet{Bach2017}, although it is not specified in the paper) for interpolating control points.
+The improvements described will now move onto the conversion of the power graph into a power-confluent drawing. Issues regarding the use of B-splines are first identified (of degree $p=3$ in the source code of \citet{Bach2017}, although it is not specified in the paper) for interpolating control points.
 These were likely chosen because they satisfy the convex hull property, which prevents crossings at shared control points. They also offer local control (i.e.\ moving a control point only affects the surrounding $p+1$ segments), which guarantees that splines that share enough intermediate control points will overlap.
 Local control is what makes it possible for drawings to be confluent; with the right routing graph, it is possible for edges to share enough control points to produce the overlapping portions that are required for a confluent drawing. Specifically, for two curves to be guaranteed to overlap they must share $p$ or more control points (see Section~\ref{sec:bspline_details} for a proof and a more detailed explanation).
 
@@ -595,12 +610,12 @@ The authors recognized this, calling it the `crossing artifact' \citep[Fig.~4]{B
 The intuition behind this splitting is correct, as it introduces another shared control point that tightens the bundle, joining the crossed edges into a junction. However, their exact description contains an ambiguity in the context of undirected graphs, as it is not specified how to identify edges as incoming or outgoing. This is problematic as an incorrect split may introduce errors into the resulting drawing, as illustrated in Figure~\ref{fig:nodesplit}.
 This ambiguity will be resolved, along with the following related problem, in Section~\ref{sec:hierarchical_routing}.
 
+\subsection{Short-circuits}
+\label{sec:short_circuits}
 The second problem is also caused by local control but has an opposite result: that splines will \emph{always} overlap if they share $p$ or more control points.
 For some ARGs, such as the examples in Figure~\ref{fig:overlap}, splines may overlap so as to create the visual impression that extra edges, not present in the original graph, exist. This violates the second condition in the confluent definition.
-Such an ARG can result from the power-to-routing graph conversion, as explained in the following section.
+% Such an ARG can result from the power-to-routing graph conversion, as explained in the following section.
 
-\subsubsection{Problem 2: Short-circuits}
-\label{sec:short_circuits}
 Here it will be explained why routing edges through their graph-theoretic shortest paths in the ARG can introduce false adjacencies.
 % A power graph is an extension to the conventional node-link diagram, that compresses the number of edges by grouping similar vertices together into \emph{power groups}, and merging edges among group members that share the same target vertex into a single \emph{power edge} instead (see the leftmost two drawings in Figure~\ref{fig:power_teaser}).
 A power decomposition is converted into an ARG by (a) connecting the members of each power group to a new vertex corresponding to the group, and (b) connecting pairs of vertices whose corresponding power groups are connected by power edges.
@@ -623,7 +638,7 @@ A power decomposition is converted into an ARG by (a) connecting the members of 
   (ii) top: a conventional node-link layout of the graph, bottom: the same power graph as in (i). 
   (iii) left: the resulting routing graph from the method of \citet{Bach2017}, right: the resulting drawing when splines take their shortest paths through this routing graph. The edge $\{a,b\}$ is routed downwards in the wrong direction, causing the edge $\{c,b\}$ to falsely appear to exist.
   The edge $\{a,e\}$ also has two equal-length shortest paths, either through the line shown or downwards through $b$.
-  % , albeit this specific case can easily be prevented by only preventing original nodes from being used as intermediate control points, as the original authors appear to have done in \citep[Fig.~2(c)]{Bach2017} for the edge $\{u,w\}$.
+  % , albeit this specific case can easily be prevented by only preventing original nodes from being used as intermediate control points, as the original authors appear to have done in \citet[Fig.~2(c)]{Bach2017} for the edge $\{u,w\}$.
   (iv) left: the result of using the new method (Section~\ref{sec:hierarchical_routing}) of retaining the hierarchical structure of power groups through directed edges, right: the resulting drawing where $\{a,b\}$ is routed through the three correct upward routing nodes. The previously incorrect routing is marked by a dashed line.
   }
   \label{fig:overlap_sm}
@@ -661,7 +676,7 @@ The purpose of having power edges outgoing at both ends will soon be made clear.
   \centering
   \includegraphics[width=.8\linewidth]{power/solution.pdf}
   \caption[A fixed method for confluent drawing]{The solution to both ambiguities described in Section~\ref{sec:hierarchical_routing}.
-  % The same example graph as in \citep[Fig.~2]{Bach2017} and here Figure~\ref{fig:power_teaser} is used, shown in a radial layout to emphasize the tree structure of power groups.
+  % The same example graph as in \citet[Fig.~2]{Bach2017} and here Figure~\ref{fig:power_teaser} is used, shown in a radial layout to emphasize the tree structure of power groups.
   The leftmost graphs are a power graph (top), and a tree that represents the hierarchy of power groups (bottom), but without power edges.
   The middle column contains the resulting routing graphs without node splitting (top) and with (bottom, split indicated in red).
   % Note that these do not include or require the root of the tree.
@@ -811,13 +826,6 @@ Furthermore, it is easy to see that a planar ARG can always lead to a planar dra
 This naturally implies a new subset of confluent drawings, much like the $\Delta$-confluent \citep{Eppstein2005} or strict confluent \citep{Eppstein2013} subclasses, which can be found only through a planar power-to-routing graph conversion. Such drawings will be named \emph{power-confluent}.
 This new classification will now be proven to be a subclass of strict confluent drawing. 
 
-\begin{figure}
-  \centering
-  \includegraphics[width=\linewidth]{power/stricter.pdf}
-  \caption[A strict confluent drawing that is not power-confluent]{An example of a strict confluent drawing that cannot be reverse-engineered into a valid power graph, unless power group boundaries are allowed to overlap. On the left is the confluent drawing (with junctions marked by transparent blue circles), and on the right is a power graph that shows all possible groupings to match these junctions. The proof is further explained in Section~\ref{sec:power_planarity}.}
-  \label{fig:strict}
-\end{figure}
-
 \subsubsection{Stricter than strict}
 The definition of strict confluent drawing has only the additional restriction that there can be at most one smooth path between vertices, and there cannot be any paths from a vertex to itself \citep{Eppstein2013}. 
 % For the power-confluent case, because each routing node can only have one parent, and each path must go up the tree through this parent, there can only ever be one path that can be taken between two vertices. Every power-confluent drawing is therefore also strict confluent.
@@ -826,20 +834,27 @@ For the power-confluent case, because the mapping of edges to power edges is sur
 The reverse is not true, because another condition of power graphs is that groups must be disjoint \citep{Royer2008}, i.e.\ their boundaries may not overlap.
 There exist confluent drawings that cannot result from power graphs unless this condition is broken, for example the tetrahedron-like structure in Figure~\ref{fig:strict}.
 In this structure there are six junctions, and so at least six power groups are required in the corresponding power graph; however, there is a maximum of four that will not overlap, as there can only be one for each `corner' of the `tetrahedron'. This is due to the middle vertex of each `corner' sharing junctions with all three surrounding it, which means that grouping any of the three valid pairings will block out the other two.
+
 Note that the graph itself is not necessarily impossible to draw in a power-confluent manner, but that this particular drawing could never result from the algorithm presented in this paper.
 Power-confluent is therefore a strictly stronger condition than strict confluent.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\linewidth]{power/stricter.pdf}
+  \caption[A strict confluent drawing that is not power-confluent]{An example of a strict confluent drawing that cannot be reverse-engineered into a valid power graph, unless power group boundaries are allowed to overlap. On the left is the confluent drawing (with junctions marked by transparent blue circles), and on the right is a power graph that shows all possible groupings to match these junctions. The proof is further explained in Section~\ref{sec:power_planarity}.}
+  \label{fig:strict}
+\end{figure}
 
 \section{Discussion}
 \label{sec:power_discussion}
 The work presented here has developed the ideas presented by \citet{Bach2017} by both improving the power graph decomposition step (Section~\ref{sec:power_graph}) and fixing some practical issues with the conversion to a confluent drawing (Section~\ref{sec:confluent_definition}). Source code for all the algorithms discussed can be found at \url{www.github.com/jxz12/pconfluent}.
 
 Further directions could involve developing methods to find power-confluent drawings, by guiding the search algorithm towards solutions that produce planar routing graphs.
-Methods such as Monte Carlo or A* search may prove useful for either finding such drawings, or just improving the greedy search presented here.
+Methods such as simulated annealing or Monte Carlo may also prove useful for improving the greedy search presented here.
 % A different optimization heuristic may also lead to less cluttered drawings, as a well compressed power graph may not lead to a good confluent drawing. Perhaps measure the number of junctions in the resulting graph or something
 % As mentioned above, proving or disproving an equivalence to strict confluent drawing is also left open. If power-confluent is a stronger condition than strict confluent, then
 
-On the theoretical side, it may be the case that relaxing the non-overlapping group boundary condition, as explored by \citet{Ahnert2014}, could result in an equivalent classification to strict confluent drawing.
-The potential proof or refutation of this equivalence is left as an open question, along with determining the exact relationship between power decomposition and confluent drawing in general.
+It is also not clear how often the theoretical issues raised in Sections~\ref{sec:node_split} and~\ref{sec:short_circuits} would occur in real world data. The pathological power graph example in Figure~\ref{fig:overlap_sm} is clearly a rare situation, and it is further not known if the power graph construction algorithm outlined in Section~\ref{sec:greedy_power} and improved in~\ref{sec:greedy_heuristics} would ever produce such a power graph. Future work could include analysing a dataset of graphs and searching for whether/how often such a situation ever occurs.
 
 \begin{figure}
   \centering
@@ -847,6 +862,9 @@ The potential proof or refutation of this equivalence is left as an open questio
   \caption[Examples of networks drawn with the power-confluent algorithm]{Two examples of graphs drawn with Algorithms~\ref{alg:pgd} then~\ref{alg:pcd}, in Figures~\ref{fig:pseudo_pgd} and~\ref{fig:pseudo_pcd} respectively. On the left is \texttt{karate}, previously shown in Figure~\ref{fig:untangled_hairballs}, top. On the right is \texttt{lesmis}, previously shown in Figure~\ref{fig:lesmis}.}
   \label{fig:power_karate_lesmis}
 \end{figure}
+
+On the theoretical side, it may be the case that relaxing the non-overlapping group boundary condition, as explored by \citet{Ahnert2014}, could result in an equivalent classification to strict confluent drawing.
+The potential proof or refutation of this equivalence is left as an open question, along with determining the exact relationship between power decomposition and confluent drawing in general.
 
 To finish on a practical note, a more tailored layout algorithm than standard force-directed methods will be necessary for the algorithm to become a truly practical tool, as layouts can often become tangled and unreadable. See Figure~\ref{fig:power_karate_lesmis} for two examples of this on graphs previously studied in this chapter.
 The layout function (Figure~\ref{fig:pseudo_pcd}, line~\ref{code:pcd:sgd}) is currently only given the routing graph as input, but may benefit from extra information, such as which edges are power edges and which are hierarchical. An effective radial layout that can avoid crossings, like the one shown in Figure~\ref{fig:radial} but automatic, may also offer a superior solution.

@@ -1,4 +1,4 @@
-\chapter{Stress optimisation}
+\chapter{Stress minimisation}
 \label{chap:stress}
 \begin{figure}
   \centering
@@ -156,16 +156,19 @@ where $w_{ij}$ and $d_{ij}$ are constants specific to each term in the summation
 
 The derivative of this equation is non-linear, like in Equation~\eqref{eq:eades} or in \citet{Fruchterman1991, Frick1995}, and so cannot be solved exactly using linear solvers like for Equations~\eqref{eq:tutte_energy} or~\eqref{eq:spectral}.
 % However an immediate benefit to this formulation is that there are no extra input parameters for the user to decide, since $w_{ij}$ and $d_{ij}$ are both dependent on the structure of the graph itself.
-However, stress as an energy function is known to produce high-quality layouts \citep{Brandes2008}. This is partly because it manages to avoid the \emph{peripheral effect} \citep{Hu2005}, a common visual artifact of many force-directed methods where repulsive forces tend to push nodes towards the boundary of the layout. This can be seen in Figure~\ref{fig:misc_force_layouts} for Eades' method; the grid on the left bulges slightly, while the binary tree and Sierpi\'nski triangle underrepresent local detail.
+However, stress as an energy function is known to produce high-quality layouts \citep{Brandes2008}. This is partly because it manages to avoid the \emph{peripheral effect} \citep{Hu2005}, a common visual artifact of many force-directed methods where repulsive forces tend to push nodes towards the boundary of the layout.
+This can be seen in Figure~\ref{fig:misc_force_layouts} for Eades' method; the grid on the left bulges slightly, while the binary tree and Sierpi\'nski triangle underrepresent local detail.
 Stress avoids this by forgoing repulsive forces entirely in Equation~\eqref{eq:stress}, as can also be seen in the bottom row in Figure~\ref{fig:misc_force_layouts}.
 
 Stress also does not require extra input parameters such as those in Equation~\eqref{eq:eades} because $d_{ij}$ and $w_{ij}$ are both derived from the structure of the graph itself.
 However, it is known to be difficult to optimise due to an abundance of local minima \citep{DeLeeuw1988, Gansner2004}, and also does not scale well to larger graphs due to the quadratic number of terms in the summation \citep{Brandes2008, Hu2005}.
+
 The subsequent content of this chapter will aim at addressing these issues through the application of an algorithm known as \emph{stochastic gradient descent} (SGD) to minimise Equation~\eqref{eq:stress}. Before describing the algorithm itself however, a history of other methods used to minimise stress will first be outlined.
 
 \subsection{Multidimensional scaling}
 \label{sec:stress_background}
-Equation~\eqref{eq:stress} was first utilised in a domain unrelated to graphs, but still for the purpose of visualisation, known as \emph{multidimensional scaling} (MDS). As the name implies, this involves taking high-dimensional data and scaling it down to fewer dimensions, usually two.
+Equation~\eqref{eq:stress} was first utilised in a domain unrelated to graphs, but still for the purpose of visualisation, known as \emph{multidimensional scaling} (MDS). As the name implies, this involves taking high-dimensional data and scaling it down to fewer dimensions, usually to two or three.
+
 The difficulty in this task can be illustrated through a simple example: the humble tetrahedron. The task at hand is to find an `ideal' drawing of the tetrahedron, where `ideal' is defined as having each of its edges drawn with equal length. When one tries to draw such a configuration on a piece of (two-dimensional) paper, it quickly becomes clear that it is not possible.
 Even for such a small graph with only four vertices, there are too few dimensions available to provide sufficient degrees of freedom.
 %\footnote{The rate at which such a problem can get out of hand is known as the \emph{curse of dimensionality} \citep{Friedman2001Local}, which is range of phenomena caused by the exponential growth of a given problem space relative to each additional input dimension}
@@ -226,6 +229,7 @@ The origin of the novel contributions in this chapter is rooted in constrained g
 
 Constraint relaxation was first introduced in video game engines as a technique to quickly approximate the behavior of cloth, which is modeled as a planar mesh of vertices that maintains its edges at a fixed length.
 A full physics simulation would represent each edge as a stiff spring, summing up and integrating over the resulting forces, but a realistic piece of cloth contains too many edges for this to be feasible.
+
 To avoid this bottleneck, \citet{Jakobsen2001} introduced the idea of considering each edge independently, moving a single pair of vertices at a time.
 While this is a rather simple and perhaps naive idea, in practice the solution converges in very few iterations.
 
@@ -649,6 +653,7 @@ Fortunately, \citet{Ortmann2017} developed an approach designed around graphs. T
 Since this approach reduces the number of terms in the summation, using it in the context of SGD also reduces the amount of work per iteration.
 
 To approximate the full model well it is important to choose pivots that are well distributed over the graph, and so \citet{Ortmann2017} presented an experimental evaluation of various methods for doing so. The implementation here uses \emph{max/min random sp} to select pivots. This was chosen because it gives good performance (second-best of all methods evaluated in terms of average reduction in stress) and the only method that performed slightly better, \emph{k-means sp}, is more complicated to implement and has a worse asymptotic complexity \citep{Ortmann2017}.
+
 To further elaborate, ordinary (non-random) \emph{max/min sp} starts by picking one pivot randomly and computing its shortest paths to all other vertices, with subsequent pivots chosen by picking the vertex with the maximum shortest path to any pivot chosen so far \citep{DeSilva2004}. The random extension \emph{max/min random sp} instead samples for subsequent pivots with a probability proportional to shortest paths to any pivot, rather than simply always picking the maximum.
 \emph{k-means sp} is also built upon \emph{max/min sp}, as it uses the calculated shortest paths as a high-dimensional embedding, exactly following the same first step as the layout method of \citet{Harel2004}. A standard $k$-means clustering algorithm is then applied to this embedding \citep{Friedman2001Nearest}, and pivots are chosen as the vertices closest the centroids of these clusters.
 This extra clustering step is what pushes up the resulting asymptotic complexity \citep{Ortmann2017} which, in combination with the extra implementation work required, was why it was not chosen here.
@@ -811,7 +816,7 @@ This measure will be applied on top of an existing graph layout, but since the t
   \label{fig:jaccard}
 \end{figure}
 
-Since color is simply a linear mix of red, green, and blue (RGB), it can be used as a 3D space in which Euclidean distances can be embedded, where each color corresponds to a separate axis. Ideally a perceptually uniform colour space would be used such as CIELAB \citep{Smart2019}, but in this small example it was not necessary.
+Since color is simply a linear mix of red, green, and blue (RGB), it can be used as a 3D space in which Euclidean distances can be embedded, where each color corresponds to a separate axis. Ideally a perceptually uniform colour space would be used such as CIELAB \citep{Smart2019}, but in this small illustrative example it was not necessary.
 Since the Jaccard distance is bounded between $0\leq d_{ij}\leq 1$, embedded distances fit perfectly within the similarly bounded axes of color. This means that vertices not only have coordinates within normal Euclidean space, but also within RGB space. 
 An illustration of this can be seen in Figure~\ref{fig:jaccard}, where vertices are coloured according to their (secondary) embedding in RGB space. Note that in this case $w_{ij}$ is simply set to one.
 
