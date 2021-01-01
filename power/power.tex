@@ -544,7 +544,7 @@ Setting $w_\cap=10$ and $w_{\Triangle}=1$ works well in practice; these are the 
 Adding the new heuristic produces the best or joint best results in all graphs, and also improves the consistency of the output, with a better worst result in all cases.
 % The improvements are small, but are consistently better and with less variance.
 Note that the variation between runs in the implementation used is due to a pseudorandom order of iteration through
-candidate merges\footnote{This is due to the use of \texttt{std::unordered\_set} in C++, which may vary between implementations of the standard library \citep{Josuttis2012}.}, (Figure.~\ref{fig:pseudo_pgd}, line~\ref{code:pgd:top}) and so when multiple merges have the same score, the choice becomes nondeterministic.
+candidate merges\footnote{This is due to the use of \texttt{std::unordered\_set} in C++, which may vary between implementations of the standard library \citep{Josuttis2012}.} (Figure.~\ref{fig:pseudo_pgd}, line~\ref{code:pgd:top}) and so when multiple merges have the same score, the choice becomes nondeterministic.
 % 
 The networks are, from top to bottom, Italian families linked by marriage \citep{Breiger1986}, members of a karate club \citep{Zachary1977}, women meeting at social events \citep{Davis2009}, interactions between bottlenose dolphins \citep{Lusseau2003}, co-occurrence of characters in the musical Les Mis\'erables \citep{Knuth1993}, American football games between US colleges \citep{Girvan2002}, and coauthorships of scientists working on network theory \citep{Newman2006Eigenvectors}.
  
