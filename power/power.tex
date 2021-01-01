@@ -26,6 +26,7 @@ The same premise behind force-directed node layout is also used in force-directe
 A similar method by \citet{Cui2008} also uses geometry to group edges, but instead discretely clusters them first. 
 
 Another effective approach is \emph{kernel density estimation} by \citet{Hurter2012}, who iteratively apply a convolutional filter over a density map of links in an already rendered diagram. This method belongs to the subfield of image-based bundling methods \citep{Lhuillier2017,Telea2018}. A diverse gallery of edge bundling algorithms applied to the same dataset can be seen in the review of \citet{Lhuillier2017}.
+
 However all of the aforementioned methods share a key similarity: they apply bundling upon the assumption that node positions are predetermined and will not be moved. This is perfectly fine and even desirable in many common use cases where nodes have a predefined location, such as geographical maps. However when there is no predefined positioning, the usual methods such as force-directed layouts were never designed to lend themselves towards bundling. A layout that can be bundled must place similar links in parallel, and this is not guaranteed or even desired for most force layouts. Maximising the angular resolution of links sharing nodes is sometimes even directly optimised as part of the cost function \citep{Argyriou2010} and so common layout methods usually do not help, and may even worsen, the bundling quality of their visualisations.
 
 \subsection{Hierarchical bundling}
@@ -81,7 +82,9 @@ This can either be done from the bottom up, i.e.\ each node starts in its own cl
 The output fits well here, since the goal is to construct a hierarchical edge bundling visualisation like the one in Figure~\ref{fig:metaunity}, but without a prior hierarchy included with the data; the dendrogram produced from such a clustering algorithm can be used as this missing hierarchy.
 
 This idea of using the output dendrogram of a clustering algorithm to produce hierarchical edge bundling has been previously explored by \citet{Jia2011} who produce a hierarchy using the algorithm of \citet{Girvan2002}. This method removes one edge from the network at a time, specifically the one with the most \emph{betweenness centrality} i.e.\ the edge traversed the most often when mapping the shortest paths between all pairs of vertices. This naturally splits clusters when an edge is removed that is the final bridge between two clusters.
-Unfortunately Jia et al.\ did not perform any quantitative analysis to evaluate the performance of their clustering algorithm, and only present results when using one clustering method. The contribution in this chapter extends their work by evaluating the performance of a number of hierarchical clustering methods, against a benchmark of graphs where the ground truth cluster configuration is known.
+
+Unfortunately Jia et al.\ did not perform any quantitative analysis to evaluate the performance of their clustering algorithm, and only present results when using one clustering method.
+The contribution in this chapter extends their work by evaluating the performance of a number of hierarchical clustering methods, against a benchmark of graphs where the ground truth cluster configuration is known.
 
 \subsection{Hierarchical clustering}
 \label{sec:dissimilarities}
@@ -221,7 +224,6 @@ where $\mathbf{L}^+$ is the pseudoinverse of $\mathbf{L}$ \citep{Albano2012}.
 % say laplacian is kirchoff for commute distance
 The distances derived from Equations~\eqref{eq:jaccard}--\eqref{eq:commute} will all be used in the following section as part of an experimental study to determine which is most effective.
 
-\newpage
 \section{Experimental study}
 \label{sec:clustering_experiment}
 Since clustering is an undefined problem, the quality of clusters will be measured by using a benchmark set of graphs where a ground truth clustering configuration is known.
@@ -324,13 +326,6 @@ Fortunately, a neat solution exists to this problem, as there exists an algorith
 Remarkably, this can be computed in polynomial time using the algorithm of \citet{Bar-Joseph2001}, which leverages the structure of the hierarchical dendrogram to formulate the task as a dynamic programming problem. All resulting layouts presented here use this optimal ordering, although its complexity of $\mathcal{O}(|V|^4)$ makes it prohibitively slow for datasets any larger than the graphs studied here.
 % This would not be applicable without a dendrogram, and so is another benefit of a hierarchical methodology.
 
-The next step is to position the branches of the tree. Many methods were tested for determining branch placement, including the use of force-directed methods such as Tutte's algorithm as in Figure~\ref{fig:misc_force_layouts}, but the method settled upon was to use polar coordinates, in the following manner.
-The angle of a parent is set to the mean of the angles of its children, and its distance from center is set proportional to the total number of leaves below it in the hierarchy. This means that the height of a branch corresponds to the size of its corresponding cluster, which is extra information embedded in the final visualisation.
-
-The final step is to render the bundles itself. With the tree layout determined, this step is exactly the same as that of \citet{Holten2006}. Important subtleties include relaxing bundles to prevent splines from overlapping too much, and skipping the lowest common ancestor as a control point in order to reduce clutter around common parent nodes.
-The resulting visualisations for the four benchmark graphs in Table~\ref{tab:bundle_graphs} can be seen in Figure~\ref{fig:untangled_hairballs}.
-Code used to generate all figures can be found at \url{www.github.com/jxz12/HierarchicalEdgeBundles}. 
-
 \begin{figure}
   \centering
   \includegraphics[height=.8\textheight]{power/bundled.png}
@@ -339,6 +334,13 @@ Code used to generate all figures can be found at \url{www.github.com/jxz12/Hier
   For all graphs, a branch merge distance of 10\% of the dendrogram height was used, with merged branches placed at a polar distance equal to the fraction of leaves it has as children, cubed.}
   \label{fig:untangled_hairballs}
 \end{figure}
+
+The next step is to position the branches of the tree. Many methods were tested for determining branch placement, including the use of force-directed methods such as Tutte's algorithm as in Figure~\ref{fig:misc_force_layouts}, but the method settled upon was to use polar coordinates, in the following manner.
+The angle of a parent is set to the mean of the angles of its children, and its distance from center is set proportional to the total number of leaves below it in the hierarchy. This means that the height of a branch corresponds to the size of its corresponding cluster, which is extra information embedded in the final visualisation.
+
+The final step is to render the bundles itself. With the tree layout determined, this step is exactly the same as that of \citet{Holten2006}. Important subtleties include relaxing bundles to prevent splines from overlapping too much, and skipping the lowest common ancestor as a control point in order to reduce clutter around common parent nodes.
+The resulting visualisations for the four benchmark graphs in Table~\ref{tab:bundle_graphs} can be seen in Figure~\ref{fig:untangled_hairballs}.
+Code used to generate all figures can be found at \url{www.github.com/jxz12/HierarchicalEdgeBundles}. 
 
 
 \section{Discussion}
@@ -448,13 +450,12 @@ This process is illustrated in Figure~\ref{fig:power_teaser}, and the ARG used i
 The only differences are the removal of the root of the tree, and the addition of extra edges between tree vertices to represent power edges, as shown in Figure~\ref{fig:power_teaser}, second from right. Note that in the original algorithm edges in the ARG are undirected \citep{Bach2017}, unlike those shown in Figure~\ref{fig:power_teaser}.
 The addition of directed edges to the ARG will be used to solve various theoretical issues in Section~\ref{sec:hierarchical_routing}.
 
-It will be shown in Section~\ref{sec:node_split} that the combination of B-splines and shortest paths introduces problems not fully explored by \citet{Bach2017}, causing the resulting drawings to violate the second and third conditions in the above definition. These problems will be solved, and the subclass of confluent drawings the algorithm can produce will be identified as a new classification known as \emph{power-confluent}. The corrected solution guarantees that the second condition is always satisfied, but still cannot guarantee the third, as discussed in Section~\ref{sec:power_planarity}.
-
-\newpage
 \section{Improvements}
-This section will describe multiple improvements to the methods described in the previous section, which encapsulate the novel contributions from this chapter. Specifically, the speed and quality of the power decomposition algorithm will be improved in Section~\ref{sec:greedy_heuristics}, and two theoretical issues will be resolved for the conversion to a confluent drawing in Sections~\ref{sec:node_split} and~\ref{sec:short_circuits}.
+This section will describe multiple improvements to the methods described in the previous section, which encapsulate the novel contributions from this chapter. The speed and quality of the power decomposition algorithm will be improved in Section~\ref{sec:greedy_heuristics}, and two theoretical issues will be resolved for the conversion to a confluent drawing in Sections~\ref{sec:node_split} and~\ref{sec:short_circuits}.
 
-It is important to note that these theoretical issues are rare in practical use cases of \citet{Bach2017}, and that the solutions proposed here will not often change the resulting drawings. When the issue does occur however, it changes the implied connectivity of the graph which is a serious error. Ensuring correctness is also necessary for the theoretical side of the method to further progress.
+Specifically, it will be shown that the combination of B-splines and shortest paths introduces problems not fully explored by \citet{Bach2017}, causing the resulting drawings to violate the second and third conditions in the above definition. These problems will be solved, and the subclass of confluent drawings the algorithm can produce will be identified as a new classification known as \emph{power-confluent}. The corrected solution guarantees that the second condition of the definition in Section~\ref{sec:confluent_definition} is always satisfied, but still cannot guarantee the third, as discussed in Section~\ref{sec:power_planarity}.
+
+It is important to note that these theoretical issues are rare in practical use cases of \citet{Bach2017}, and that the solutions proposed here will not often change the resulting drawings. When the issue does occur however, it changes the implied connectivity of the graph. Ensuring correctness is also necessary for work on the theoretical side of the method to further progress.
 
 \subsection{Greedy heuristics}
 \label{sec:greedy_heuristics}
@@ -543,7 +544,7 @@ Setting $w_\cap=10$ and $w_{\Triangle}=1$ works well in practice; these are the 
 Adding the new heuristic produces the best or joint best results in all graphs, and also improves the consistency of the output, with a better worst result in all cases.
 % The improvements are small, but are consistently better and with less variance.
 Note that the variation between runs in the implementation used is due to a pseudorandom order of iteration through
-candidate merges\footnote{Due to the use of \texttt{std::unordered\_set} in C++, which may vary between implementations of the standard library \citep{Josuttis2012}.}, (Figure.~\ref{fig:pseudo_pgd}, line~\ref{code:pgd:top}) and so when multiple merges have the same score, the choice becomes nondeterministic.
+candidate merges\footnote{This is due to the use of \texttt{std::unordered\_set} in C++, which may vary between implementations of the standard library \citep{Josuttis2012}.}, (Figure.~\ref{fig:pseudo_pgd}, line~\ref{code:pgd:top}) and so when multiple merges have the same score, the choice becomes nondeterministic.
 % 
 The networks are, from top to bottom, Italian families linked by marriage \citep{Breiger1986}, members of a karate club \citep{Zachary1977}, women meeting at social events \citep{Davis2009}, interactions between bottlenose dolphins \citep{Lusseau2003}, co-occurrence of characters in the musical Les Mis\'erables \citep{Knuth1993}, American football games between US colleges \citep{Girvan2002}, and coauthorships of scientists working on network theory \citep{Newman2006Eigenvectors}.
  
@@ -607,7 +608,9 @@ Local control is what makes it possible for drawings to be confluent; with the r
 
 There are two problems with using B-splines in this context. The first is that splines that share fewer than $p$ control points will \emph{not} overlap, but sharing even a single routing node should indicate a bundled junction.
 The authors recognized this, calling it the `crossing artifact' \citep[Fig.~4]{Bach2017}, and fixed it by splitting routing nodes into two: one for incoming and one for outgoing edges.
-The intuition behind this splitting is correct, as it introduces another shared control point that tightens the bundle, joining the crossed edges into a junction. However, their exact description contains an ambiguity in the context of undirected graphs, as it is not specified how to identify edges as incoming or outgoing. This is problematic as an incorrect split may introduce errors into the resulting drawing, as illustrated in Figure~\ref{fig:nodesplit}.
+The intuition behind this splitting is correct, as it introduces another shared control point that tightens the bundle, joining the crossed edges into a junction. However, their exact description contains an ambiguity in the context of undirected graphs, as it is not specified how to identify edges as incoming or outgoing.
+
+This is problematic as an incorrect split may introduce errors into the resulting drawing, as illustrated in Figure~\ref{fig:nodesplit}.
 This ambiguity will be resolved, along with the following related problem, in Section~\ref{sec:hierarchical_routing}.
 
 \subsection{Short-circuits}
@@ -657,20 +660,6 @@ The key detail here is that only one power edge should ever be traversed for any
 
 \subsection{Hierarchical routing}
 \label{sec:hierarchical_routing}
-
-% The solution to these problems is to retain the hierarchical structure of power groups as a directed tree, with all routing edges directed towards the leaves. Power edges are then added back, except as a special type of edge that is incoming at both ends (the purpose of which will soon be made clear). If the root of the tree is then discarded, what is left is the exact same ARG as before, except now with all routing edges explicitly directed (see Figure~\ref{fig:radial}, middle column).
-The solution to these problems is to instead construct the ARG as follows:
-\begin{mdframed}[backgroundcolor=WhiteSmoke]
-\begin{itemize}[leftmargin=*]
-  \item The hierarchical structure of power groups is retained as a directed tree, with all routing edges directed towards its leaves.
-  \item Power edges are reattached between their corresponding branch vertices, as a special type of routing edge that is incoming at both branch vertices.
-  \item The root of the tree is discarded.
-\end{itemize}
-\end{mdframed}
-This leaves the same ARG as before, except now with all routing edges explicitly directed (see Figure~\ref{fig:radial}, middle column).
-Note that this also means all adjacency information is now preserved in the ARG, such that the original graph can be recovered.
-The purpose of having power edges outgoing at both ends will soon be made clear.
-
 
 \begin{figure}
   \centering
@@ -750,12 +739,26 @@ The purpose of having power edges outgoing at both ends will soon be made clear.
   \label{fig:pseudo_pcd}
 \end{figure}
 
+% The solution to these problems is to retain the hierarchical structure of power groups as a directed tree, with all routing edges directed towards the leaves. Power edges are then added back, except as a special type of edge that is incoming at both ends (the purpose of which will soon be made clear). If the root of the tree is then discarded, what is left is the exact same ARG as before, except now with all routing edges explicitly directed (see Figure~\ref{fig:radial}, middle column).
+The solution to these problems is to instead construct the ARG as follows:
+\begin{mdframed}[backgroundcolor=WhiteSmoke]
+\begin{itemize}[leftmargin=*]
+  \item The hierarchical structure of power groups is retained as a directed tree, with all routing edges directed towards its leaves.
+  \item Power edges are reattached between their corresponding branch vertices, as a special type of routing edge that is incoming at both branch vertices.
+  \item The root of the tree is discarded.
+\end{itemize}
+\end{mdframed}
+This leaves the same ARG as before, except now with all routing edges explicitly directed (see Figure~\ref{fig:radial}, middle column).
+Note that this also means all adjacency information is now preserved in the ARG, such that the original graph can be recovered.
+The purpose of having power edges outgoing at both ends will soon be made clear.
+
 To draw the adjacency edges back on top, any shortest path calculations can now be forgoed. Instead, for each power edge, a depth-first search is performed for all child leaf nodes starting from both ends of the power edge. Each path to each leaf from one end is then concatenated to the reversed path to each leaf from the other end, and every concatenated path is used as the sequence of control points for a spline.
 These paths are now guaranteed to be unique because the ARG is now effectively a tree, due to power edges being incoming at both ends to prevent their traversal. Since only the one correct power edge is traversed for each spline, the short-circuit problem described in Section~\ref{sec:confluent_definition} is alleviated.
 
 Imposing this directionality on the routing graph also fixes the node splitting ambiguity in Section~\ref{sec:confluent_definition}, guaranteeing that the split occurs in the correct direction, according to the rule of separating incoming and outgoing edges to different nodes.
 This works because every routing node is the boundary between two sides of a biclique, equivalent to a single bundled junction; the explicit direction of routing edges now encodes the orientation of the bundle itself.
 This entire process is illustrated in Figure~\ref{fig:radial}, and pseudocode for the resulting algorithm can be seen in Figure~\ref{fig:pseudo_pcd}, Algorithm~\ref{alg:pcd}.
+
 
 \subsection{B-splines}
 \label{sec:bspline_details}

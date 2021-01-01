@@ -12,13 +12,12 @@ TODOS:
 - mention multilevel algorithms and why connected components are separated (no shortest path between them)
 - Section 1.4.2, emphasise the badness of uniform colourmap more
 - Add Daniel and James to acknowledgements
-- make it clear that Bach et al. may never result in the problems presented
 - conclusion should probably also emphasise ecobuilder as the main narrative driver
 
 ## Post-viva revisions:
 requested:
 1. Chapter numbers now start from 1.
-2. For Chapter 2, the lack of a clear separation was caused by not placing the constraint relaxation literature in the Background section. This has now been refactored and reworded so that the Background section contains it. For Chapter 3, the same problem was caused by not placing the description of dissimilarity measures in the Background, and this has been similarly refactored. Chapter 4 has now moved the definitions of confluent drawing and the description of greedy agglomeration into its new Background section. Extra sentences and page breaks have further been added to emphasise the demarcation between background and new contributions.
+2. For Chapter 2, the lack of a clear separation was caused by not placing the constraint relaxation literature in the Background section. This has now been refactored and reworded so that the Background section contains it. For Chapter 3, the same problem was caused by not placing the description of dissimilarity measures in the Background, and this has been similarly refactored. Chapter 4 has now moved the definitions of confluent drawing and the description of greedy agglomeration into its new Background section. Extra sentences have further been added to emphasise the demarcation between background and new contributions.
 3.
 4.
 5. An extra paragraph has been added to the start of Section 2.2, and the extra references have been added to Section 2.1. Comparing the method to different (non-hierarchical) methods has also been added to the discussion in 2.3.
@@ -29,8 +28,8 @@ requested:
 10. These errors have all been fixed.
 
 recommended:
-1. TODO: mention that the bit where this can happen is not within scope for Bach et al.
-2.
+1. The potential future work of finding such a real example has been added to the discussion in Chapter 4
+2. This could be achieved with a different type of spline, but quadratic B-splines require two overlapping routing nodes, and so a path of three nodes (and therefore three nested groups) is required to reproduce the error.
 3. An extra paragraph has been added to Section 2.3.1 to elaborate the choice of pivot selection strategy.
 4.
 5.
