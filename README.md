@@ -20,7 +20,7 @@ requested:
    b) Extra paragraphs and a new section have been added to include the Brandes paper. The 'drawing via gradient descent' paper has been included at the end of the discussion in Section 2.5, just before the conclusions.
    c)
    d)
-4. An extra paragraph has been added to Section 2.2 (penultimate paragraph before 2.2.1) to give early emphasis on the initialisation step. This refers to a new subsection 2.2.4, which discusses the Brandes paper in more detail in the context of discussing the results.  
+4. An extra paragraph has been added to Section 2.2 (penultimate paragraph before 2.2.1) to give early emphasis on the possibility of smart initialisation. This then references a new subsection 2.2.4, which discusses the Brandes paper in detail, within the context of discussing the results.  
 5. An extra paragraph has been added to the start of Section 2.2, and the extra references have been added to Section 2.1. Comparing the method to different (non-hierarchical) methods has also been added to the discussion in 2.3.
 6. An extra paragraph has been added to the start of Section 3.2, and the potential future work of analysing how often the pathological case occurs has been added to the discussion in Section 3.3 (third paragraph).
 7.
