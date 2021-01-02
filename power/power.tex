@@ -242,7 +242,8 @@ The graph \texttt{karate} is a classic dataset that has been extensively studied
 The \texttt{footballTSE} graph is a network of American football games between Colleges in the US, where the ground truth is the conference in which they belong. It was originally studied by \citet{Girvan2002} in the same paper as the GN algorithm was presented. The ground truth data used is a version corrected by \citet{Evans2010}, as the original data clusters were assigned from the 2001 season instead of the correct 2000 season. 
 The \texttt{caltech} graph is a social network of students at the California Institute of Technology, extracted from the website Facebook and originally studied by \citet{Traud2012}. It has been shown to demonstrate clique structure \citep{Nocaj2015}, where the ground truth used here are the dorms in which students were living. This is the most messy data and so the dorm ground truth is the least well matched by the clustering algorithms used.
 % The original graph contains 769 vertices, so the largest connected component was used here.
-The \texttt{lfr} graph is a sample graph from the Lancichinetti Fortunato Radicchi (LFR) benchmark \citep{Lancichinetti2008} which is a model to generate graphs with a clustered structure, given a number of parameters to account for power law distributions in cluster size and vertex degree. The parameters used here were $\tau_1=3$, $\tau_2=1.5$, and $\mu=0.1$. They represent the degree distribution, community size, and fraction of edges to place between communities, respectively. The LFR benchmark was developed in order to improve the popular random model of \citet{Girvan2002}.
+
+The \texttt{lfr} graph is an artificial graph from the Lancichinetti Fortunato Radicchi (LFR) benchmark \citep{Lancichinetti2008} which is a model to generate graphs with a clustered structure, given a number of parameters to account for power law distributions in cluster size and vertex degree. The parameters used here were $\tau_1=3$, $\tau_2=1.5$, and $\mu=0.1$. They represent the degree distribution, community size, and fraction of edges to place between communities, respectively. The LFR benchmark was developed in order to improve the popular random model of \citet{Girvan2002}.
 %In practice the \texttt{networkx} implementation is not very robust to changes in parameters $\alpha=?$
 All graphs are undirected and unweighted.
 
@@ -430,7 +431,7 @@ The simplest case is when two modules $m$ and $n$ share the exact same neighbour
 A trickier case is if only one of the modules contains edges that cannot be merged. For example, $m$ cannot fully absorb $n$ if $N(m)\supset N(n)$. Leaf modules of the hierarchical tree, i.e.\ individual vertices, also cannot be absorbed, and so the same situation occurs when $m$ is a leaf and $n$ is a module. In both cases $m$ adopts $n$, and $N(m)\cap N(n)$ is removed from $N(n)$.
 If both contain edges that cannot be absorbed, i.e.\ $N(m)\not\subset N(n)$ and $N(m)\not\supset N(n)$, then a new module is created that adopts $m$ and $n$ as children and steals $N(m)\cap N(n)$ as its neighbour set. This also happens if $m$ and $n$ are both leaf modules.
 Note that this is done equivalently in the original description by always generating a new parent module, and removing either child if their neighbour sets become empty \citep{Dwyer2014}.
-The greedy process above will be the subject of contributions in Section~\ref{sec:greedy_heuristics}.
+The greedy process above will be the subject of improvements in Section~\ref{sec:greedy_heuristics}.
 
 \subsection{Confluent drawing}
 \label{sec:confluent_definition}
@@ -453,7 +454,7 @@ The addition of directed edges to the ARG will be used to solve various theoreti
 \section{Improvements}
 This section will describe multiple improvements to the methods described in the previous section, which encapsulate the novel contributions from this chapter. The speed and quality of the power decomposition algorithm will be improved in Section~\ref{sec:greedy_heuristics}, and two theoretical issues will be resolved for the conversion to a confluent drawing in Sections~\ref{sec:node_split} and~\ref{sec:short_circuits}.
 
-Specifically, it will be shown that the combination of B-splines and shortest paths introduces problems not fully explored by \citet{Bach2017}, causing the resulting drawings to violate the second and third conditions in the above definition. These problems will be solved, and the subclass of confluent drawings the algorithm can produce will be identified as a new classification known as \emph{power-confluent}. The corrected solution guarantees that the second condition of the definition in Section~\ref{sec:confluent_definition} is always satisfied, but still cannot guarantee the third, as discussed in Section~\ref{sec:power_planarity}.
+Specifically for the conversion, it will be shown that the combination of B-splines and shortest paths introduces problems not fully explored by \citet{Bach2017}, causing the resulting drawings to violate the second and third conditions in the above definition. These problems will be solved, and the subclass of confluent drawings the algorithm can produce will be identified as a new classification known as \emph{power-confluent}. The corrected solution guarantees that the second condition of the definition in Section~\ref{sec:confluent_definition} is always satisfied, but still cannot guarantee the third, as discussed in Section~\ref{sec:power_planarity}.
 
 It is important to note that these theoretical issues are rare in practical use cases of \citet{Bach2017}, and that the solutions proposed here will not often change the resulting drawings. When the issue does occur however, it changes the implied connectivity of the graph. Ensuring correctness is also necessary for work on the theoretical side of the method to further progress.
 
@@ -596,6 +597,7 @@ Pseudocode for the above described algorithm can be seen in Figure~\ref{fig:pseu
 \label{sec:node_split}
 The improvements described will now move onto the conversion of the power graph into a power-confluent drawing. Issues regarding the use of B-splines are first identified (of degree $p=3$ in the source code of \citet{Bach2017}, although it is not specified in the paper) for interpolating control points.
 These were likely chosen because they satisfy the convex hull property, which prevents crossings at shared control points. They also offer local control (i.e.\ moving a control point only affects the surrounding $p+1$ segments), which guarantees that splines that share enough intermediate control points will overlap.
+
 Local control is what makes it possible for drawings to be confluent; with the right routing graph, it is possible for edges to share enough control points to produce the overlapping portions that are required for a confluent drawing. Specifically, for two curves to be guaranteed to overlap they must share $p$ or more control points (see Section~\ref{sec:bspline_details} for a proof and a more detailed explanation).
 
 \begin{figure}
@@ -607,10 +609,10 @@ Local control is what makes it possible for drawings to be confluent; with the r
 \end{figure}
 
 There are two problems with using B-splines in this context. The first is that splines that share fewer than $p$ control points will \emph{not} overlap, but sharing even a single routing node should indicate a bundled junction.
-The authors recognized this, calling it the `crossing artifact' \citep[Fig.~4]{Bach2017}, and fixed it by splitting routing nodes into two: one for incoming and one for outgoing edges.
+The authors recognized this, calling it the `crossing artifact' \citep[Fig.~4]{Bach2017}, and fixed it by splitting routing nodes into two: one for incoming and one for outgoing edges. This is illustrated in Figure~\ref{fig:nodesplit}.
 The intuition behind this splitting is correct, as it introduces another shared control point that tightens the bundle, joining the crossed edges into a junction. However, their exact description contains an ambiguity in the context of undirected graphs, as it is not specified how to identify edges as incoming or outgoing.
 
-This is problematic as an incorrect split may introduce errors into the resulting drawing, as illustrated in Figure~\ref{fig:nodesplit}.
+This is problematic as an incorrect split may introduce errors into the resulting drawing, as shown in Figure~\ref{fig:nodesplit}, right.
 This ambiguity will be resolved, along with the following related problem, in Section~\ref{sec:hierarchical_routing}.
 
 \subsection{Short-circuits}
@@ -755,7 +757,7 @@ The purpose of having power edges outgoing at both ends will soon be made clear.
 To draw the adjacency edges back on top, any shortest path calculations can now be forgoed. Instead, for each power edge, a depth-first search is performed for all child leaf nodes starting from both ends of the power edge. Each path to each leaf from one end is then concatenated to the reversed path to each leaf from the other end, and every concatenated path is used as the sequence of control points for a spline.
 These paths are now guaranteed to be unique because the ARG is now effectively a tree, due to power edges being incoming at both ends to prevent their traversal. Since only the one correct power edge is traversed for each spline, the short-circuit problem described in Section~\ref{sec:confluent_definition} is alleviated.
 
-Imposing this directionality on the routing graph also fixes the node splitting ambiguity in Section~\ref{sec:confluent_definition}, guaranteeing that the split occurs in the correct direction, according to the rule of separating incoming and outgoing edges to different nodes.
+Imposing this directionality on the routing graph also fixes the node splitting ambiguity in Section~\ref{sec:confluent_definition}, guaranteeing that the split occurs in the correct direction, according to the rule of separating incoming and outgoing edges to different nodes. Note that incoming and outgoing in this context no longer refers to edges in the original graph; how to deal with these will be described in Section~\ref{sec:power_directed}.
 This works because every routing node is the boundary between two sides of a biclique, equivalent to a single bundled junction; the explicit direction of routing edges now encodes the orientation of the bundle itself.
 This entire process is illustrated in Figure~\ref{fig:radial}, and pseudocode for the resulting algorithm can be seen in Figure~\ref{fig:pseudo_pcd}, Algorithm~\ref{alg:pcd}.
 
@@ -832,14 +834,7 @@ This new classification will now be proven to be a subclass of strict confluent 
 \subsubsection{Stricter than strict}
 The definition of strict confluent drawing has only the additional restriction that there can be at most one smooth path between vertices, and there cannot be any paths from a vertex to itself \citep{Eppstein2013}. 
 % For the power-confluent case, because each routing node can only have one parent, and each path must go up the tree through this parent, there can only ever be one path that can be taken between two vertices. Every power-confluent drawing is therefore also strict confluent.
-For the power-confluent case, because the mapping of edges to power edges is surjective \citep{Royer2008}, each edge can only correspond to a single path through the power graph hierarchy, and therefore also through the routing graph behind the confluent drawing. Every power-confluent drawing without self-loops is therefore also strict confluent.
-
-The reverse is not true, because another condition of power graphs is that groups must be disjoint \citep{Royer2008}, i.e.\ their boundaries may not overlap.
-There exist confluent drawings that cannot result from power graphs unless this condition is broken, for example the tetrahedron-like structure in Figure~\ref{fig:strict}.
-In this structure there are six junctions, and so at least six power groups are required in the corresponding power graph; however, there is a maximum of four that will not overlap, as there can only be one for each `corner' of the `tetrahedron'. This is due to the middle vertex of each `corner' sharing junctions with all three surrounding it, which means that grouping any of the three valid pairings will block out the other two.
-
-Note that the graph itself is not necessarily impossible to draw in a power-confluent manner, but that this particular drawing could never result from the algorithm presented in this paper.
-Power-confluent is therefore a strictly stronger condition than strict confluent.
+For the power-confluent case, because the mapping of edges to power edges is surjective \citep{Royer2008}, each edge can only correspond to a single path through the power graph hierarchy, and therefore also through the routing graph behind the confluent drawing. Every power-confluent drawing is therefore also strict confluent.
 
 \begin{figure}
   \centering
@@ -847,6 +842,13 @@ Power-confluent is therefore a strictly stronger condition than strict confluent
   \caption[A strict confluent drawing that is not power-confluent]{An example of a strict confluent drawing that cannot be reverse-engineered into a valid power graph, unless power group boundaries are allowed to overlap. On the left is the confluent drawing (with junctions marked by transparent blue circles), and on the right is a power graph that shows all possible groupings to match these junctions. The proof is further explained in Section~\ref{sec:power_planarity}.}
   \label{fig:strict}
 \end{figure}
+
+The reverse is not true, because another condition of power graphs is that groups must be disjoint \citep{Royer2008}, i.e.\ their boundaries may not overlap.
+There exist confluent drawings that cannot result from power graphs unless this condition is broken, for example the tetrahedron-like structure in Figure~\ref{fig:strict}.
+In this structure there are six junctions, and so at least six power groups are required in the corresponding power graph; however, there is a maximum of four that will not overlap, as there can only be one for each `corner' of the `tetrahedron'. This is due to the middle vertex of each `corner' sharing junctions with all three surrounding it, which means that grouping any of the three valid pairings will block out the other two.
+
+Note that the graph itself is not necessarily impossible to draw in a power-confluent manner, but that this particular drawing could never result from the algorithm presented in this paper.
+Power-confluent is therefore a strictly stronger condition than strict confluent.
 
 \section{Discussion}
 \label{sec:power_discussion}

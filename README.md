@@ -6,8 +6,7 @@ The second is the method of edge bundling, where the idea of hierarchical edge b
 The final topic is an engineering application in the form of a serious game called EcoBuilder, which utilises the node-link diagram to visualise the dynamical behaviour of food webs. Its purpose is to crowdsource research through a citizen science approach, with outcomes in both visualisation and mathematical ecology.
 
 TODOS:
-- include Brandes and Kobourov papers to show impact of SGD (add an extra section?) (point 4)
-- mention multilevel algorithms and why connected components are separated (no shortest path between them)
+- mention multilevel algorithms (search for TODO)
 - Add Daniel and James to acknowledgements
 - note somewhere that one of the ecobuilder sections will read like a user guide
 - conclusion should probably also emphasise ecobuilder as the main narrative driver
@@ -15,7 +14,7 @@ TODOS:
 ## Post-viva revisions:
 requested:
 1. Chapter numbers now start from 1.
-2. For Chapter 2, the lack of a clear separation was caused by not placing the constraint relaxation literature in the Background section. This has now been refactored and reworded so that the Background section contains it. For Chapter 3, the same problem was caused by not placing the description of dissimilarity measures in the Background, and this has been similarly refactored. Chapter 4 has now moved the definitions of confluent drawing and the description of greedy agglomeration into its new Background section. Extra sentences have further been added to emphasise the demarcation between background and new contributions.
+2. For Chapter 2, the lack of a clear separation was caused by not placing the constraint relaxation and large graphs literature in the Background section. This has now been refactored and reworded so that the Background section now contains both. For Chapter 3, the same problem was caused by not placing the description of dissimilarity measures in the Background, and this has been similarly refactored. Chapter 4 has now moved the definitions of confluent drawing and the description of greedy agglomeration into its new Background section. Extra sentences have further been added to emphasise the demarcation between background and new contributions.
 3. a) These have been added, along with the suggested survey papers in the pre-viva report.
    b) Extra paragraphs and a new section have been added to include the Brandes paper. The 'drawing via gradient descent' paper has been included at the end of the discussion in Section 2.5, just before the conclusions.
    c)
@@ -31,12 +30,14 @@ requested:
 recommended:
 1. The potential future work of finding such a real example has been added to the discussion in Chapter 4
 2. This could be achieved with a different type of spline, but quadratic B-splines require two overlapping routing nodes, and so a path of three nodes (and therefore three nested groups) is required to reproduce the error.
-3. An extra paragraph has been added to Section 2.3.1 to elaborate the choice of pivot selection strategy.
+3. An extra paragraph has been added to Section 2.3.1 to elaborate the choice of pivot selection strategy. (paragraph 3)
 4.
 5. Chapter 2:
     a) The section title has been changed to be more specific to the problem at hand.
     b) Citations regarding what humans do when asked to draw a network have been added to the introductory section.
     c) An extra paragraph has been added to the start of Section 2.1.1 to make clear that the optimisation interpretation is not novel. Simulated annealing was also mentioned again when discussing the exponential schedule at the end of "fixed number of iterations", Section 2.2.1
+    d) The suggested multilevel coarsening comparison paper was included in the (now Background) review for large graphs.
+    e) the extra reference to emphasise the danger of using the rainbow colourmap was included in Section 2.4.2, paragraph 3.
    Chapter 3:
     a) "thus far" has been changed to "thus far in this thesis"
    Chapter 4:
