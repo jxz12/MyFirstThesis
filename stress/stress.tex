@@ -8,7 +8,7 @@
   \label{fig:graph_representations}
 \end{figure}
 
-If one were to ask a random group of people to draw a network on a piece of paper, it is likely that most would draw dots to represent the nodes, and lines joining the dots to represent the edges. This is a representation so intuitive that it is often synonymous with the abstract concept of a network entirely.
+If one were to ask a random group of people to draw a network/graph on a piece of paper, it is likely that most would draw dots to represent the nodes, and lines joining the dots to represent the edges. This is a representation so intuitive that it is often synonymous with the abstract concept of a graph entirely.
 This is the reason why this `join-the-dots' representation, known as the node-link diagram, is the most commonly studied and applied \citep{Ghoniem2004}, and is also why it has been chosen for the purposes of this thesis.
 
 The contribution of this first chapter is entirely focused on algorithms for positioning the nodes in a node-link representation, specifically through the numerical optimisation of a popular objective function known as \emph{stress} \citep{Zheng2019Stochastic}.
@@ -305,7 +305,7 @@ The use of this sparse approximation will be explored in Section~\ref{sec:sparse
 
 \section{Stochastic gradient descent}
 \label{sec:sgd}
-The remaining content of this chapter will describe the novel application of stochastic gradient descent (SGD) to minimise stress. SGD is a method widely used in other fields, most notably in machine learning \citep{Bottou2012}, but not previously applied to minimise Equation~\ref{eq:stress}. 
+The remaining content within this chapter will describe the novel application of stochastic gradient descent (SGD) to minimise stress. SGD is a method widely used in other fields, most notably in machine learning \citep{Bottou2012}, but was not previously applied to minimise Equation~\ref{eq:stress}. 
 SGD approximates the gradient of a complex function using an unbiased estimator of that function, and in the case that the complex function is a sum, the estimator may use the gradients of its individual terms \citep{Bottou2012}.
 
 For stress in particular, this has an intuitive geometric interpretation of moving a single pair of vertices at a time; this interpretation allows for a simple modification to the optimisation step which help to avoid local minima and speed up convergence. The benefits of SGD over majorization will be shown through experiment.

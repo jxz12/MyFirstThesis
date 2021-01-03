@@ -116,7 +116,7 @@ It leverages the idea that each species has a metabolism rate that can be measur
 \begin{figure}
     \centering
     \includegraphics[width=.8\textwidth]{joy/metabolism.pdf}
-    \caption[A plot of metabolism against individual body mass]{A plot of metabolism against individual body mass for a selection of animals. The slow-moving sloth is a good example showing that the model is imperfect, but still a very good estimate when considering the complexity of life. Data taken from \citep{Nagy1999}, power law slope and intercept from \citep[Fig.~2]{Brown2004}. All photos taken from \url{www.pixabay.com} under the Pixabay License.}
+    \caption[A plot of metabolism against individual body mass]{A plot of metabolism against individual body mass for a selection of animals. The slow-moving sloth is a good example showing that the model is imperfect, but still a very good estimate when considering the complexity of life. Data taken from \citep{Nagy1999}, power law slope and intercept from Fig.~2 in \citet{Brown2004}. All photos taken from \url{www.pixabay.com} under the Pixabay License.}
     \label{fig:metabolism}
 \end{figure}
 
@@ -149,6 +149,7 @@ The strengths of predator--prey interactions are defined as
   \label{eq:interaction_strength}
 \end{equation}
 where $a_0$ is a normalising constant, $e_0$ measures biomass conversion efficiency, and $\mathcal{F}(i,j)$ is a function that captures the scaling of interaction rate in terms of consumer mass as well as consumer--resource body mass ratio. The $\mathbf{m}^{\text{--}1}$ factor at the end is to convert it into mass-specific units, just as the minus one in the exponent of Equation~\eqref{eq:metabolism_beta}.
+
 The function $\mathcal{F}(i,j)$ can be expressed in many ways, and is more difficult to measure than individual metabolism as it involves the interaction between two species. To overcome this, \citet{Pawar2012} constructed a mathematical model that simulates species as randomly moving individuals, such that they can be treated as particles colliding under a Brownian motion approximation \citep{Ocubo1980}. Traits such as movement speed and mutual detection distance between consumer and resource have allometric relationships, and so were carefully combined (and validated against empirical data) to construct a mechanistic model of species interaction rate.
 The final resulting formulations for $\mathcal{F}(i,j)$ are
 \begin{equation}
@@ -163,7 +164,7 @@ The numerical values of the constants used for this model can be seen in Table~\
 
 \begin{table}
   \centering
-  \caption[Values of constants used for the model in Section~\ref{sec:predator_prey}]{Constants used for the model in Section~\ref{sec:predator_prey}. The value for $e_0$ takes two values to account for prey being more difficult to digest as a plant (0.2) than an animal (0.5), close to the naturally observed values \citep{Lindeman1942, Kozlovsky1968}.}
+  \caption[Values of constants used for the model in Section~\ref{sec:predator_prey}]{Constants used for the model in Section~\ref{sec:predator_prey}, taken from \citet{Pawar2012}. The value for $e_0$ takes two values to account for prey being more difficult to digest as a plant (0.2) than an animal (0.5), close to the naturally observed values \citep{Lindeman1942, Kozlovsky1968}.}
   \setlength{\tabcolsep}{1em} % for the horizontal padding
   {\renewcommand{\arraystretch}{1.25}% for the vertical padding
   \begin{tabular}{|c|c|c|}
@@ -228,8 +229,8 @@ However, none of these models can capture the topology of food webs fully satisf
 One thing that all the aforementioned models share is \emph{low dimensionality}. This essentially means that there exists a structural pattern that can be largely explained using rules and models without too many parameters.
 % The models described have been shown to recreate ecosystem features well, but is there a way to quantify whether real food webs can even be described with models without too many parameters?
 % The second critical flaw of the game was the fact that the user had no control over the structure of the food webs they were creating.
-It is important that the dimensionality of topologies players are tasked with recreating is low, because humans struggle with understanding high-dimensional information. After all, the algorithms studied in previous chapters all aimed at reducing the dimensionality of graphs down to two dimensions. To gain an idea of just how complicated structures can become, the number of possible edges in a general directed graph is $n(n-1)$, which means that there are $2^{n(n-1)}$ possible configurations for the user to try, assuming edges can go in both directions. Even if edges can only in one direction then there are $3^{n(n-1)/2}$, which is still worse than exponential. To illustrate how fast this grows, with just six species this already corresponds to over ten million possible topologies. With twenty species, this is more than the estimated number of atoms in the universe \citep{Guth2003}.
-Note that these calculations are for completely general graphs, and that there are extra constraints in food webs such as plants not being predators; the idea of how complex these topologies nevertheless still holds.
+It is important that the dimensionality of topologies players are tasked with recreating is low, because humans struggle with understanding high-dimensional information. After all, the algorithms studied in previous chapters all aimed at reducing the dimensionality of graphs down to two dimensions. To gain an idea of just how complicated structures can become, the number of possible edges in a general directed graph is $n(n-1)$, which means that there are $2^{n(n-1)}$ possible configurations for the user to try, assuming edges can go in both directions. Even if edges can only in one direction then there are $3^{n(n-1)/2}$, which is still worse than exponential.
+Note that these calculations are for completely general graphs, and that there are extra constraints in food webs such as plants not being predators; the idea of just how complex these topologies can be nevertheless still holds.
 
 \begin{figure}
   \centering
@@ -288,6 +289,35 @@ A summary statistic based on the trophic levels of all species is known as \emph
 and can be interpreted as the standard deviation of differences in trophic level over each edge. It is strictly larger than zero, where zero indicated perfect coherence, and so the larger it is the more incoherent the web.
 This quantity was studied by \citet{Johnson2014}, where it was shown that more coherent topologies result in more stable ecosystems. It will be used here to analyse the strategies taken by players to tackle challenges in the game.
 
+\subsection{Dynamic graph layout}
+\label{sec:dynamic_layout}
+The layout of the nodes shown to the player leverages the work done in Chapter~\ref{chap:stress} by minimising stress.
+However the topology of their network will change every time the player adds/removes a node/link, and so the layout must be recomputed each time an action is performed.
+A problem with this is that there is no guarantee that nodes will not be moved vastly apart in successive layouts, especially since stress is invariant to rotation, translation, and reflection.
+Another problem is that nodes with identical shortest paths to all other nodes in the topology may also swap positions, with no effect on the resulting stress. For example, the upper two nodes in the X shape in Figure~\ref{fig:ecobuilder_device} are topologically identical, and so swapping their positions would have no impact on the resultant stress.
+Simply re-performing the layout process every time a link is added results in these kinds of mismatches becoming a common occurrence.
+
+This problem of aligning layouts between different topologies is known as \emph{dynamic} graph layout in the literature, where the task is defined as preserving the \emph{layout stability} of the drawing or the \emph{mental map} of the viewer.
+Among the first works to describe this formally are \citet{Eades1991, Misue1995}, where different definitions of stability are presented, such as reducing the movement of the same node across successive layouts, and/or maintaining similar neighbourhoods of nodes in close proximity. 
+
+\citet{Archambault2012, Archambault2013, Archambault2016} later resolved the real benefit of maintaining stability, as prior studies had surprisingly not found improvement in task performance with increased stability. For example, previous tests gave graph readability tasks such as finding the node with the highest degree with no significant increase in performance \cite{Saffrey2008}. It was shown that that the real benefit of stability was to keep track of specific nodes and edges in an evolving graph, resulting in increased performance in \emph{orientation} tasks, such as tracking specific locations or paths in the topology.
+
+A naive method of solving this is to use the previous layout as the initialisation for the next. This is effective at maintaining nodes close to each other, but unfortunately can throw the optimisation directly into a local minimum, leading to low-quality layouts.
+The work in Chapter~\ref{chap:stress} showed that stochastic gradient descent (SGD) does not require smart initialisation to effectively minimise stress, but unfortunately it is not good enough to escape from a bad (i.e.\ worse than random) initialisation. This is especially true when a single axis is constrained, as will be described in Section~\ref{sec:objectives}.
+Another common strategy is to simply pin nodes from previous layouts and only move ones that have directly changed \citep{Ghani2012}, but over the course of time this may lead to accumulated stress and tangled layouts.
+
+Common methods of solving the problem better include \emph{anchoring} and \emph{linking}, which both involve keeping information from previous layouts in consideration. Anchoring is the idea of precomputing an ideal position for each node and adding an attractive force for that node to its ideal position, although this is usually only applicable in offline situations where the sequence of topologies is already known. Linking applies a force between corresponding nodes in adjacent layouts, and so can be done in an online context.
+\citet{Brandes2011Dynamic} explored multiple ways of performing both in the context of stress     minimisation, and found that the linking strategy worked best in most contexts for maintaining stability. They also quantified the trade-off between readability and stability, as one must give up some reduction in stress to keep nodes together across successive layouts.
+
+A variety of other creative ideas to deal with this problem have also been proposed, such as tweaking a force-directed model to minimize Bayesian probability differences between layouts \citep{Brandes1997}. Simplifying the union of the two graphs using a hierarchical decomposition, similarly to those studied in Chapter~\ref{chap:power}, and depicting only the movement of the hierarchy was also explored by \citet{Archambault2009}. Presenting the user with multiple timeslices of the transition in a grid, rather than through animation, has also been shown to improve task response times, although at the expense of accuracy \citep{Archambault2011}.
+A example of a modern method is Dynamic Network Plaid \citep{Lee2019} which presents timeslices of successive topologies on a large touch-screen display, opening up new realms of possibility in terms of interactive exploration of the data.
+
+In the context of EcoBuilder, since the considered graphs are small i.e.\ fewer than a couple dozen vertices, it was decided that the state-of-the-art methods mentioned above were not crucial for the intended use case. However this would a top priority for any future work. The layout is simply recomputed on each topological change, and a linear equation known as the \emph{Procrustes}\footnote{The name Procrustes is derived from Greek mythology, and translates to `stretcher'. It is based on the story of a man named Damastes, who was given it as a nickname because he would offer unsuspecting travellers a place to stay for the night, but proceed to stretch their limbs on a rack if they did not exactly fit the bed. Karma eventually caught up to Damastes when he experienced the same fate as his guests at the hands of Theseus \citep{Cox2000}.} statistic was used to align successive layouts.
+This simply measures the sum of squared distances of movements, and can be directly minimised using linear methods. Therefore, the differences in rotation, translation, and reflection layouts are neutralised, but other stability metrics are not considered and left as future work.
+Note that this statistic has been previously used to assess the similarity between layout algorithms \citep{Ortmann2017}.
+More specific details on implementation are described in Section~\ref{sec:eco_visualisation}.
+
+
 \subsection{Citizen science}
 \label{sec:citizen_science}
 At the time of writing, the video game industry has grown large enough to eclipse the film and music industries, combined \citep{Egenfeldt-Nielsen2019}. Its recent growth is due to the rise in mobile and competitive gaming, which have rounded out the market to appeal to casual and hardcore audiences respectively.
@@ -321,187 +351,10 @@ Thankfully, the operation was a success due to the ensuing \emph{trophic cascade
 EcoBuilder aims to give ordinary people the ability to make similar decisions in their own simulated ecosystems. These simulations will be performed using the equations in Section~\ref{sec:predator_prey}, and so phenomena like the chain reactions seen in Yellowstone can be recreated, as emergent properties of the underlying dynamical system.
 
 The goal, in terms of citizen science, is to create a symbiotic relationship between players and researchers within the context of the game.
-Players will learn about how ecosystems function, and why they may fall apart given the wrong structural decisions. In return, players will be tasked with building ecosystems that offer potential solutions to the stability vs.\ complexity debate. A further visualisation experiment is also embedded within the game, with the aim of exploring different types of node layout for food webs. These research outcomes of the game are further discussed in Section~\ref{sec:eco_hypotheses}.
-The following section will first study the process behind the design and development of the apparatus where this is made possible.
-
-\section{User interface}
-\label{sec:user_interface}
-\begin{figure}
-    \centering
-    \makebox[\textwidth][c]{\includegraphics[width=1.09\textwidth]{joy/gameplay.pdf}}
-    \caption[A labelled screenshot of EcoBuilder gameplay]{An illustrative screenshot of gameplay in EcoBuilder. The components labelled 1--8 are explained in Section~\ref{sec:user_interface}.}
-    \label{fig:eco_gameplay}
-\end{figure}
-
-There are multiple components that go into the development of any game, and EcoBuilder is no different. The Unity game engine \citep{Goldstone2009} was chosen as the computational framework, due to its ease of compilation to various platforms, including mobile and WebGL. To illustrate the various engineering challenges behind the user interface, Figure~\ref{fig:eco_gameplay} will be used as a reference screenshot of the gameplay performed by a player. The various moving parts are labelled in the order they will be explained.
-However, the best way to gain an understanding of the interface is to try it --- links for downloading the game on iOS and Android can be found at \url{www.ecobuildergame.org}.
-
-\subsection{Food web visualisation}
-\label{sec:eco_visualisation}
-The most complex component of the gameplay is the visualisation of the ecosystem itself, as it must simultaneously display its topology and dynamical behaviour. For that reason, this whole section will be devoted to its explanation, and the following Section~\ref{sec:HUD} will concern the remaining components.
-
-As shown by label~1 in Figure~\ref{fig:eco_gameplay}, a node-link diagram is used for visualising the topology of the food web.
-The nodes of the diagram represent species, where their shape and colour are dependent on the two traits, size and interference (further explained in Section~\ref{sec:HUD}, label~6).
-Node colour depends on both traits simultaneously, to span a 2D plane in the 3D CIELAB colour space to maintain perceptual uniformity \citep{Smart2019}, where the planes used for plants and animals can be seen in bottom left of Figures~\ref{fig:101} to~\ref{fig:103}.
-Node shapes were designed to be relatively spherical in order to resemble a classical node-link diagram, and change depending on the choice of plant or animal. The cute faces are procedurally generated using random combinations of eyes and mouths.
-Links are rendered with low opacity, except with moving circles that flow in the direction of biomass transfer. Such animated edges were studied by \citet{Holten2011} to be effective at showing link direction, and also recommended in \citet{Bach2017}.
-Coloured outlines around nodes and links are also used to indicate their status, for example in Figure~\ref{fig:eco_gameplay} a blue outline means the component cannot be edited, and a yellow outline means it is the current focus of the panel labelled by the number~6.
-
-To show the equilibrium abundance of each species, as calculated by Equation~\ref{eq:equilibrium}, a small symbol is placed next to each species, which follows the same conventions as battery life indicators on mobile devices, and health bars in video games. Because this abundance can be negative (corresponding to extinction), values below zero are shown as red that only fills a small fraction of the space, and positive values as green that fills up more. An example of negative abundance can be seen in Figure~\ref{fig:ecobuilder_device}.
-Numbers showing the exact traits of each species are also placed above the battery icons, so that the exact definition of the species can be exactly identified.
-
-\subsubsection{Interactive layout}
-\label{sec:ecobuilder_layout}
-The introduction of interaction adds multiple extra factors that need to be taken into consideration.
-The first is the question of how the player adds new edges to the graph. This is done in the simplest and most intuitive manner: the player simply drags in between the two nodes they wish to attach to each other. Since the flow of biomass is directed from prey to predator, the first intuition may be to drag from the prey to predator, however preliminary feedback showed that players found it more intuitive to think in terms of \emph{this eats that}. The default setting in the game therefore has the player drag from predator to prey, but this is left as an option in the settings.
-
-The layout of the nodes is computed by minimising stress, as studied in Chapter~\ref{chap:stress}.
-However, an issue is that the topology will change every time the player adds a link, and so the layout must be recomputed each time.
-The main problem with this is that stress as an energy function is invariant to rotation, translation, and reflection, so there is no guarantee that any two layouts will line up well at all.
-A first attempt to solve this was to use the previous layout as the initialisation for the next. This is effective at maintaining nodes close to each other, but unfortunately can throw the optimisation directly into a local minimum, leading to low-quality layouts. The work in Chapter~\ref{chap:stress} showed that stochastic gradient descent (SGD) does not require smart initialisation to effectively minimise stress, but unfortunately it is not good enough to escape from a bad (i.e.\ worse than random) initialisation.
-The game therefore proceeds by reinitialising the layout randomly when the topology of the graph changes, and running SGD from scratch every time. 
-
-The Unity game engine works by providing the programmer with functions to implement that will be run once per frame, but SGD is not quite fast enough to be completely computed every frame and still maintain a good frame rate.
-Because of this, the layout code is implemented as a thread that runs concurrently alongside the primary frame-by-frame thread, and only returns the layout to display on the screen once it is completed. SGD is fast enough to only require a couple of frames, even on mobile devices, but threading is still required to prevent stutter.
-On top of this, the local version of majorization (see Section~\ref{sec:majorization}) is used once per vertex per frame in order to fine tune the layout slowly into a precise minimum.
-
-However, this brings back the problem of subsequent layouts not lining up well with each other, thus impairing the user's mental map \citep{Eades1991, Diehl2001} of the graph. This problem is known as \emph{dynamic} graph layout in the literature.
-A variety of ideas to deal with this problem have been proposed, such as tweaking a force-directed model to minimize Bayesian probability differences between layouts \citep{Brandes1997}, or considering the two graphs at the same time but with additional edges attached between corresponding nodes \citep{Erten2003}. Simplifying the union of the two graphs using a hierarchical decomposition, similarly to those studied in Chapter~\ref{chap:power}, and depicting only the movement of the hierarchy is another creative idea \citep{Archambault2009}. Presenting the user with multiple timeslices of the transition in a grid, rather than through animation, has also been shown to improve task response times, although at the expense of accuracy \citep{Archambault2011}.
-
-Since the changes from subsequent topologies only differ by at most a single edge, and the considered graphs are small i.e.\ fewer than a couple dozen vertices, it was decided that the state-of-the-art methods mentioned above were not necessary for this use case. A simple linear equation to describe the player's mental map is instead used, known as the \emph{Procrustes}\footnote{The name Procrustes is derived from Greek mythology, and translates to `stretcher'. It is based on the story of a man named Damastes, who was given it as a nickname because he would offer unsuspecting travellers a place to stay for the night, but proceed to stretch their limbs on a rack if they did not exactly fit the bed. Karma eventually caught up to Damastes when he experienced the same fate as his guests at the hands of Theseus \citep{Cox2000}.} statistic.
-This is simply defined by the sum of squared distances between two layouts
-\begin{equation}
-  \mathrm{procrustes}(\mathbf{X}, \mathbf{X}^\prime) = \sum_{i\in V} ||\mathbf{X}_i - \mathbf{X}_i^\prime||^2
-  \label{eq:procrustes}
-\end{equation}
-and can be exactly minimised using linear transformations.
-% The square root of the right-hand side is usually taken as the final value
-Removing the translational component is performed by simply placing the barycenter of both layouts at the origin. Traditionally $\mathbf{X}^\prime$ is then dilated, but stress is not invariant to scaling so this step is skipped here. The rotational component is then removed by differentiating the right-hand side of Equation~\eqref{eq:procrustes} with respect to a rotation $\theta$ and solving for the derivative equalling zero, resulting in
-\begin{equation}
-  \theta(\mathbf{x},\mathbf{y}, \mathbf{x^\prime}, \mathbf{y^\prime}) = 
-  \tan^{\text{--}1}\left(\frac{\sum_i(\mathbf{y}_i\mathbf{x}^\prime_i-\mathbf{x}_i\mathbf{y}^\prime_i)}{\sum_i(\mathbf{x}_i\mathbf{x}^\prime_i-\mathbf{y}_i\mathbf{y}^\prime_i)}\right)
-\end{equation}
-where $\mathbf{x}$ and $\mathbf{y}$ are the two dimensions of the layout $\mathbf{X}$, and similarly for $\mathbf{X}^\prime$. Since the dilation step was skipped, this process is performed for both the new layout and its reflection, where the result with a lower value of Equation~\eqref{eq:procrustes} is chosen. Note that usually in the literature, the square root of this value is taken as the final statistic.
-
-This definition has been previously used to assess the similarity of layouts given any linear transformation \citep{Ortmann2017}, and is used in the game in order to align subsequent layouts. If the sets of vertices differ between topologies, then their union is instead compared.
-To transition smoothly between aligned layouts, the \texttt{SmoothDamp()} function provided by Unity is used, which attaches a critically damped spring between an object and its target position, to avoid jerky movement by maintaining continuity \citep{Kirmse2004}.
-
-\subsubsection{Constraining the y-axis}
-A domain-specific feature of food webs is that any valid topology allows for the trophic level to be calculated for each species, following the process outlined in Section~\ref{sec:topology}. For this reason, an additional constraint to the layout is included, that constrains the y-axis to the trophic level of the species.
-
-The diagonal dominance of the Laplacian matrix to be inverted in order to solve for trophic levels allows for the Jacobi method to be used. Expressing the trophic level Equation~\eqref{eq:trophic_matrix} as 
-\begin{equation}
-  \mathbf{y} = \mathbf{L}^{\text{--}1}\mathbf{b},
-  \label{eq:trophic_laplacian}
-\end{equation}
-ordinary Jacobi solves for $\mathbf{y}$ by assigning
-\begin{equation}
-  \mathbf{y}_i^\prime = \frac{1}{\mathbf{L}_{ii}}\left(\mathbf{b}_i - \sum_{j\neq i}\mathbf{L}_{ij}\mathbf{y}_i\right)
-\end{equation}
-for each vertex $i$ \citep{Young2014}. In this case, $\mathbf{b}$ is simply a column vector of ones.
-An iterative method was chosen because the topology of the graph will only change by a single edge at a time, and so previously calculated trophic levels is a good approximation for subsequent values. From experience, the number of iterations required for convergence is almost always fewer than ten. Since the matrix $\mathbf{L}$ contains an entry for every edge, the complexity per iteration is $\mathcal{O}(|E|)$, as opposed to solving the system exactly. 
-Equation~\eqref{eq:trophic_laplacian} does not have a solution if any component has no vertex with an in-degree of zero (i.e.\ no primary producers). In this case, trophic level computations are simply ignored.
-
-% 3D vs 2D: originally used 3D, but we found that players could not quickly pick up the rotational interface. Nodes would also often become obscured in the center of the layout, so we switched to 2D instead. 
-A problem here is that stress is more difficult to optimise, because there is now only one degree of freedom for vertices to move around in. The solution found was to increase the maximum value of $\mu$ in Equation~\eqref{eq:mu} to $1.1$, as well as adding five extra initialisation iterations at the beginning of the optimisation. This is however an ad hoc solution and future work should involve testing variations of this systematically.
-The aforementioned Procrustes statistic also skips the rotation step in this case, as any rotation would break the orientation of these constraints.
-An example of the same food web visualised with and without this constraint is shown in Figure~\ref{fig:trophic}, where it can be seen that the constrained version tends to point edges upwards.
-
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{joy/trophic.png}
-    \caption[A side-by-side comparison of trophic level constraints]{A side-by-side comparison of the same food web with and without trophic level constraints. The unconstrained layout is on the left, and the constrained is on the right. In the game itself, the little circles along links move to show the direction of biomass flow.}
-    \label{fig:trophic}
-\end{figure}
-
-An important question is whether constraining the y-axis is helpful to the user in the first place. Intuition says the constraint will largely make edges point upwards, which should help to preserve the player's mental map of the flow of biomass throughout the system. The opposing argument is that layouts will have higher stress, and so may become more crowded.
-This question will be systematically tested by the game. Half of the players will be given an standard layout and the other half a constrained layout, and data collected from the game will be used to study which is more effective. More detail on this experiment is outlined in Section~\ref{sec:eco_hypotheses}.
-
-\subsection{Heads-up display}
-\label{sec:HUD}
-The remaining labels on Figure~\ref{fig:eco_gameplay} point to elements of a 2D overlay, upon which exists what is known as a heads-up display (HUD). The idea of a HUD is now ubiquitous to video game interfaces, but its name originated from military aviation, where the pilot would need to have extra information available whilst leaving their view unobstructed. 
-Its purpose in the context of games is the same, where it gives the player the remaining information required to complete the game, whilst leaving the main visualisation as visible as possible.
-
-\subsubsection{Label 2: Constraints}
-Different levels offer different scenarios, with specific topological constraints shown on this first panel. The top two icons show the maximum numbers of plants and animals the player may introduce, and the bottom two show the number of edges and the maximum chain length. Chain length is defined for each plant as zero, and each animal as the shortest path from any plant to it. These are all used throughout the game as conditions required to pass each level.
-
-Earlier versions of the game also included maximum loop length as an extra constraint, but there does not exist a polynomial time algorithm to search for all loops in a graph. Johnson's algorithm \citep{Johnson1975} was attempted for this, but its running time grew to unacceptable levels, and so it was cut from the final release of the game.
-
-\subsubsection{Label 3: Score}
-This panel displays the player's score, as well as how many stars they have obtained. To obtain the first star, the only conditions are that all species coexist and that there is a single connected component. The second and third stars require the player to reach certain numerical score thresholds as a further challenge for skilled players. The current score is shown as the number in the pale brown sub-panel, and the target is shown as the green number below.
-
-Many different metrics were tried and tested for use as a score, most of which were unsuitable. For example, the total abundance every species was a good candidate, but this is maximised by having only plants in the food web, as any animals simply lose too much biomass via the efficiency factor $e_0$ in Equation~\eqref{eq:interaction_strength}. The score should instead continuously increase as the food web becomes more complex. Another related option was to take the total \emph{flux} of the food web, defined as the total amount of biomass flow through every interaction. This is defined here as the sum of the positive off-diagonals in Equation~\eqref{eq:jacobian_evaluated}.
-
-One definition of quantitative complexity is $\sigma\sqrt{nC}$, where $\sigma$ is the standard deviation of the off-diagonals of the community matrix in Equation~\ref{eq:jacobian_evaluated}, $n$ is the number of species, and $C$ is the connectance, defined as the proportion of realised to possible interactions such that $0\leq C\leq1$. Specifically this is $C=|E| / (n(n-1)/2)$. This quantity was shown by May to negatively correlate with the probability of stability as defined in Equation~\eqref{eq:lambda_stability}, and acted as the springboard for the aforementioned complexity vs.\ stability debate.
-This criterion has been taken and updated to more accurately match real ecosystem structure \citep{Allesina2012, Tang2014Correlation}, but all contain the components $\sigma$, $n$, and $C$.
-Unfortunately none of these metrics were able to fit the purposes of a game, because the factor $\sigma$ is not very interpretable, and players found it difficult to work out why it would go up or down.
-% sometimes super suddenly. It was also maxed out at 2 species
-Leaving out $\sigma$ and only including $n$ and $C$ does not work either, since they are both structural measures and so do not capture any dynamics of the system.
-
-The final formulation settled upon was a compromise between the aforementioned options: the factor $\sigma$ is replaced by the total abundance and the square root removed, to construct a final score of
-\begin{equation}
-  \mathrm{score} = \left(\sum^n_i\mathbf{z}^*_i\right)nC
-  \label{eq:score}
-\end{equation}
-where $\mathbf{z^*}$ is from Equation~\eqref{eq:equilibrium}. This alternative is interpretable and goes up as the food web grows in size.
-Unfortunately, this leaves us with a metric that does not have any direct significance in terms of answering a research problem, so is not suitable for crowdsourcing the answer to an ecological question. This problem will be discussed in Section~\ref{sec:research_world}, where the player will be given two alternate scoring metrics that are of interest.
-
-\subsubsection{Label 4: Level}
-The square in the top right of the HUD is a button that represents the level currently being played. When the player has earned the first star of a level, this button can be pressed to pass the level and unlock the next. The appearance of this button before the level has been passed can be seen in Figure~\ref{fig:ecobuilder_device}, where pressing it gives the option to quit the game or reset the level. The screen shown to the player upon completing a level is shown in Figure~\ref{fig:eco_server}, left.
-
-\subsubsection{Label 5: Help}
-This panel is present throughout the game, in both menu screens and during a level playthrough. It was necessary to not overfill this box for two reasons: the first is that the target platform for the game is mobile devices, so space is limited; the second is that in preliminary playtests, players tended to skip any long blocks of text. Some players would even skip all text, regardless of length, and so care had to be taken to use a `learn-by-doing' approach as often as possible. For that reason, multiple levels that act as heavily guided and constrained tutorials were included.
-
-The green arrow on the edge of the panel can be used to hide or show the text at will.
-If the player does not find the solution to a level after two minutes, the text also shows itself to reveal a hint. Further playtests showed that the sometimes counter-intuitive behaviour of the simulation can be frustrating to players, so giving extra help after a delay was a necessary step, a technique often used by game developers to ensure that players get stuck as rarely as possible.
-
-\subsubsection{Label 6: Inspector}
-This panel is known as the inspector, and is the avenue through which the player views and changes the traits of their species.
-These two traits, body mass and interference, take a wide range of values: mass goes from one gram to one thousand kilograms, therefore spanning six orders of magnitude; interference goes from 10$^{\text{--}4}$ to 10$^{\text{--}1}$, spanning three orders of magnitude. This range for mass was chosen to capture species of almost all sizes in the natural world. Smaller species do exist and are vital to Earth's ecosystem (such as bacteria and the smallest insects) but they are left as out of scope for the game.
-The range of interference values was set to span this range, as preliminary playtests showed that species with any larger interference tended to be very difficult to keep alive at all, and species with any smaller interference tended to destabilise the rest of the food web.
-Preliminary tests also showed that allowing the player to choose interference on top of body mass was too much information for players to begin with. The ability to tweak interference by hand is therefore not unlocked until the second set of levels known as Research World is reached (see Section~\ref{sec:eco_hypotheses}).
-Further discussion of interference values can be found in Section~\ref{sec:hypothesis2}.
-% The range of interference values is set to span the range of values that the off-diagonals of the interaction matrix can possibly take when parameterised with Equation~\ref{eq:interaction_strength}, using the aforementioned range of body masses. This was done because it is not known what range of values interference takes in nature, and so the assumption was taken that it should not differ too greatly from the magnitude of inter-species interactions.
-% interference goes from 1e-5 to 1 (reference hsi-cheng's work)
-
-Both traits are also set according to a log scale, so that all orders of magnitude are accessible. The sliders themselves are constrained to only take discrete values, so that the player knows the exact values being used. This also means that values can be displayed using a single number next to the species, as shown in the screenshot in Figure~\ref{fig:eco_gameplay}.
-
-The button to the upper-left of the panel can be used to remove unwanted species from the food web. It is placed next to the name of the species, which is randomly generated by joining together sequences of syllables.\footnote{Credit for the random name generation algorithm goes to \url{www.fantasynamegenerators.com}, accessed 13/8/20.}
-The player may also input their own name for each species, if they wish to do so.
-
-\subsubsection{Label 7: Initiator}
-This panel contains two buttons that are used to initiate the addition of a new species to their ecosystem.
-It is at this point at which the binary choice between plant and animal is chosen and fixed, which not only makes sense from a biological standpoint, but is also necessary in terms of topology, because plants must have an in-degree of zero i.e.\ they cannot be predators. This is not strictly true for the real world, because species such as the Venus flytrap are in fact carnivorous plants. There are even animals that can perform photosyntesis, such as the sea slug, which can `steal' the ability to produce chloroplasts from the algae it eats \citep{Rumpho2008}.
-These such creatures, as remarkable as they are, were considered rare enough to leave out of scope for EcoBuilder.
-
-At this point it is worth mentioning that the number of plants was also limited to a maximum of three in any given level, and usually fewer. This was necessary here because there is no explicit competition between plants, i.e.\ a $(-,-)$ pair in the interaction matrix, and so there is no penalty at all for adding more of them.
-This decision was made because of the difficulty behind parameterising these extra interactions, and so the limiting of the number of plants was instead used. Other plant growth models such as the \emph{chemostat} model \citep{Sommer1983} were also considered, but not utilised in the final version.
-
-\subsubsection{Label 8: Recorder}
-The final component of the gameplay in EcoBuilder is that ability to undo and redo actions, a feature now considered standard among most consumer applications. The arrow pointing left goes backward to undo an action, and the arrow pointing right goes forward to redo a previously undone action, as is conventional. It is implemented simply using a stack, and so undone actions are lost forever if a new action is performed.
-The criteria for being an action is a topological change, i.e.\ the addition or removal of vertices or edges, or a change in value for the trait of a species.
-
-The entire sequence of actions performed by the player is recorded, and when the level is completed it is transformed into a string to sent to a server, along with other playthrough data. The remaining contents of this data will be explained in the following section.
-
-\subsection{Data collection}
-
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{joy/server.png}
-    \caption[Player registration and data collection]{Screenshots to illustrate player registration and data collection. From left to right: the report screen shown when a level is completed, the registration page for player accounts, and the settings page for account details.}
-    \label{fig:eco_server}
-\end{figure}
-
-Figure~\ref{fig:eco_server}, left, depicts the report card shown to the player when they complete a level. It tells the player the number of stars they achieved, their score, and the median score from all high scores throughout the world. The median score is shown in order to motivate the player to strive for higher scores, as a small competitive incentive.
-The small button to the middle-right of the panel can also be pressed to show the exact decomposition of their score, as defined by Equation~\ref{eq:score}, but scaled to fall within a reasonable range of values that make sense as a score. The player can then replay the level or continue to the next.
-
-When this report card panel is shown, a POST request is sent to the server containing multiple fields, including: a timestamp, the score, each component of the parameterisation defined by Equation~\ref{eq:interaction_matrix}, a list of timed actions performed by the player, and a list of device metadata such as operating system and resolution.
-These fields are received by the server and stored in an SQL database for future analysis.
-
-The middle screenshot in Figure~\ref{fig:eco_server} shows the registration page that is shown the first time the application is opened. An account is required for two purposes: the first is to ensure that the data being collected can be matched to a single player, even if they decide to switch devices; the second is to have them tick a box to indicate that they are aware of the general data protection regulation (GDPR) their data will be held under. Note that since there is no `sensitive' personal data being collected, such as ethnicity or political opinions, a tick box is not strictly necessary.
-Some general demographic information, such as age and education background, is optionally collected at registration.
-The player may also delete their account whenever they wish, as shown by the settings page to the right of Figure~\ref{fig:eco_server}. Here they may also change game settings such as volume or drag direction. They may also view the GDPR privacy policy in full, and a credits page to thank the lab members who kindly gave their time to help playtest the game.
-
+Players will learn about how ecosystems function, and why they may fall apart given the wrong structural decisions. In return, players will be tasked with building ecosystems that offer potential solutions to the stability vs.\ complexity debate. A further visualisation experiment is also embedded within the game, with the aim of exploring different types of node layout for food webs.
+The design of the game such that these research outcomes of the game will be outlined in the following Section~\ref{sec:eco_hypotheses}.
+A more detailed description of implementation and design details can be found in Section~\ref{sec:user_interface}, which serves as an appendix to this chapter.
+% The following section will first study the process behind the design and development of the apparatus where this is made possible.
 
 \section{Experimental design}
 \label{sec:eco_hypotheses}
@@ -511,20 +364,21 @@ When the player first opens the game, they are greeted with two large buttons th
 \subsection{Learning World}
 \label{sec:learning_world}
 Learning World contains 18 levels in total, all of which contain relatively simple scenarios designed to be instructive. For example, levels 3 and 4 both force the use of a heavy animal that cannot be saved with a single plant, to teach the player that heavier species consume slower (on a mass-specific basis) and so require more abundant food sources. Levels 5 and 6 present the player with a situation known as \emph{competitive exclusion}, a well-known natural phenomenon that states that if two predators share the exact same prey, then the predator with a faster intake rate will almost always drive the slower to extinction.
-The real-world example of this told to the player is the exclusion of red squirrels after the introduction of grey squirrels in Britain, due to their superior foraging ability \citep{Gurnell2004}.
-This principle, although predicted by the mathematical model, is however not as common in nature as one would think. Examples such as the `paradox of the plankton' seemingly ignore the principle entirely, as tens or hundreds of plankton species are able to coexist despite sharing the same resources \citep{Hutchinson1961}; results from the game may help to reveal why this occurs.
 
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{joy/worlds.png}
-    \caption[Learning World and Research World]{Screenshots to illustrate Learning and Research World. From left to right: the splash screen the user sees when they start the game, the list of levels in Learning World, and the leaderboards in Research World.}
+    \caption[Learning World and Research World]{Screenshots to illustrate Learning and Research World. From left to right: the splash screen the user sees when they start the game, the list of levels in Learning World, and the leaderboards in Research World.
+    A more detailed outline of the user interface within each level can be found in Section~\ref{sec:user_interface}.}
     \label{fig:eco_worlds}
 \end{figure}
 
+The real-world example of this told to the player is the exclusion of red squirrels after the introduction of grey squirrels in Britain, due to their superior foraging ability \citep{Gurnell2004}.
+This principle, although predicted by the mathematical model, is however not as common in nature as one would think. Examples such as the `paradox of the plankton' seemingly ignore the principle entirely, as tens or hundreds of plankton species are able to coexist despite sharing the same resources \citep{Hutchinson1961}; results from the game may help to reveal why this occurs.
 
-EcoBuilder is a \emph{puzzle} game, in that the player is not tasked with time constraints or tests of dexterity. It is therefore a direct test of the ability of the player to understand the dynamics of the underlying simulation.
-This presents the opportunity to perform a controlled test to measure the extent of this understanding. In this case, two node layout methods will be tested, where is computed by simply minimizing stress, and the other additionally has the y-axis positions of species constrained to their trophic level. The layout with only stress optimised will be referred to as the \emph{standard} layout, and with y-axis constrained as the \emph{trophic} layout.
-Other experiments in the literature generally give participants topological tasks such as finding paths between nodes \citep{Bach2017, Okoe2018} or deciding which nodes would disconnect the network if removed \citep{Purchase1997}. A novel difference with the experiment here is that there is an actual dynamical system for the participant to further understand.
+To complete each level in the game, the player needs only to construct an ecosystem where all species can coexist. Each level additionally has the option to earn extra `stars' by also maximising their score, thereby giving the player a motivation to better understand the underlying dynamics of the simulation.
+A description of the scoring metric used in the game can be found in Equation~\ref{eq:score} in Section~\ref{sec:HUD}.
+Unfortunately, this metric that does not have any direct significance in terms of answering a research problem, so is not suitable for crowdsourcing the answer to an ecological question. This issue will be discussed in the following Section~\ref{sec:research_world}, where the player will be given two alternate scoring metrics that are of greater research interest.
 
 \subsection{Research World}
 \label{sec:research_world}
@@ -536,11 +390,25 @@ The purpose of Research World is to see how players approach these three situati
 
 There are a couple of extra details that first must be addressed, however, before letting players loose. The first issue is that there are many trivial solutions if the player is allowed to add many identical species. This is because the main cause of extinctions in the simulation is due to chain reactions such as the aforementioned competitive exclusion, but these do not occur if species are identical \citep{Armstrong1980}. For this reason, no two species are allowed to have the same set of traits. Since there are 9 possible values for body mass and 5 for interference, this results in an upper limit of 45 combinations, plus the binary choice of plant or animal. The number of plants is limited to 3, leaving a total of 48 species per web: more than enough to comfortably fill the screen of a mobile device.
 
-The final addition to Research world is another tool for navigating the topology of food webs. If a species is tapped twice, the layout transitions into a mode where only the direct connections to that species are visible, where its prey are positioned below it and its predators above. The topology can then be navigated in this mode, by hopping from one node to another by again tapping.
-This extra feature was necessary because as the number of species goes up, layouts can become crowded and difficult such that it is difficult to see fine details. The extra layer of interaction helps to alleviate this.
-% Unfortunately, minimising stress is not able to prevent the problem of crowded layouts. This situation can happen easily for topologies with many edges, and leads to nodes being bunched up closely together. superfocus was our eventual solution, but we do the learning world controlled test without.
-
 \subsection{Objectives}
+\label{sec:objectives}
+EcoBuilder is a \emph{puzzle} game --- the player is not tasked with time constraints or tests of dexterity. It is therefore a direct test of the ability of the player to understand the dynamics of the underlying simulation.
+This presents the opportunity to perform a controlled test to measure the extent of this understanding under different conditions. In this case, two node layout methods are tested, where one is computed by simply minimizing stress, and the other additionally has the y-axis positions of species constrained to their trophic level. The layout with only stress optimised will be referred to as the \emph{standard} layout, and with y-axis constrained as the \emph{trophic} layout.
+See Figure~\ref{fig:trophic} for an illustrative example of both layouts side by side. Further details on the implementation of these layouts can be found in Section~\ref{sec:ecobuilder_layout} 
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{joy/trophic.png}
+    \caption[A side-by-side comparison of trophic level constraints]{A side-by-side comparison of the same food web with and without trophic level constraints. The unconstrained layout is on the left, and the constrained is on the right. In the game itself, the little circles along links move to show the direction of biomass flow.}
+    \label{fig:trophic}
+\end{figure}
+
+Other experiments in the literature generally give participants topological tasks such as finding paths between nodes \citep{Bach2017, Okoe2018} or deciding which nodes would disconnect the network if removed \citep{Purchase1997}. A novel difference with the experiment here is that there is an actual dynamical system for the participant to further understand.
+
+The fact that puzzle games are solved using human intelligence also brings the possibility of leveraging this intelligence to crowdsource research.
+As previously described in Section~\ref{sec:topology}, the number of possible topologies in a directed graph without bidirectional edges is $3^{n(n-1)/2}$. To place this in perspective, with just six species this already corresponds to over ten million possible topologies. With twenty species, this is $4.5\times 10^{90}$: more than the estimated number of atoms in the observable universe \citep{Guth2003}.
+Tasking the player with finding the patterns and strategies to navigate such complexity is the purpose of Research World.
+
 With these details in mind, it is possible to state two objectives:
 \begin{mdframed}[backgroundcolor=WhiteSmoke]
   \begin{itemize}[leftmargin=*]
@@ -552,13 +420,14 @@ The reasoning behind the first objective is because constraining species to thei
 
 % The second statement is slightly vague on purpose, because it is not known what is meant by a `high' score, before letting players try it themselves.
 % The reason for predicting that most will not find success is because the dynamical systems involved are complex and sometimes counterintuitive, and expecting all players to gain a good intuition for what strategies work well is unrealistic.
-The second objective is the citizen science component of the game, where it is hoped that players will learn enough about the dynamical behaviour of ecosystems, through their experience in Learning world, to solve the extra problems where the solutions are both unknown and involve many more species.
+The second objective is the citizen science component of the game, where it is hoped that players will learn enough about the dynamical behaviour of ecosystems through their experience in Learning World, to solve the extra problems where the solutions are both unknown and involve many more species.
 The strategies taken by the top players will be analysed to see if real-world features materialise as emergent properties of the constructed ecosystems.
 
 \section{Results and analysis}
 \label{sec:eco_results}
+\definecolor{JustSaiyan}{rgb}{0.25,0.25,0}
 
-Data from a total of the 842 players who completed at least one level, and over 9000 individual playthroughs were analysed to produce the results presented here. The analysis will begin with examining player performance in Learning World, and then finish with Research World.
+Data from a total of the 842 players who completed at least one level, and {\color{JustSaiyan}over 9000} individual playthroughs were analysed to produce the results presented here. The analysis will begin with examining player performance in Learning World, and then finish with Research World.
 
 \subsection{Objective 1}
 \label{sec:hypothesis1}
@@ -572,7 +441,8 @@ The first question to ask is: how many levels did players complete before stoppi
 \end{figure}
 The test statistic studied here for both plots is the \emph{median}, marked by vertical dotted lines for both plots, where it can be seen that progress is slightly further for the trophic group for both measures.
 To validate the significance of this result, a permutation test was performed with the null hypothesis that there is no difference in medians between the two layouts.
-This was done through a one-tailed test on 100,000 permutations of the test set, and the resulting p-values are written on top of the corresponding charts in Figure~\ref{fig:player_progression}.
+This was done through a permutation one-tailed test \citep{Good2006}, by counting the number of times that the observed increase in median for the trophic group occurred over 100,000 permutations of the concatenated test set.
+The resulting p-values are written on top of the corresponding charts in Figure~\ref{fig:player_progression}.
 
 The p-value of 0.028 for levels completed shows a statistically significant result for which group made it further through the game, as defined a p-value below 5\%. The corresponding result for number of stars achieved is not as convincing, but is still positive nonetheless.
 Looking at the shape of levels completed, there is a big cutoff at levels 8 and 9, which is a sign that those two levels where designed to be a little too difficult. However, almost all players with the perseverance to make it over that hump continued on to complete the remaining levels. This was the biggest group of players in general, coming in at just under 25\% of all players.
@@ -690,4 +560,178 @@ Any sequel that would attempt to consider even larger ecosystems, i.e.\ in the o
 The idea of restricting the player to two-dimensional topologies, as defined in Section~\ref{sec:topology}, could offer a neat solution to the problem, as each species would only require a position, along with two coordinates to specify its feeding range, to fully describe its incoming links.
 Edge bundling techniques like those studied in Chapter~\ref{chap:power} were also deemed as too complex for the context of a mobile game, but a desktop version could open that door as well.
 
+A priority for any sequel would also be to implement the improved layout stability methods outlined in Section~\ref{sec:dynamic_layout}. Even though the networks considered in the game are small, layouts that did not preserve the mental map of the player were a more common occurrence than desired, and this problem would be exacerbated even further if larger networks were involved.
+One potential option is to continue the crowd sourcing theme and use the method of \citet{Yuan2012}, who use many human-produced layouts of subgraphs to piece together an overall pleasing layout. At the very least, more interactive exploration options would surely be of use to the player.
+
 All source code and assets used to produce the game are open source and publicly available at \url{www.github.com/jxz12/EcoBuilder}.
+
+\section{Appendix: User interface}
+\label{sec:user_interface}
+This section describes the user interface of EcoBuilder in detail. It is placed as an appendix to this chapter, as the content is not strictly necessary for understanding the research aims and goals presented in the main text.
+
+\begin{figure}
+    \centering
+    \makebox[\textwidth][c]{\includegraphics[width=1.09\textwidth]{joy/gameplay.pdf}}
+    \caption[A labelled screenshot of EcoBuilder gameplay]{An illustrative screenshot of gameplay in EcoBuilder. The components labelled 1--8 are explained in Section~\ref{sec:user_interface}.}
+    \label{fig:eco_gameplay}
+\end{figure}
+
+There are multiple components that go into the development of any game, and EcoBuilder is no different. The Unity game engine \citep{Goldstone2009} was chosen as the computational framework, due to its ease of compilation to various platforms, including mobile and WebGL. To illustrate the various engineering challenges behind the user interface, Figure~\ref{fig:eco_gameplay} will be used as a reference screenshot of the gameplay performed by a player. The various moving parts are labelled in the order they will be explained.
+However, the best way to gain an understanding of the interface is to try it --- links for downloading the game on iOS and Android can be found at \url{www.ecobuildergame.org}.
+
+\subsection{Food web visualisation}
+\label{sec:eco_visualisation}
+The most complex component of the gameplay is the visualisation of the ecosystem itself, as it must simultaneously display its topology and dynamical behaviour. For that reason, this whole section will be devoted to its explanation, and the following Section~\ref{sec:HUD} will concern the remaining components.
+
+As shown by label~1 in Figure~\ref{fig:eco_gameplay}, a node-link diagram is used for visualising the topology of the food web.
+The nodes of the diagram represent species, where their shape and colour are dependent on the two traits, size and interference (further explained in Section~\ref{sec:HUD}, label~6).
+Node colour depends on both traits simultaneously, to span a 2D plane in the 3D CIELAB colour space to maintain perceptual uniformity \citep{Smart2019}, where the planes used for plants and animals can be seen in bottom left of Figures~\ref{fig:101} to~\ref{fig:103}.
+Node shapes were designed to be relatively spherical in order to resemble a classical node-link diagram, and change depending on the choice of plant or animal. The cute faces are procedurally generated using random combinations of eyes and mouths.
+Links are rendered with low opacity, except with moving circles that flow in the direction of biomass transfer. Such animated edges were studied by \citet{Holten2011} to be effective at showing link direction, and also recommended in \citet{Bach2017}.
+Coloured outlines around nodes and links are also used to indicate their status, for example in Figure~\ref{fig:eco_gameplay} a blue outline means the component cannot be edited, and a yellow outline means it is the current focus of the panel labelled by the number~6.
+
+To show the equilibrium abundance of each species, as calculated by Equation~\ref{eq:equilibrium}, a small symbol is placed next to each species, which follows the same conventions as battery life indicators on mobile devices, and health bars in video games. Because this abundance can be negative (corresponding to extinction), values below zero are shown as red that only fills a small fraction of the space, and positive values as green that fills up more. An example of negative abundance can be seen in Figure~\ref{fig:ecobuilder_device}.
+Numbers showing the exact traits of each species are also placed above the battery icons, so that the exact definition of the species can be exactly identified.
+
+\subsubsection{Interactive layout}
+\label{sec:ecobuilder_layout}
+The introduction of interaction adds multiple extra factors that need to be taken into consideration.
+The first is the question of how the player adds new edges to the graph. This is done in the simplest and most intuitive manner: the player simply drags in between the two nodes they wish to attach to each other. Since the flow of biomass is directed from prey to predator, the first intuition may be to drag from the prey to predator, however preliminary feedback showed that players found it more intuitive to think in terms of \emph{this eats that}. The default setting in the game therefore has the player drag from predator to prey, but this is left as an option in the settings.
+
+The Unity game engine works by providing the programmer with functions to implement that will be run once per frame, but SGD is not quite fast enough to be completely computed every frame and still maintain a good frame rate.
+Because of this, the layout code is implemented as a thread that runs concurrently alongside the primary frame-by-frame thread, and only returns the layout to display on the screen once it is completed. SGD is fast enough to only require a couple of frames, even on mobile devices, but concurrency is still required to prevent stutter.
+On top of this, the local version of majorization (see Section~\ref{sec:majorization}) is used once per vertex per frame in order to fine tune the layout slowly into a precise minimum.
+
+As described in Section~\ref{sec:dynamic_layout}, successive topologies constructed by the player are aligned using a Procrustes transformation, and will be described in detail here.
+The Procrustes \emph{error} is simply defined by the sum of squared distances between two layouts
+\begin{equation}
+  \mathrm{procrustes}(\mathbf{X}, \mathbf{X}^\prime) = \sum_{i\in V} ||\mathbf{X}_i - \mathbf{X}_i^\prime||^2.
+  \label{eq:procrustes}
+\end{equation}
+The purpose of the corresponding transformation is to minimise this error, and can be performed exactly using linear methods.
+
+Removing the translational component is performed by simply placing the barycenter of both layouts at the origin. Traditionally $\mathbf{X}^\prime$ is then dilated, but stress is not invariant to scaling so this step is skipped here. The rotational component is then removed by differentiating the right-hand side of Equation~\eqref{eq:procrustes} with respect to a rotation $\theta$ and solving for the derivative equalling zero, resulting in
+\begin{equation}
+  \theta(\mathbf{x},\mathbf{y}, \mathbf{x^\prime}, \mathbf{y^\prime}) = 
+  \tan^{\text{--}1}\left(\frac{\sum_i(\mathbf{y}_i\mathbf{x}^\prime_i-\mathbf{x}_i\mathbf{y}^\prime_i)}{\sum_i(\mathbf{x}_i\mathbf{x}^\prime_i-\mathbf{y}_i\mathbf{y}^\prime_i)}\right)
+\end{equation}
+where $\mathbf{x}$ and $\mathbf{y}$ are the two dimensions of the layout $\mathbf{X}$, and similarly for $\mathbf{X}^\prime$. Since the dilation step was skipped, this process is performed for both the new layout and its reflection, where the result with a lower value of Equation~\eqref{eq:procrustes} is chosen. Note that usually in the literature, the square root of this value is taken as the final statistic.
+If the sets of vertices differ between topologies, then their intersection is instead compared.
+
+To transition smoothly between aligned layouts, the \texttt{SmoothDamp()} function provided by Unity is used, which attaches a critically damped spring between an object and its target position, to avoid jerky movement by maintaining continuity \citep{Kirmse2004}.
+Connected components are layed out separately, and simply placed horizontally adjacent to each other such to avoid overlap.
+
+\subsubsection{Constraining the y-axis}
+A domain-specific feature of food webs is that any valid topology allows for the trophic level to be calculated for each species, following the process outlined in Section~\ref{sec:topology}. For this reason, an additional constraint to the layout is included, that constrains the y-axis to the trophic level of the species.
+
+The diagonal dominance of the Laplacian matrix to be inverted in order to solve for trophic levels allows for the Jacobi method to be used. Expressing the trophic level Equation~\eqref{eq:trophic_matrix} as 
+\begin{equation}
+  \mathbf{y} = \mathbf{L}^{\text{--}1}\mathbf{b},
+  \label{eq:trophic_laplacian}
+\end{equation}
+ordinary Jacobi solves for $\mathbf{y}$ by assigning
+\begin{equation}
+  \mathbf{y}_i^\prime = \frac{1}{\mathbf{L}_{ii}}\left(\mathbf{b}_i - \sum_{j\neq i}\mathbf{L}_{ij}\mathbf{y}_i\right)
+\end{equation}
+for each vertex $i$ \citep{Young2014}. In this case, $\mathbf{b}$ is simply a column vector of ones.
+An iterative method was chosen because the topology of the graph will only change by a single edge at a time, and so previously calculated trophic levels is a good approximation for subsequent values. From experience, the number of iterations required for convergence is almost always fewer than ten. Since the matrix $\mathbf{L}$ contains an entry for every edge, the complexity per iteration is $\mathcal{O}(|E|)$, as opposed to solving the system exactly. 
+Equation~\eqref{eq:trophic_laplacian} does not have a solution if any component has no vertex with an in-degree of zero (i.e.\ no primary producers). In this case, trophic level computations are simply ignored.
+
+% 3D vs 2D: originally used 3D, but we found that players could not quickly pick up the rotational interface. Nodes would also often become obscured in the center of the layout, so we switched to 2D instead. 
+A problem here is that stress is more difficult to optimise, because there is now only one degree of freedom for vertices to move around in. The solution found was to increase the maximum value of $\mu$ in Equation~\eqref{eq:mu} to $1.1$, as well as adding five extra initialisation iterations at the beginning of the optimisation. This is however an ad hoc solution and future work should involve testing variations of this systematically.
+The aforementioned Procrustes statistic also skips the rotation step in this case, as any rotation would break the orientation of these constraints.
+An example of the same food web visualised with and without this constraint is shown back in Figure~\ref{fig:trophic}, where it can be seen that the constrained version tends to point edges upwards.
+
+An important question is whether constraining the y-axis is helpful to the user in the first place. Intuition says the constraint will largely make edges point upwards, which should help to preserve the player's mental map of the flow of biomass throughout the system. The opposing argument is that layouts will have higher stress, and so may become more crowded.
+This question will be systematically tested by the game. Half of the players will be given an standard layout and the other half a constrained layout, and data collected from the game will be used to study which is more effective. More detail on this experiment is outlined in Section~\ref{sec:eco_hypotheses}.
+
+\subsubsection{Focus}
+A final addition to Research world is another tool for navigating the topology of food webs. If a species is tapped twice, the layout transitions into a mode where only the direct connections to that species are visible, where its prey are positioned below it and its predators above. The topology can then be navigated in this mode, by hopping from one node to another by again tapping.
+This extra feature was necessary because as the number of species goes up, layouts can become crowded and difficult such that it is difficult to see fine details.
+The ability to focus attention on a single node helps to alleviate this.
+% Unfortunately, minimising stress is not able to prevent the problem of crowded layouts. This situation can happen easily for topologies with many edges, and leads to nodes being bunched up closely together. superfocus was our eventual solution, but we do the learning world controlled test without.
+
+\subsection{Heads-up display}
+\label{sec:HUD}
+The remaining labels on Figure~\ref{fig:eco_gameplay} point to elements of a 2D overlay, upon which exists what is known as a heads-up display (HUD). The idea of a HUD is now ubiquitous to video game interfaces, but its name originated from military aviation, where the pilot would need to have extra information available whilst leaving their view unobstructed. 
+Its purpose in the context of games is the same, where it gives the player the remaining information required to complete the game, whilst leaving the main visualisation as visible as possible.
+
+\subsubsection{Label 2: Constraints}
+Different levels offer different scenarios, with specific topological constraints shown on this first panel. The top two icons show the maximum numbers of plants and animals the player may introduce, and the bottom two show the number of edges and the maximum chain length. Chain length is defined for each plant as zero, and each animal as the shortest path from any plant to it. These are all used throughout the game as conditions required to pass each level.
+
+Earlier versions of the game also included maximum loop length as an extra constraint, but there does not exist a polynomial time algorithm to search for all loops in a graph. Johnson's algorithm \citep{Johnson1975} was attempted for this, but its running time grew to unacceptable levels, and so it was cut from the final release of the game.
+
+\subsubsection{Label 3: Score}
+This panel displays the player's score, as well as how many stars they have obtained. To obtain the first star, the only conditions are that all species coexist and that there is a single connected component. The second and third stars require the player to reach certain numerical score thresholds as a further challenge for skilled players. The current score is shown as the number in the pale brown sub-panel, and the target is shown as the green number below.
+
+Many different metrics were tried and tested for use as a score, most of which were unsuitable. For example, the total abundance every species was a good candidate, but this is maximised by having only plants in the food web, as any animals simply lose too much biomass via the efficiency factor $e_0$ in Equation~\eqref{eq:interaction_strength}. The score should instead continuously increase as the food web becomes more complex. Another related option was to take the total \emph{flux} of the food web, defined as the total amount of biomass flow through every interaction. This is defined here as the sum of the positive off-diagonals in Equation~\eqref{eq:jacobian_evaluated}.
+
+One definition of quantitative complexity is $\sigma\sqrt{nC}$, where $\sigma$ is the standard deviation of the off-diagonals of the community matrix in Equation~\ref{eq:jacobian_evaluated}, $n$ is the number of species, and $C$ is the connectance, defined as the proportion of realised to possible interactions such that $0\leq C\leq1$. Specifically this is $C=|E| / (n(n-1)/2)$. This quantity was shown by May to negatively correlate with the probability of stability as defined in Equation~\eqref{eq:lambda_stability}, and acted as the springboard for the aforementioned complexity vs.\ stability debate.
+This criterion has been taken and updated to more accurately match real ecosystem structure \citep{Allesina2012, Tang2014Correlation}, but all contain the components $\sigma$, $n$, and $C$.
+Unfortunately none of these metrics were able to fit the purposes of a game, because the factor $\sigma$ is not very interpretable, and initial feedback showed that players found it difficult to work out why it would go up or down.
+% sometimes super suddenly. It was also maxed out at 2 species
+Leaving out $\sigma$ and only including $n$ and $C$ does not work either, since they are both structural measures and so do not capture any dynamics of the system.
+
+The final formulation settled upon was a compromise between the aforementioned options: the factor $\sigma$ is replaced by the total abundance and the square root removed, to construct a final score of
+\begin{equation}
+  \mathrm{score} = \left(\sum^n_i\mathbf{z}^*_i\right)nC
+  \label{eq:score}
+\end{equation}
+where $\mathbf{z^*}$ is from Equation~\eqref{eq:equilibrium}. This alternative was found to be interpretable and goes up as the food web grows in size.
+
+\subsubsection{Label 4: Level}
+The square in the top right of the HUD is a button that represents the level currently being played. When the player has earned the first star of a level, this button can be pressed to pass the level and unlock the next. The appearance of this button before the level has been passed can be seen in Figure~\ref{fig:ecobuilder_device}, where pressing it gives the option to quit the game or reset the level. The screen shown to the player upon completing a level is shown in Figure~\ref{fig:eco_server}, left.
+
+\subsubsection{Label 5: Help}
+This panel is present throughout the game, in both menu screens and during a level playthrough. It was necessary to not overfill this box for two reasons: the first is that the target platform for the game is mobile devices, so space is limited; the second is that in preliminary playtests, players tended to skip any long blocks of text. Some players would even skip all text, regardless of length, and so care had to be taken to use a `learn-by-doing' approach as often as possible. For that reason, multiple levels that act as heavily guided and constrained tutorials were included.
+
+The green arrow on the edge of the panel can be used to hide or show the text at will.
+If the player does not find the solution to a level after two minutes, the text also shows itself to reveal a hint. Further playtests showed that the sometimes counter-intuitive behaviour of the simulation can be frustrating to players, so giving extra help after a delay was a necessary step, a technique often used by game developers to ensure that players get stuck as rarely as possible.
+
+\subsubsection{Label 6: Inspector}
+This panel is known as the inspector, and is the avenue through which the player views and changes the traits of their species.
+These two traits, body mass and interference, take a wide range of values: mass goes from one gram to one thousand kilograms, therefore spanning six orders of magnitude; interference goes from 10$^{\text{--}4}$ to 10$^{\text{--}1}$, spanning three orders of magnitude. This range for mass was chosen to capture species of almost all sizes in the natural world. Smaller species do exist and are vital to Earth's ecosystem (such as bacteria and the smallest insects) but they are left as out of scope for the game.
+The range of interference values was set to span this range, as preliminary playtests showed that species with any larger interference tended to be very difficult to keep alive at all, and species with any smaller interference tended to destabilise the rest of the food web.
+Preliminary tests also showed that allowing the player to choose interference on top of body mass was too much information for players to begin with. The ability to tweak interference by hand is therefore not unlocked until the second set of levels known as Research World is reached (see Section~\ref{sec:eco_hypotheses}).
+Further discussion of interference values can be found in Section~\ref{sec:hypothesis2}.
+% The range of interference values is set to span the range of values that the off-diagonals of the interaction matrix can possibly take when parameterised with Equation~\ref{eq:interaction_strength}, using the aforementioned range of body masses. This was done because it is not known what range of values interference takes in nature, and so the assumption was taken that it should not differ too greatly from the magnitude of inter-species interactions.
+% interference goes from 1e-5 to 1 (reference hsi-cheng's work)
+
+Both traits are also set according to a log scale, so that all orders of magnitude are accessible. The sliders themselves are constrained to only take discrete values, so that the player knows the exact values being used. This also means that values can be displayed using a single number next to the species, as shown in the screenshot in Figure~\ref{fig:eco_gameplay}.
+
+The button to the upper-left of the panel can be used to remove unwanted species from the food web. It is placed next to the name of the species, which is randomly generated by joining together sequences of syllables.\footnote{Credit for the random name generation algorithm goes to \url{www.fantasynamegenerators.com}, accessed 13/8/20.}
+The player may also input their own name for each species, if they wish to do so.
+
+\subsubsection{Label 7: Initiator}
+This panel contains two buttons that are used to initiate the addition of a new species to their ecosystem.
+It is at this point at which the binary choice between plant and animal is chosen and fixed, which not only makes sense from a biological standpoint, but is also necessary in terms of topology, because plants must have an in-degree of zero i.e.\ they cannot be predators. This is not strictly true for the real world, because species such as the Venus flytrap are in fact carnivorous plants. There are even animals that can perform photosyntesis, such as the sea slug, which can `steal' the ability to produce chloroplasts from the algae it eats \citep{Rumpho2008}.
+These such creatures, as remarkable as they are, were considered rare enough to leave out of scope for EcoBuilder.
+
+At this point it is worth mentioning that the number of plants was also limited to a maximum of three in any given level, and usually fewer. This was necessary here because there is no explicit competition between plants, i.e.\ a $(-,-)$ pair in the interaction matrix, and so there is no penalty at all for adding more of them.
+This decision was made because of the difficulty behind parameterising these extra interactions, and so the limiting of the number of plants was instead used. Other plant growth models such as the \emph{chemostat} model \citep{Sommer1983} were also considered, but not utilised in the final version.
+
+\subsubsection{Label 8: Recorder}
+The final component of the gameplay in EcoBuilder is that ability to undo and redo actions, a feature now considered standard among most consumer applications. The arrow pointing left goes backward to undo an action, and the arrow pointing right goes forward to redo a previously undone action, as is conventional. It is implemented simply using a stack, and so undone actions are lost forever if a new action is performed.
+The criteria for being an action is a topological change, i.e.\ the addition or removal of vertices or edges, or a change in value for the trait of a species.
+
+The entire sequence of actions performed by the player is recorded, and when the level is completed it is transformed into a string to sent to a server, along with other playthrough data. The remaining contents of this data will be explained in the following section.
+
+\subsection{Data collection}
+Figure~\ref{fig:eco_server}, left, depicts the report card shown to the player when they complete a level. It tells the player the number of stars they achieved, their score, and the median score from all high scores throughout the world. The median score is shown in order to motivate the player to strive for higher scores, as a small competitive incentive.
+The small button to the middle-right of the panel can also be pressed to show the exact decomposition of their score, as defined by Equation~\ref{eq:score}, but scaled to fall within a reasonable range of values that make sense as a score. The player can then replay the level or continue to the next.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{joy/server.png}
+    \caption[Player registration and data collection]{Screenshots to illustrate player registration and data collection. From left to right: the report screen shown when a level is completed, the registration page for player accounts, and the settings page for account details.}
+    \label{fig:eco_server}
+\end{figure}
+
+
+When this report card panel is shown, a POST request is sent to the server containing multiple fields, including: a timestamp, the score, each component of the parameterisation defined by Equation~\ref{eq:interaction_matrix}, a list of timed actions performed by the player, and a list of device metadata such as operating system and resolution.
+These fields are received by the server and stored in an SQL database for future analysis.
+
+The middle screenshot in Figure~\ref{fig:eco_server} shows the registration page that is shown the first time the application is opened. An account is required for two purposes: the first is to ensure that the data being collected can be matched to a single player, even if they decide to switch devices; the second is to have them tick a box to indicate that they are aware of the general data protection regulation (GDPR) their data will be held under. Note that since there is no `sensitive' personal data being collected, such as ethnicity or political opinions, a tick box is not strictly necessary.
+Some general demographic information, such as age and education background, is optionally collected at registration.
+The player may also delete their account whenever they wish, as shown by the settings page to the right of Figure~\ref{fig:eco_server}. Here they may also change game settings such as volume or drag direction. They may also view the GDPR privacy policy in full, and a credits page to thank the lab members who kindly gave their time to help playtest the game.
+
