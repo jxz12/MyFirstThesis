@@ -756,7 +756,7 @@ This extra clustering step is what pushes up the resulting asymptotic complexity
   }
 \end{figure}
 
-These pivots $p\in P$ are then each assigned a region $R(p)$, which is the set of vertices closer to that pivot than any other. The relevant weights $w_{ip}$ are then adapted depending on the composition of the region, resulting in a new decomposed second half of the summation
+These pivots $p\in P$ are then each assigned a region $R(p)$, which is the set of vertices closer to that pivot than any other. The relevant weights $w_{ip}$ are then adapted depending on the composition of the region, resulting in a new second half of Equation~\eqref{eq:split_stress} with fewer terms
 \begin{equation}
   \begin{split}
   \text{stress}(\mathbf{X}) = \sum_{\{i,j\}\in E}w_{ij}\sigma_{ij}
@@ -876,10 +876,11 @@ This claim was further supported by \citet{Borsig2020} in their replication stud
 By contrast, the plots in Section~\ref{sec:sgd_experiment} clearly show how vastly the results from majorization can differ depending on initialization, especially when restricted to a limited number of iterations. This reliability of SGD can be crucial for real-time applications with fixed limits on computation time, such as within an interactive visualization.
 
 However there are still situations where SGD can struggle with local minima, such as \texttt{dwt\_2680} which is susceptible to twisting in the middle. This can be seen in Figure~\ref{fig:stress_plots_big} where a twisted layout is purposefully included to illustrate this pitfall.
-A potential solution to this is overshooting, or in other words allowing values of $0 < \mu < 2$ in Equation~\eqref{eq:mu}. This greatly reduces the chance of a twist, but results in poorer local minima in most other cases and can also bring back the problem of divergence, so is a potential avenue for future work,
+A potential solution to this is overshooting, or in other words allowing values of $1 < \mu < 2$ in Equation~\eqref{eq:mu}. This greatly reduces the chance of a twist, but results in poorer local minima in most other cases and can also bring back the problem of divergence, so is a potential avenue for future work,
 perhaps to be used in conjunction with an adaptive annealing schedule to further optimize performance depending on the input data.
 
-Another valid option is to set the maximum value of $\mu$ to a value somewhere in between one and two. This will be used in Chapter~\ref{chap:joy}, Section~\ref{sec:eco_visualisation} for a real-world application, where it will be shown that allowing a slightly higher maxiumum step size is in fact necessary for another domain-specific application, on top of the ones shown in Section~\ref{sec:cookbook}.
+% Another valid option is to set the maximum value of $\mu$ to a value somewhere in between one and two. 
+This will be used in Chapter~\ref{chap:joy}, Section~\ref{sec:eco_visualisation} for a real-world application, where it will be shown that allowing a slightly higher maximum step size is in fact necessary for another domain-specific application, on top of the ones shown in Section~\ref{sec:cookbook}.
 
 Interaction could also allow the user to manually adjust the step size $\eta$ from Equation~\eqref{eq:SGD_step}, allowing them to `shake' the graph out of local minima themselves. The step size annealing from Section~\ref{sec:annealing} is the most ad hoc and data-dependent component of SGD, so handing control over to the user could help, especially in dynamical situations where the structure of the graph changes with time.
 

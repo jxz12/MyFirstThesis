@@ -157,7 +157,7 @@ where $d_{\{i\cup j\}k}$ is the new distance between $k$ and a newly merged clus
 Recalculating the dissimilarity matrix after a merge therefore takes $\mathcal{O}(|V|)$ time. Searching through this matrix to find the best merge takes $\mathcal{O}(|V|^2)$ time, but this can be reduced to $\mathcal{O}(|V|\log(|V|)$ with a priority queue. Since forming a complete dendrogram requires $\mathcal{O}(|V|)$ merges, the overall complexity of greedy agglomerative clustering is $\mathcal{O}(|V|^2\log(|V|)$ .
 
 
-\subsubsection{Random walks as dissimilarities}
+\subsection{Random walks as dissimilarities}
 The first step before performing the agglomeration is to calculate the pairwise dissimilarities between individual datapoints. As previously noted, the shortest path distance was used in the context of optimising stress, but it be shown here that this is far from optimal in a clustering context.
 The reason for this that there is not enough \emph{local} information to differentiate vertices successfully.
 For example, imagine a graph with two fully connected cliques, but with one edge connecting a single inter-cluster pair (one edge connecting the two clusters to the left of Figure~\ref{fig:clique_vs_biclique}). Since the shortest path between the pair is one hop, it means that the pair is considered just as similar to each other as to the other vertices in their respective cliques.
@@ -398,7 +398,8 @@ But just as there exist \emph{lossless} compression formats for images, such as 
 \section{Background}
 \label{sec:power_background}
 Confluent drawing has its roots in the more theoretical side of graph drawing, and was originally developed by \citet{Dickerson2005} as a novel method for drawing planar graphs. In Figure~\ref{fig:power_teaser} for example, the drawing of the original graph on the left contains many crossings and in fact can not be drawn in a planar way. Allowing edges to overlap, but requiring all smooth curves to denote an edge between endpoints, means that all connectivity is preserved, thus adhering to the analogy of lossless compression.
-This eliminates crossings by allowing edges to overlap, and is analogous to junctions on a train track that allow carriages to switch directions without stopping.
+
+This process is analogous to inserting junctions on a train track to allow carriages to switch directions without stopping.
 The precise definition of a confluent drawing will be outlined later in Section~\ref{sec:confluent_definition}.
 
 The work in this chapter will study a subset of confluent drawing known as \emph{power-confluent} drawing.
@@ -412,8 +413,7 @@ This idea was originally developed for use in biological protein--protein intera
 
 This is also the method chosen by \citet{Bach2017}, to construct their initial power graphs, and so is the one studied here. Note that the following description is specific to undirected graphs; the changes required for directed graphs are described in Section~\ref{sec:power_directed}.
 
-\subsection{Greedy agglomeration}
-\label{sec:greedy_power}
+\subsubsection{Greedy agglomeration}
 The algorithm works taking advantage of the fact that the hierarchy of power groups can also be represented as a tree, with vertices as the leaves, similarly to the hierarchical clustering of Section~\ref{sec:dissimilarities}. It first initializes every vertex as the sole member of a power group, henceforth referred to as a \emph{module}, and initializes a set of neighbours for each trivial module based on the edges of the graph.
 It then greedily merges pairs of top-level modules at a time, picking the merge that eliminates the most edges at each step, until no more edges can be eliminated.
 The number of eliminated edges for any given merge is given by
@@ -460,7 +460,7 @@ It is important to note that these theoretical issues are rare in practical use 
 
 \subsection{Greedy heuristics}
 \label{sec:greedy_heuristics}
-The algorithm outlined in Section~\ref{sec:greedy_power} greedily selects the next merge based on the reduction in edges as in Equation~\eqref{eq:kappa_cap}. However this is not the only metric that the greedy algorithm can use to judge the quality of any given merge.
+The algorithm outlined in Section~\ref{sec:power_graph} greedily selects the next merge based on the reduction in edges as in Equation~\eqref{eq:kappa_cap}. However this is not the only metric that the greedy algorithm can use to judge the quality of any given merge.
 Only using one heuristic often results in many merges with the same score, and so the choice of merge may be arbitrarily chosen from many candidates, some of which may lead directly to local optima. In such situations it can be useful to include additional heuristics to further discriminate between choices.
 This is not explicitly mentioned in \citet{Dwyer2014}, but is implemented in their provided source code, where they include two other metrics: minimising the total number of groups/modules after the merge, and minimising the number of times power group boundaries are crossed by power edges.
 
@@ -859,7 +859,7 @@ Methods such as simulated annealing or Monte Carlo may also prove useful for imp
 % A different optimization heuristic may also lead to less cluttered drawings, as a well compressed power graph may not lead to a good confluent drawing. Perhaps measure the number of junctions in the resulting graph or something
 % As mentioned above, proving or disproving an equivalence to strict confluent drawing is also left open. If power-confluent is a stronger condition than strict confluent, then
 
-It is also not clear how often the theoretical issues raised in Sections~\ref{sec:node_split} and~\ref{sec:short_circuits} would occur in real world data. The pathological power graph example in Figure~\ref{fig:overlap_sm} is clearly a rare situation, and it is further not known if the power graph construction algorithm outlined in Section~\ref{sec:greedy_power} and improved in~\ref{sec:greedy_heuristics} would ever produce such a power graph. Future work could include analysing a dataset of graphs and searching for whether/how often such a situation ever occurs.
+It is also not clear how often the theoretical issues raised in Sections~\ref{sec:node_split} and~\ref{sec:short_circuits} would occur in real world data. The pathological power graph example in Figure~\ref{fig:overlap_sm} is clearly a rare situation, and it is further not known if the power graph construction algorithm outlined in Section~\ref{sec:power_graph} and improved in~\ref{sec:greedy_heuristics} would ever produce such a power graph. Future work could include analysing a dataset of graphs and searching for whether/how often such a situation ever occurs.
 
 \begin{figure}
   \centering
